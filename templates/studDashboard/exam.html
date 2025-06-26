@@ -24,16 +24,6 @@
       height: 100%;
       object-fit: cover;
     }
-    #consoleLog {
-      max-height: 200px;
-      overflow-y: auto;
-      font-size: 0.9rem;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      padding: 0.5rem;
-      margin-top: 1rem;
-      white-space: pre-wrap;
-    }
   </style>
 </head>
 <body class="bg-gray-100 fullscreen" onload="startExam()">
@@ -48,7 +38,6 @@
           Submit Exam
         </button>
       </form>
-
     </div>
   </div>
 
@@ -60,8 +49,9 @@
 
   <script type="module">
     window.startExam = startExam;
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
     import { Client } from "https://esm.sh/@gradio/client";
@@ -89,15 +79,8 @@
 
     const examTitleEl = document.getElementById("examTitle");
     const questionContainer = document.getElementById("questionContainer");
-    const consoleLog = document.getElementById("consoleLog");
 
     let studentName = "", studentEmail = "", examData = null, violationCount = 0;
-
-    function logToConsole(msg) {
-      const timestamp = new Date().toLocaleTimeString();
-      consoleLog.textContent += `[${timestamp}] ${msg}\n`;
-      consoleLog.scrollTop = consoleLog.scrollHeight;
-    }
 
     function goFullscreen() {
       const elem = document.documentElement;
@@ -132,35 +115,31 @@
 
         const result = await gradioClient.predict("/predict", { image: blob });
         const { status, violation, violation_type } = result.data || {};
-        logToConsole(`API Result: ${JSON.stringify(result.data)}`);
 
-if (violation) {
-  const timestamp = new Date().toISOString();
-  const fileRef = storageRef(storage, `violations/${studentEmail}_${timestamp}.jpg`);
-  const uploadResult = await uploadBytes(fileRef, blob);
-  const imageURL = await getDownloadURL(uploadResult.ref);
+        if (violation) {
+          const timestamp = new Date().toISOString();
+          const fileRef = storageRef(storage, `violations/${studentEmail}_${timestamp}.jpg`);
+          const uploadResult = await uploadBytes(fileRef, blob);
+          const imageURL = await getDownloadURL(uploadResult.ref);
 
-  await addDoc(collection(db, `exams/${examId}/violations`), {
-    studentName,
-    studentEmail,
-    detectedAt: timestamp,
-    event: violation_type,
-    status,
-    imageURL
-  });
+          await addDoc(collection(db, `exams/${examId}/violations`), {
+            studentName,
+            studentEmail,
+            detectedAt: timestamp,
+            event: violation_type,
+            status,
+            imageURL
+          });
 
-  logToConsole(`Violation detected: ${violation_type}`);
-  if (violation_type !== "look_away_warning") violationCount++;
-  if (violationCount >= 3) {
-    alert("❌ Multiple violations detected. Exam ended.");
-    location.href = "studentDashboard.html";
-    return;
-  }
-}
-
+          if (violation_type !== "look_away_warning") violationCount++;
+          if (violationCount >= 3) {
+            alert("❌ Multiple violations detected. Exam ended.");
+            location.href = "studentDashboard.html";
+            return;
+          }
+        }
       } catch (err) {
-        console.error("❌ Error in analyzeFrameLoop:", err);
-        logToConsole(`Error: ${err.message}`);
+        console.error("❌ Error in analyzeFrameLoop:", err.message);
       }
       setTimeout(analyzeFrameLoop, 1000);
     }
