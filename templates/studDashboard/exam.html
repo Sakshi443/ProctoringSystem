@@ -4,58 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Online Exam</title>
+  <!-- DEV ONLY: swap this to a built Tailwind CSS file in production -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body.fullscreen { overflow: auto; }
     #webcamBox {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      width: 200px;
-      height: 150px;
-      border: 2px solid #4B5563;
-      border-radius: 0.5rem;
-      overflow: hidden;
-      z-index: 50;
-      background: black;
+      position: fixed; top: 1rem; right: 1rem;
+      width: 200px; height: 150px;
+      border: 2px solid #4B5563; border-radius: 0.5rem;
+      overflow: hidden; background: black; z-index:50;
     }
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    video { width: 100%; height: 100%; object-fit: cover; }
   </style>
 </head>
-<body class="bg-gray-100 fullscreen" onload="startExam()">
-  <div id="webcamBox"><video id="webcam" autoplay muted></video></div>
 
-  <div class="max-w-4xl mx-auto py-10 px-4" id="examContainer">
+<body class="bg-gray-100">
+
+  <!-- Webcam preview -->
+  <div id="webcamBox">
+    <video id="webcam" autoplay muted></video>
+  </div>
+
+  <!-- Exam container -->
+  <div id="examContainer" class="max-w-4xl mx-auto py-10 px-4">
     <div class="bg-white p-6 rounded shadow">
       <h1 id="examTitle" class="text-2xl font-bold mb-6 text-center">Loading...</h1>
       <form id="examForm" class="space-y-6">
         <div id="questionContainer" class="space-y-6"></div>
-        <button id="submitBtn" type="submit" class="mt-8 px-6 py-3 bg-green-600 text-white rounded text-lg font-semibold hover:bg-green-700">
+        <button id="submitBtn" type="submit"
+          class="mt-8 px-6 py-3 bg-green-600 text-white rounded text-lg font-semibold hover:bg-green-700">
           Submit Exam
         </button>
       </form>
     </div>
   </div>
 
-  <div id="confirmationScreen" class="hidden fixed inset-0 bg-white items-center justify-center flex-col z-50">
+  <!-- Confirmation screen -->
+  <div id="confirmationScreen" class="hidden fixed inset-0 bg-white flex items-center justify-center flex-col z-50">
     <h2 class="text-3xl font-bold text-green-600 mb-4">✅ Exam Submitted!</h2>
     <p class="text-lg mb-6">Your responses were saved successfully.</p>
-    <button onclick="goToDashboard()" class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">OK</button>
+    <button onclick="goToDashboard()"
+      class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">
+      OK
+    </button>
   </div>
 
   <script type="module">
-    window.startExam = startExam;
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
     import { Client } from "https://esm.sh/@gradio/client";
 
+    // ─── Firebase Initialization ────────────────────────────────────────────
     const firebaseConfig = {
       apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
       authDomain: "proctored-system.firebaseapp.com",
@@ -64,159 +64,172 @@
       messagingSenderId: "512898908874",
       appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
     };
-
-    const app = initializeApp(firebaseConfig);
+    initializeApp(firebaseConfig);
     const db = getFirestore();
     const auth = getAuth();
     const storage = getStorage();
-    let gradioClient = null;
 
+    // ─── Globals ────────────────────────────────────────────────────────────
+    let gradioClient = null;
+    let studentName = "", studentEmail = "", examData = null;
+    let violationCount = 0;
     const examId = localStorage.getItem("currentExamId");
     if (!examId) {
-      alert("❌ Exam not selected. Redirecting to dashboard.");
-      window.location.href = "/templates/studDashboard/studentDashboard.html";
+      alert("❌ No exam selected — redirecting.");
+      location.href = "/templates/studDashboard/studentDashboard.html";
     }
 
-    const examTitleEl = document.getElementById("examTitle");
-    const questionContainer = document.getElementById("questionContainer");
-
-    let studentName = "", studentEmail = "", examData = null, violationCount = 0;
-
-    function goFullscreen() {
-      const elem = document.documentElement;
-      if (elem.requestFullscreen) elem.requestFullscreen();
-    }
-
-    function startExam() {
-      goFullscreen();
-      const video = document.getElementById('webcam');
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          video.srcObject = stream;
-          setupExamLogic();
-        })
-        .catch(() => alert("❌ Webcam access is required to continue the exam."));
-    }
-
+    // ─── Helpers ────────────────────────────────────────────────────────────
     async function initGradioClient() {
       if (!gradioClient) gradioClient = await Client.connect("Sakshi4/facenumber");
     }
 
+    // Capture & analyze one frame, then reschedule itself
     async function analyzeFrameLoop() {
       try {
         await initGradioClient();
-        const video = document.getElementById('webcam');
-        if (!video || !video.videoWidth) return;
+        const vid = document.getElementById("webcam");
+        if (!vid.videoWidth) throw new Error("Webcam not ready");
         const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
+        canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
+        canvas.getContext("2d").drawImage(vid, 0, 0);
+        const blob = await new Promise(r=>canvas.toBlob(r,"image/jpeg"));
 
-        const result = await gradioClient.predict("/predict", { image: blob });
-        const { status, violation, violation_type } = result.data || {};
+        const resp = await gradioClient.predict("/predict", { image: blob });
+        const { status, violation, violation_type } = resp.data || {};
 
         if (violation) {
-          const timestamp = new Date().toISOString();
-          const fileRef = storageRef(storage, `violations/${studentEmail}_${timestamp}.jpg`);
-          const uploadResult = await uploadBytes(fileRef, blob);
-          const imageURL = await getDownloadURL(uploadResult.ref);
+          const ts = new Date().toISOString();
+          const ref = storageRef(storage, `violations/${studentEmail}_${ts}.jpg`);
+          const uploadRes = await uploadBytes(ref, blob);
+          const imageURL = await getDownloadURL(uploadRes.ref);
 
-          await addDoc(collection(db, `exams/${examId}/violations`), {
-            studentName,
-            studentEmail,
-            detectedAt: timestamp,
-            event: violation_type,
-            status,
-            imageURL
-          });
+          await addDoc(
+            collection(db, `exams/${examId}/violations`),
+            {
+              studentName,
+              studentEmail,
+              detectedAt: ts,
+              event: violation_type,
+              status,
+              imageURL
+            }
+          );
 
+          // Count only major violations
           if (violation_type !== "look_away_warning") violationCount++;
           if (violationCount >= 3) {
-            alert("❌ Multiple violations detected. Exam ended.");
-            location.href = "studentDashboard.html";
-            return;
+            alert("❌ 3 violations — exam ended.");
+            return location.href = "studentDashboard.html";
           }
         }
-      } catch (err) {
-        console.error("❌ Error in analyzeFrameLoop:", err.message);
+      } catch(err) {
+        console.error("❌ Proctoring error:", err.message);
       }
-      setTimeout(analyzeFrameLoop, 1000);
+      setTimeout(analyzeFrameLoop, 1000);  // repeat each second
     }
 
+    // Bootstrap after webcam + auth ready
     async function setupExamLogic() {
+      // 1) Start proctoring loop
       analyzeFrameLoop();
+
+      // 2) Tab-switch detection
       document.addEventListener("visibilitychange", async () => {
         if (document.hidden) {
           violationCount++;
-          await addDoc(collection(db, `exams/${examId}/violations`), {
-            studentName,
-            studentEmail,
-            detectedAt: new Date().toISOString(),
-            event: 'TAB_SWITCH',
-            count: violationCount
-          });
-          alert(`⚠ Tab switch ${violationCount} detected.`);
+          await addDoc(
+            collection(db, `exams/${examId}/violations`),
+            {
+              studentName,
+              studentEmail,
+              detectedAt: new Date().toISOString(),
+              event: "TAB_SWITCH",
+              count: violationCount
+            }
+          );
+          if (violationCount >= 3) {
+            alert("❌ 3 violations — exam ended.");
+            location.href = "studentDashboard.html";
+          }
         }
       });
 
-      onAuthStateChanged(auth, async (user) => {
+      // 3) Render questions once user is authenticated
+      onAuthStateChanged(auth, async user => {
         if (!user) return location.href = "/index.html";
         studentName = user.displayName || "Student";
         studentEmail = user.email;
-        const examSnap = await getDoc(doc(db, "exams", examId));
-        if (!examSnap.exists()) return;
-        examData = examSnap.data();
-        examTitleEl.textContent = examData.testName;
 
-        examData.questions.forEach((q, i) => {
+        const snap = await getDoc(doc(db,"exams",examId));
+        if (!snap.exists()) return alert("Exam not found");
+        examData = snap.data();
+        document.getElementById("examTitle").textContent = examData.testName;
+
+        examData.questions.forEach((q,i) => {
           const div = document.createElement("div");
-          div.classList.add("bg-gray-50", "p-4", "rounded");
+          div.className = "bg-gray-50 p-4 rounded";
           div.innerHTML = `
-            <p class="font-medium">${i + 1}. ${q.questionText}</p>
-            ${q.options.map(opt => `
+            <p class="font-medium">${i+1}. ${q.questionText}</p>
+            ${q.options.map(opt=>`
               <label class="block">
-                <input type="radio" name="q${i}" value="${opt}" class="mr-2">${opt}
+                <input type="radio" name="q${i}" value="${opt}" class="mr-2" />
+                ${opt}
               </label>
-            `).join('')}
+            `).join("")}
           `;
-          questionContainer.appendChild(div);
+          document.getElementById("questionContainer").append(div);
         });
       });
     }
 
-    document.getElementById("examForm").addEventListener("submit", async (e) => {
+    // Called on page load
+    window.startExam = () => {
+      const vid = document.getElementById("webcam");
+      navigator.mediaDevices.getUserMedia({ video:true })
+        .then(stream => {
+          vid.srcObject = stream;
+          setupExamLogic();
+        })
+        .catch(()=> alert("❌ Please allow webcam."));
+    };
+
+    // Submission handler
+    document.getElementById("examForm").addEventListener("submit", async e => {
       e.preventDefault();
-      const answers = document.querySelectorAll("input[type=radio]:checked");
       let score = 0, responses = [];
+      document.querySelectorAll("input[type=radio]:checked")
+        .forEach(ans => {
+          const idx = +ans.name.slice(1);
+          const sel = ans.value;
+          const correct = examData.questions[idx].options[ examData.questions[idx].correct ];
+          const mark = sel===correct?1:0;
+          score += mark;
+          responses.push({
+            question: examData.questions[idx].questionText,
+            selected: sel, correct, awarded: mark
+          });
+        });
 
-      answers.forEach(ans => {
-        const qIndex = parseInt(ans.name.replace('q', ''));
-        const selected = ans.value;
-        const correctIndex = examData.questions[qIndex].correct;
-        const correct = examData.questions[qIndex].options[correctIndex];
-        const awarded = selected === correct ? 1 : 0;
-        score += awarded;
-        responses.push({ question: examData.questions[qIndex].questionText, selected, correct, awarded });
-      });
+      await addDoc(
+        collection(db, `exams/${examId}/submissions`),
+        {
+          studentName,
+          studentEmail,
+          examId,
+          submittedAt: new Date().toISOString(),
+          score,
+          responses
+        }
+      );
 
-      await addDoc(collection(db, `exams/${examId}/submissions`), {
-        studentName,
-        studentEmail,
-        examId,
-        submittedAt: new Date().toISOString(),
-        score,
-        responses
-      });
-
-      if (document.fullscreenElement) await document.exitFullscreen();
       document.getElementById("examContainer").classList.add("hidden");
       document.getElementById("confirmationScreen").classList.remove("hidden");
     });
 
-    window.goToDashboard = () => {
-      location.href = "studentDashboard.html";
-    };
+    // Dashboard redirect
+    window.goToDashboard = () => location.href = "studentDashboard.html";
+
   </script>
 </body>
 </html>
