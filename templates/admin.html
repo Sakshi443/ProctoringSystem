@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Approval</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: .5rem; text-align: left; }
+    button { padding: .25rem .5rem; margin-right: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>👤 Pending Teacher Approvals</h1>
+  <button onclick="signOut()">Logout</button>
+  <table id="pendings">
+    <thead>
+      <tr><th>Username</th><th>Email</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut as fbSignOut
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      updateDoc,
+      deleteDoc,
+      doc
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.appspot.com",
+      messagingSenderId: "512898908874",
+      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
+      measurementId: "G-3SL8C6C8RD",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 🛡️ Guard: only admin can access
+    onAuthStateChanged(auth, user => {
+      if (!user || user.email !== "mmanoorkar9@gmail.com") {
+        location.href = "index.html";
+      } else {
+        loadPending();
+      }
+    });
+
+    // 🔁 Load pending teachers
+    async function loadPending() {
+      const tbody = document.querySelector('#pendings tbody');
+      tbody.innerHTML = '';
+      const q = query(
+        collection(db, "users"),
+        where("role", "==", "teacher"),
+        where("approved", "==", false)
+      );
+      const snap = await getDocs(q);
+      snap.forEach(docSnap => {
+        const { username, email } = docSnap.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${username}</td>
+          <td>${email}</td>
+          <td>
+            <button class="approve" data-id="${docSnap.id}">Approve</button>
+            <button class="reject" data-id="${docSnap.id}">Reject</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // 📌 Handle approve/reject clicks
+      tbody.addEventListener('click', async e => {
+        const btn = e.target;
+        const uid = btn.dataset.id;
+        if (!uid) return;
+
+        if (btn.classList.contains('approve')) {
+          await updateDoc(doc(db, "users", uid), { approved: true });
+          btn.textContent = "Approved";
+          btn.disabled = true;
+          btn.nextElementSibling.disabled = true;
+        }
+
+        if (btn.classList.contains('reject')) {
+          const confirmed = confirm("Are you sure you want to reject this user?");
+          if (confirmed) {
+            await deleteDoc(doc(db, "users", uid));
+            btn.closest("tr").remove();
+          }
+        }
+      });
+    }
+
+    // 🚪 Sign out
+    window.signOut = () => fbSignOut(auth).then(() => location.href = "index.html");
+  </script>
+</body>
+</html>

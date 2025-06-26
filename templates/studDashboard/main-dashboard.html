@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+        <div class="px-3 py-3 lg:px-5 lg:pl-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center justify-start rtl:justify-end">
+                    <a href="#" class="flex ms-2 md:me-24">
+                        <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Student Dashboard</span>
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center ms-3">
+                        <button type="button" class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                            <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo">
+                        </button>
+                        <div id="dropdown-user" class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600">
+                            <div class="px-4 py-3">
+                                <p id="currentUserName" class="text-sm text-gray-900 dark:text-white"></p>
+                                <p id="currentUserEmail" class="text-sm font-medium text-gray-900 truncate dark:text-gray-300"></p>
+                            </div>
+                            <ul>
+                                <li>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" onclick="logout()">Sign out</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700">
+        <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+            <ul class="space-y-2 font-medium">
+                <li>
+                    <a href="./exam-page.html" onclick="showSection('exams')" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="ms-3">My Exams</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="./result-page.html" onclick="showSection('results')" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="ms-3">Results</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="p-4 sm:ml-64 mt-16">
+        <div id="examsSection" class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+            <h2 class="text-xl font-bold mb-4">Assigned Exams</h2>
+            <div id="studentExamList" class="space-y-4"></div>
+        </div>
+        <div id="resultsSection" class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 hidden">
+            <h2 class="text-xl font-bold mb-4">Exam Results</h2>
+            <div id="resultsList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+            authDomain: "proctored-system.firebaseapp.com",
+            projectId: "proctored-system",
+            storageBucket: "proctored-system.firebasestorage.app",
+            messagingSenderId: "512898908874",
+            appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
+            measurementId: "G-3SL8C6C8RD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth();
+
+        window.startExam = async (examId) => {
+            const user = auth.currentUser;
+            if (!user) return alert("Please login again.");
+
+            const violationsRef = collection(db, `exams/${examId}/violations`);
+            const snap = await getDocs(query(violationsRef, where("studentEmail", "==", user.email)));
+            if (snap.size >= 3) {
+                alert("❌ You are disqualified from this exam due to 3 tab violations.");
+                return;
+            }
+
+            localStorage.setItem("currentExamId", examId);
+            window.location.href = "exam-page.html";
+        };
+
+       onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        localStorage.setItem("username", user.displayName || "Student");
+        localStorage.setItem("email", user.email);
+        document.getElementById("currentUserName").textContent = localStorage.getItem("username");
+        document.getElementById("currentUserEmail").textContent = localStorage.getItem("email");
+
+        const examsSnap = await getDocs(query(collection(db, "exams"), where("assignedTo", "array-contains", user.uid)));
+        const examList = document.getElementById("studentExamList");
+        const resultsList = document.getElementById("resultsList");
+        examList.innerHTML = "";
+        resultsList.innerHTML = "";
+
+        for (const exam of examsSnap.docs) {
+            const data = exam.data();
+            const div = document.createElement("div");
+            div.className = "border p-3 rounded shadow";
+            div.innerHTML = `
+                <strong>${data.testName}</strong><br>
+                Date: ${data.startDateTime}<br>
+                <button class="mt-2 px-4 py-2 bg-blue-600 text-white rounded" onclick="setExamAndStart('${exam.id}')">Take Exam</button>
+            `;
+            examList.appendChild(div);
+
+            const resultSnap = await getDocs(query(collection(db, `exams/${exam.id}/submissions`), where("studentEmail", "==", user.email)));
+            resultSnap.forEach(result => {
+                const resultData = result.data();
+                const resultDiv = document.createElement("div");
+                resultDiv.className = "border p-3 rounded shadow";
+                resultDiv.innerHTML = `
+                    <strong>${data.testName}</strong><br>
+                    Score: ${resultData.score} / ${resultData.total}<br>
+                    Date Submitted: ${new Date(resultData.submittedAt).toLocaleString()}
+                `;
+                resultsList.appendChild(resultDiv);
+            });
+        }
+    }
+});
+
+// Helper function to set current exam and redirect
+window.setExamAndStart = function(examId) {
+    localStorage.setItem("currentExamId", examId);
+    window.location.href = "exam-page.html"; // or whatever your exam page is named
+};
+
+        function showSection(section) {
+            document.getElementById("examsSection").classList.add("hidden");
+            document.getElementById("resultsSection").classList.add("hidden");
+            document.getElementById(section + "Section").classList.remove("hidden");
+        }
+
+        window.logout = async () => {
+            await signOut(auth);
+            localStorage.clear();
+            location.href = "../../index.html";
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+</body>
+
+</html>

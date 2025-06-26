@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take Exam</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <div class="max-w-4xl mx-auto py-10">
+    <div class="bg-white p-6 rounded shadow">
+      <h1 id="examTitle" class="text-2xl font-bold mb-4">Loading...</h1>
+      <div id="questionContainer" class="space-y-6"></div>
+      <button id="submitBtn" class="mt-6 px-4 py-2 bg-green-600 text-white rounded">Submit Exam</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, setDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.firebasestorage.app",
+      messagingSenderId: "512898908874",
+      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore();
+    const auth = getAuth();
+
+    const examId = localStorage.getItem("currentExamId");
+    const examTitle = document.getElementById("examTitle");
+    const questionContainer = document.getElementById("questionContainer");
+    let studentName = "", studentEmail = "";
+    let examData = null;
+    let violationCount = 0;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return window.location.href = "../index.html";
+      studentName = user.displayName || "Student";
+      studentEmail = user.email;
+
+      const violationRef = collection(db, `exams/${examId}/violations`);
+      const qSnap = await getDocs(query(violationRef, where("studentEmail", "==", studentEmail)));
+      if (qSnap.size >= 3) {
+        alert("You are disqualified due to repeated tab switches.");
+        return window.location.href = "student-dashboard.html";
+      }
+
+      const examRef = doc(db, "exams", examId);
+      const examSnap = await getDoc(examRef);
+
+      if (examSnap.exists()) {
+        examData = examSnap.data();
+        examTitle.textContent = examData.testName;
+
+        examData.questions.forEach((q, i) => {
+          const div = document.createElement("div");
+          div.classList.add("bg-gray-50", "p-4", "rounded");
+          div.innerHTML = `
+            <p class="font-medium">${i + 1}. ${q.question} <span class='text-sm text-gray-500'>(+${q.marks || 1})</span></p>
+            ${q.options.map((opt, idx) => `
+              <label class="block">
+                <input type="radio" name="q${i}" value="${opt}" class="mr-2">
+                ${opt}
+              </label>
+            `).join('')}
+          `;
+          questionContainer.appendChild(div);
+        });
+      } else {
+        examTitle.textContent = "Exam not found.";
+      }
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      const answers = document.querySelectorAll("input[type=radio]:checked");
+      let score = 0;
+      const responses = [];
+
+      answers.forEach(ans => {
+        const qIndex = parseInt(ans.name.replace('q', ''));
+        const selected = ans.value;
+        const correct = examData.questions[qIndex].correctAnswer;
+        const marks = examData.questions[qIndex].marks || 1;
+        const awarded = selected === correct ? marks : 0;
+        score += awarded;
+        responses.push({ question: examData.questions[qIndex].question, selected, correct, awarded });
+      });
+
+      const submission = {
+        studentName,
+        studentEmail,
+        examId,
+        examTitle: examData.testName,
+        submittedAt: new Date().toISOString(),
+        totalScore: score,
+        responses
+      };
+
+      await addDoc(collection(db, "exam_submissions"), submission);
+
+      alert(`✅ Exam submitted! Your score is ${score}`);
+      window.location.href = "src\public\studDashboard\studentDashboard.html";
+    });
+
+    document.addEventListener("visibilitychange", async () => {
+      if (document.hidden) {
+        violationCount++;
+
+        await addDoc(collection(db, `exams/${examId}/violations`), {
+          studentName,
+          studentEmail,
+          detectedAt: new Date().toISOString(),
+          event: 'TAB_SWITCH',
+          count: violationCount
+        });
+
+        alert(`⚠️ Tab switch #${violationCount} detected!\nName: ${studentName}\nEmail: ${studentEmail}`);
+
+        if (violationCount >= 3) {
+          alert("❌ You have switched tabs 3 times. Exam ended.");
+          window.location.href = "student-dashboard.html";
+        }
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      }
+    });
+  </script>
+</body>
+
+</html>

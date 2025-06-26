@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Proctor - Profile</title>
+
+  <!-- Fonts and icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
+  <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
+  <link id="pagestyle" href="/static/assets/css/material-dashboard.css?v=3.2.0" rel="stylesheet" />
+</head>
+
+<body class="g-sidenav-show bg-gray-100">
+  <!-- Sidebar -->
+  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 bg-white my-2"
+    id="sidenav-main">
+    <div class="sidenav-header">
+      <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
+        id="iconSidenav"></i>
+      <a class="navbar-brand px-4 py-3 m-0" href="./StudentDashboard.html" target="_blank">
+        <span class="ms-1 text-sm text-dark">Proctor</span>
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0 mb-2">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active bg-gradient-dark text-white" href="studentDashboard.html">
+            <i class="material-symbols-rounded opacity-5">dashboard</i>
+            <span class="nav-link-text ms-1">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="./exam-page.html" onclick="showSection('exams')">
+            <i class="material-symbols-rounded opacity-5">table_view</i>
+            <span class="nav-link-text ms-1">My Exams</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="./startExam.html">
+            <i class="material-symbols-rounded opacity-5">table_view</i>
+            <span class="nav-link-text ms-1">Start Exam</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="./results.html" onclick="showSection('results')">
+            <i class="material-symbols-rounded opacity-5">receipt_long</i>
+            <span class="nav-link-text ms-1">Result</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="./violations.html" onclick="showSection('violations')">
+            <i class="material-symbols-rounded opacity-5">view_in_ar</i>
+            <span class="nav-link-text ms-1">Violations</span>
+          </a>
+        </li>
+
+        <li class="nav-item mt-3">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Account pages
+          </h6>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="./profile.html">
+            <i class="material-symbols-rounded opacity-5">person</i>
+            <span class="nav-link-text ms-1">Profile</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="../index.html" onclick="logout()">
+            <i class="material-symbols-rounded opacity-5">assignment</i>
+            <span class="nav-link-text ms-1">Sign out</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-3 shadow-none border-radius-xl" id="navbarBlur"
+      data-scroll="true">
+      <div class="container-fluid py-1 px-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Profile</li>
+          </ol>
+        </nav>
+      </div>
+    </nav>
+
+    <div class="container-fluid px-2 px-md-4">
+      <div class="page-header min-height-100 border-radius-xl mt-0" style="background-image: url('#');">
+        <span class="mask bg-gradient-dark opacity-6"></span>
+      </div>
+
+      <div class="card card-body mx-2 mx-md-2 mt-n6">
+        <div class="row gx-4 mb-2">
+          <div class="col-auto my-auto">
+            <div class="h-100">
+              <h5 class="mb-1" id="displayName">Loading...</h5>
+              <p class="mb-0 font-weight-normal text-sm" id="userRole">Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-xl-4">
+            <div class="card card-plain h-100">
+              <div class="card-header pb-0 p-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Profile Information</h6>
+                <a href="javascript:;">
+                  <i class="fas fa-user-edit text-secondary text-sm" title="Edit Profile"></i>
+                </a>
+              </div>
+              <div class="card-body p-3">
+                <ul class="list-group">
+                  <li class="list-group-item border-0 ps-0 pt-0 text-sm">
+                    <strong class="text-dark">Full Name:</strong>
+                    &nbsp;<span id="fullName">Loading...</span>
+                  </li>
+                  <li class="list-group-item border-0 ps-0 text-sm">
+                    <strong class="text-dark">Mobile:</strong>
+                    &nbsp;<span id="userPhone">+91-XXXX</span>
+                  </li>
+                  <li class="list-group-item border-0 ps-0 text-sm">
+                    <strong class="text-dark">Email:</strong>
+                    &nbsp;<span id="userEmail">Loading...</span>
+                  </li>
+                  <li class="list-group-item border-0 ps-0 text-sm">
+                    <strong class="text-dark">Location:</strong> &nbsp;India
+                  </li>
+                  <li class="list-group-item border-0 ps-0 pb-0">
+                    <strong class="text-dark text-sm">Social:</strong>
+                    <a class="btn btn-facebook btn-simple mb-0 ps-1 pe-2 py-0" href="#"><i
+                        class="fab fa-facebook fa-lg"></i></a>
+                    <a class="btn btn-twitter btn-simple mb-0 ps-1 pe-2 py-0" href="#"><i
+                        class="fab fa-twitter fa-lg"></i></a>
+                    <a class="btn btn-instagram btn-simple mb-0 ps-1 pe-2 py-0" href="#"><i
+                        class="fab fa-instagram fa-lg"></i></a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase + Profile JS -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.appspot.com",
+      messagingSenderId: "512898908874",
+      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
+      measurementId: "G-3SL8C6C8RD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+        const userDoc = await getDoc(doc(db, "users", uid));
+        const userData = userDoc.exists() ? userDoc.data() : {};
+
+        const name = user.displayName || userData.username || "User";
+        const email = user.email || "Not available";
+        const role = userData.role || "student";
+
+        document.getElementById("displayName").textContent = name;
+        document.getElementById("userRole").textContent = role.charAt(0).toUpperCase() + role.slice(1);
+        document.getElementById("fullName").textContent = name;
+        document.getElementById("userEmail").textContent = email;
+      } else {
+        location.href = "../index.html";
+      }
+    });
+
+    window.logout = async () => {
+      await signOut(auth);
+      localStorage.clear();
+      location.href = "../index.html";
+    };
+  </script>
+
+  <!-- Material Dashboard Scripts -->
+  <script src="/static/assets/js/core/popper.min.js"></script>
+  <script src="/static/assets/js/core/bootstrap.min.js"></script>
+  <script src="/static/assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="/static/assets/js/plugins/smooth-scrollbar.min.js"></script>
+  <script src="/static/assets/js/material-dashboard.min.js?v=3.2.0"></script>
+</body>
+
+</html>
