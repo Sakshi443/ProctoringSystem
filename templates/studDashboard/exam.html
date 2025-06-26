@@ -1,3 +1,4 @@
+<!-- Save as: student_exam.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,13 +50,8 @@
     <button onclick="goToDashboard()"
       class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">OK</button>
   </div>
-  <script type="module">
-    window.startExam = startExam;
-import {
-  getStorage, ref as storageRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
-const storage = getStorage();
 
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import {
       getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs
@@ -63,6 +59,9 @@ const storage = getStorage();
     import {
       getAuth, onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import {
+      getStorage, ref as storageRef, uploadBytes, getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
     import { Client } from "https://esm.sh/@gradio/client";
 
     const firebaseConfig = {
@@ -77,18 +76,17 @@ const storage = getStorage();
     const app = initializeApp(firebaseConfig);
     const db = getFirestore();
     const auth = getAuth();
+    const storage = getStorage();
     let gradioClient = null;
 
     const examId = localStorage.getItem("currentExamId");
-    if (!examId) {
-      alert("❌ Exam not selected. Redirecting to dashboard.");
-      window.location.href = "/templates/studDashboard/studentDashboard.html";
-    }
-
     const examTitleEl = document.getElementById("examTitle");
     const questionContainer = document.getElementById("questionContainer");
 
     let studentName = "", studentEmail = "", examData = null, violationCount = 0;
+    let examDurationMinutes = 30;
+
+    window.startExam = startExam;
 
     function goFullscreen() {
       const elem = document.documentElement;
@@ -97,33 +95,47 @@ const storage = getStorage();
       else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
     }
 
+    function startCountdownTimer() {
+      const endTime = new Date().getTime() + examDurationMinutes * 60 * 1000;
+      const timerEl = document.createElement("div");
+      timerEl.id = "timer";
+      timerEl.className = "fixed top-4 left-4 bg-white text-xl font-semibold text-red-600 p-3 rounded shadow z-50";
+      document.body.appendChild(timerEl);
+
+      const interval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = endTime - now;
+
+        if (distance <= 0) {
+          clearInterval(interval);
+          timerEl.textContent = "⏰ Time's up!";
+          alert("⏰ Time's up! Auto-submitting your exam.");
+          document.getElementById("examForm").dispatchEvent(new Event("submit"));
+        } else {
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          timerEl.textContent = `🕒 ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+      }, 1000);
+    }
+
     function startExam() {
       goFullscreen();
-
-      const video = document.getElementById('webcam');
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
-          video.srcObject = stream;
+          document.getElementById("webcam").srcObject = stream;
           setupExamLogic();
         })
         .catch(() => {
-          alert("❌ Webcam access is required to continue the exam.");
-          document.body.innerHTML = `
-            <div class="flex items-center justify-center h-screen bg-gray-100">
-              <div class="text-center">
-                <h1 class="text-3xl font-bold text-red-600 mb-4">Camera Access Denied</h1>
-                <p class="text-lg">Please allow webcam access to begin the proctored exam.</p>
-                <button onclick="location.reload()" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                  Retry
-                </button>
-              </div>
-            </div>
-          `;
+          alert("❌ Webcam access is required.");
+          location.href = "/templates/studDashboard/studentDashboard.html";
         });
     }
 
     async function setupExamLogic() {
+      await initGradioClient();
       analyzeFrameLoop();
+      startCountdownTimer();
 
       document.addEventListener("visibilitychange", async () => {
         if (document.hidden) {
@@ -135,53 +147,39 @@ const storage = getStorage();
             event: 'TAB_SWITCH',
             count: violationCount
           });
-          alert(`⚠ Tab switch ${violationCount} detected.`);
-          if (violationCount >= 3) {
-            alert("❌ You switched tabs 3 times. Exam ended.");
-            location.href = "/templates/studDashboard/studentDashboard.html";
-          }
         }
       });
 
-      document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey || e.metaKey || e.altKey) {
-          e.preventDefault();
-          alert("⚠ Shortcut keys are disabled during the exam.");
-        }
+      document.addEventListener("keydown", e => {
+        if (e.ctrlKey || e.metaKey || e.altKey) e.preventDefault();
       });
-
       document.addEventListener("contextmenu", e => e.preventDefault());
 
-      onAuthStateChanged(auth, async (user) => {
+      onAuthStateChanged(auth, async user => {
         if (!user) return location.href = "/index.html";
         studentName = user.displayName || "Student";
         studentEmail = user.email;
 
-        const violationRef = collection(db, `exams/${examId}/violations`);
-        const qSnap = await getDocs(query(violationRef, where("studentEmail", "==", studentEmail)));
+        const qSnap = await getDocs(query(collection(db, `exams/${examId}/violations`), where("studentEmail", "==", studentEmail)));
         if (qSnap.size >= 3) {
-          alert("❌ Disqualified due to multiple violations.");
+          alert("❌ Disqualified due to violations.");
           return location.href = "/templates/studDashboard/studentDashboard.html";
         }
 
         const examSnap = await getDoc(doc(db, "exams", examId));
-        if (!examSnap.exists()) {
-          examTitleEl.textContent = "Exam not found.";
-          return;
-        }
+        if (!examSnap.exists()) return;
 
         examData = examSnap.data();
         examTitleEl.textContent = examData.testName;
 
         await addDoc(collection(db, `exams/${examId}/sessions`), {
-          studentEmail,
-          startedAt: new Date().toISOString()
+          studentEmail, startedAt: new Date().toISOString()
         });
 
         examData.questions.forEach((q, i) => {
-          const marks = typeof q.marks === "number" && !isNaN(q.marks) ? q.marks : 1;
+          const marks = typeof q.marks === "number" ? q.marks : 1;
           const div = document.createElement("div");
-          div.classList.add("bg-gray-50", "p-4", "rounded");
+          div.className = "bg-gray-50 p-4 rounded";
           div.innerHTML = `
             <p class="font-medium">${i + 1}. ${q.questionText} <span class='text-sm text-gray-500'>(+${marks})</span></p>
             ${q.options.map(opt => `
@@ -193,71 +191,54 @@ const storage = getStorage();
           questionContainer.appendChild(div);
         });
       });
-
-      setInterval(analyzeFrame, 1000);
     }
 
     async function initGradioClient() {
-      if (!gradioClient) {
-        gradioClient = await Client.connect("Sakshi4/facenumber");
-      }
+      if (!gradioClient) gradioClient = await Client.connect("Sakshi4/facenumber");
     }
 
-async function analyzeFrameLoop() {
-  try {
-    await initGradioClient();
+    async function analyzeFrameLoop() {
+      try {
+        const video = document.getElementById('webcam');
+        if (!video || !video.videoWidth) return;
 
-    const video = document.getElementById('webcam');
-    if (!video || !video.videoWidth) return;
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
 
-    // 🖼️ Capture frame
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
+        const result = await gradioClient.predict("/predict", { image: blob });
+        const { status, violation, violation_type } = result.data;
 
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
+        if (violation) {
+          const timestamp = new Date().toISOString();
+          const fileRef = storageRef(storage, `violations/${studentEmail}_${timestamp}.jpg`);
+          const uploadResult = await uploadBytes(fileRef, blob);
+          const imageURL = await getDownloadURL(uploadResult.ref);
 
-    // 📡 Send to Gradio
-    const result = await gradioClient.predict("/predict", { image: blob });
-    console.log("📦 Gradio Response:", result.data);
+          await addDoc(collection(db, `exams/${examId}/violations`), {
+            studentName,
+            studentEmail,
+            detectedAt: timestamp,
+            event: violation_type,
+            status,
+            imageURL
+          });
 
-    const { status, violation, violation_type } = result.data || {};
-
-    if (violation) {
-      // 📤 Upload image to Firebase Storage
-      const timestamp = new Date().toISOString();
-      const fileRef = storageRef(storage, `violations/${studentEmail}_${timestamp}.jpg`);
-      const uploadResult = await uploadBytes(fileRef, blob);
-      const imageURL = await getDownloadURL(uploadResult.ref);
-
-      // 📝 Save violation to Firestore
-      await addDoc(collection(db, `exams/${examId}/violations`), {
-        studentName,
-        studentEmail,
-        detectedAt: timestamp,
-        event: violation_type,
-        status,
-        imageURL
-      });
-
-      alert(`🚨 ${status}`);
-      if (violation_type !== "look_away_warning") violationCount++;
-      if (violationCount >= 3) {
-        alert("❌ Multiple violations detected. Exam ended.");
-        location.href = "studentDashboard.html";
-        return;
+          if (violation_type !== "look_away_warning") violationCount++;
+          if (violationCount >= 3) {
+            alert("❌ 3 violations. Exam ended.");
+            location.href = "/templates/studDashboard/studentDashboard.html";
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("analyzeFrame error:", err);
       }
+
+      setTimeout(analyzeFrameLoop, 1000);
     }
-
-  } catch (err) {
-    console.error("❌ Error in analyzeFrameLoop:", err);
-  }
-
-  setTimeout(analyzeFrameLoop, 1000); // 👈 Call next loop after 1s
-}
-
-
 
     document.getElementById("examForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -265,30 +246,23 @@ async function analyzeFrameLoop() {
       let score = 0, responses = [];
 
       answers.forEach(ans => {
-        const qIndex = parseInt(ans.name.replace('q', ''));
+        const i = parseInt(ans.name.replace("q", ""));
         const selected = ans.value;
-        const correctIndex = examData.questions[qIndex].correct;
-        const correct = examData.questions[qIndex].options[correctIndex];
-        const marks = typeof examData.questions[qIndex].marks === "number" ? examData.questions[qIndex].marks : 1;
+        const correctIndex = examData.questions[i].correct;
+        const correct = examData.questions[i].options[correctIndex];
+        const marks = typeof examData.questions[i].marks === "number" ? examData.questions[i].marks : 1;
         const awarded = selected === correct ? marks : 0;
         score += awarded;
-        responses.push({ question: examData.questions[qIndex].questionText, selected, correct, awarded });
+        responses.push({ question: examData.questions[i].questionText, selected, correct, awarded });
       });
 
-      const total = examData.questions.reduce((sum, q) => {
-        const m = typeof q.marks === "number" ? q.marks : 1;
-        return sum + m;
-      }, 0);
+      const total = examData.questions.reduce((t, q) => t + (typeof q.marks === "number" ? q.marks : 1), 0);
 
       await addDoc(collection(db, `exams/${examId}/submissions`), {
-        studentName,
-        studentEmail,
-        examId,
+        studentName, studentEmail, examId,
         examTitle: examData.testName,
         submittedAt: new Date().toISOString(),
-        total,
-        score,
-        responses
+        total, score, responses
       });
 
       if (document.fullscreenElement) await document.exitFullscreen();
@@ -296,36 +270,7 @@ async function analyzeFrameLoop() {
       document.getElementById("confirmationScreen").classList.remove("hidden");
     });
 
-    window.goToDashboard = () => {
-      location.href = "studentDashboard.html";
-    };
-    let examDurationMinutes = 30; // You can set dynamically from Firebase if needed
-let examEndTime;
-
-function startCountdownTimer() {
-  examEndTime = new Date().getTime() + examDurationMinutes * 60 * 1000;
-  const timerEl = document.createElement("div");
-  timerEl.id = "timer";
-  timerEl.className = "fixed top-4 left-4 bg-white text-xl font-semibold text-red-600 p-3 rounded shadow z-50";
-  document.body.appendChild(timerEl);
-
-  const interval = setInterval(() => {
-    const now = new Date().getTime();
-    const distance = examEndTime - now;
-
-    if (distance <= 0) {
-      clearInterval(interval);
-      timerEl.textContent = "⏰ Time's up!";
-      alert("⏰ Time's up! Auto-submitting your exam.");
-      document.getElementById("examForm").dispatchEvent(new Event("submit"));
-    } else {
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      timerEl.textContent = `🕒 ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-  }, 1000);
-}
-
+    window.goToDashboard = () => location.href = "studentDashboard.html";
   </script>
 </body>
 </html>
