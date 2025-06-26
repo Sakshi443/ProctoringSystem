@@ -169,8 +169,55 @@
         if (!examSnap.exists()) return;
         examData = examSnap.data();
         examTitleEl.textContent = examData.testName;
+
+        examData.questions.forEach((q, i) => {
+          const div = document.createElement("div");
+          div.classList.add("bg-gray-50", "p-4", "rounded");
+          div.innerHTML = `
+            <p class="font-medium">${i + 1}. ${q.questionText}</p>
+            ${q.options.map(opt => `
+              <label class="block">
+                <input type="radio" name="q${i}" value="${opt}" class="mr-2">${opt}
+              </label>
+            `).join('')}
+          `;
+          questionContainer.appendChild(div);
+        });
       });
     }
+
+    document.getElementById("examForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const answers = document.querySelectorAll("input[type=radio]:checked");
+      let score = 0, responses = [];
+
+      answers.forEach(ans => {
+        const qIndex = parseInt(ans.name.replace('q', ''));
+        const selected = ans.value;
+        const correctIndex = examData.questions[qIndex].correct;
+        const correct = examData.questions[qIndex].options[correctIndex];
+        const awarded = selected === correct ? 1 : 0;
+        score += awarded;
+        responses.push({ question: examData.questions[qIndex].questionText, selected, correct, awarded });
+      });
+
+      await addDoc(collection(db, `exams/${examId}/submissions`), {
+        studentName,
+        studentEmail,
+        examId,
+        submittedAt: new Date().toISOString(),
+        score,
+        responses
+      });
+
+      if (document.fullscreenElement) await document.exitFullscreen();
+      document.getElementById("examContainer").classList.add("hidden");
+      document.getElementById("confirmationScreen").classList.remove("hidden");
+    });
+
+    window.goToDashboard = () => {
+      location.href = "studentDashboard.html";
+    };
   </script>
 </body>
 </html>
