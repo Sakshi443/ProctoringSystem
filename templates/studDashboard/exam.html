@@ -78,7 +78,7 @@
     const examId = localStorage.getItem("currentExamId");
     if (!examId) {
       alert("❌ Exam not selected. Redirecting to dashboard.");
-      window.location.href = "/templates/studDashboard/studentDashboard.html";
+      window.location.href = "studentDashboard.html";
     }
 
     const examTitleEl = document.getElementById("examTitle");
@@ -132,7 +132,7 @@
           alert(`⚠ Tab switch ${violationCount} detected.`);
           if (violationCount >= 3) {
             alert("❌ You switched tabs 3 times. Exam ended.");
-            location.href = "/templates/studDashboard/studentDashboard.html";
+            location.href = "studentDashboard.html";
           }
         }
       });
