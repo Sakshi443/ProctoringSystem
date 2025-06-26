@@ -155,7 +155,7 @@
         const qSnap = await getDocs(query(violationRef, where("studentEmail", "==", studentEmail)));
         if (qSnap.size >= 3) {
           alert("❌ Disqualified due to multiple violations.");
-          return location.href = "/templates/studDashboard/studentDashboard.html";
+          return location.href = "./studentDashboard.html";
         }
 
         const examSnap = await getDoc(doc(db, "exams", examId));
