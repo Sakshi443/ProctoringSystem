@@ -76,7 +76,7 @@
     const examId = localStorage.getItem("currentExamId");
     if (!examId) {
       alert("❌ Exam not selected. Redirecting to dashboard.");
-      window.location.href = "/templates/studDashboard/studentDashboard.html";
+      window.location.href = "studentDashboard.html";
     }
 
     const examTitleEl = document.getElementById("examTitle");
@@ -117,7 +117,7 @@
           alert(`⚠ Tab switch ${violationCount} detected.`);
           if (violationCount >= 3) {
             alert("❌ You switched tabs 3 times. Exam ended.");
-            location.href = "/templates/studDashboard/studentDashboard.html";
+            location.href = "studentDashboard.html";
           }
         }
       });
@@ -139,7 +139,7 @@
         const qSnap = await getDocs(query(collection(db, `exams/${examId}/violations`), where("studentEmail", "==", studentEmail)));
         if (qSnap.size >= 3) {
           alert("❌ Disqualified due to multiple violations.");
-          return location.href = "/templates/studDashboard/studentDashboard.html";
+          return location.href = "studentDashboard.html";
         }
 
         const examSnap = await getDoc(doc(db, "exams", examId));
