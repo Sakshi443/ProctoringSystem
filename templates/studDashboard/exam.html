@@ -24,6 +24,16 @@
       height: 100%;
       object-fit: cover;
     }
+    #consoleLog {
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 0.5rem;
+      margin-top: 1rem;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body class="bg-gray-100 fullscreen" onload="startExam()">
@@ -38,6 +48,7 @@
           Submit Exam
         </button>
       </form>
+      <div id="consoleLog"></div>
     </div>
   </div>
 
@@ -78,8 +89,15 @@
 
     const examTitleEl = document.getElementById("examTitle");
     const questionContainer = document.getElementById("questionContainer");
+    const consoleLog = document.getElementById("consoleLog");
 
     let studentName = "", studentEmail = "", examData = null, violationCount = 0;
+
+    function logToConsole(msg) {
+      const timestamp = new Date().toLocaleTimeString();
+      consoleLog.textContent += `[${timestamp}] ${msg}\n`;
+      consoleLog.scrollTop = consoleLog.scrollHeight;
+    }
 
     function goFullscreen() {
       const elem = document.documentElement;
@@ -113,8 +131,8 @@
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
 
         const result = await gradioClient.predict("/predict", { image: blob });
-        console.log("🎯 Gradio API Response:", result);
         const { status, violation, violation_type } = result.data || {};
+        logToConsole(`API Result: ${JSON.stringify(result.data)}`);
 
         if (violation) {
           const timestamp = new Date().toISOString();
@@ -141,6 +159,7 @@
         }
       } catch (err) {
         console.error("❌ Error in analyzeFrameLoop:", err);
+        logToConsole(`Error: ${err.message}`);
       }
       setTimeout(analyzeFrameLoop, 1000);
     }
