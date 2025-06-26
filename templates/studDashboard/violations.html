@@ -133,8 +133,8 @@
             </div>
             <div class="card-body px-0 pt-0 pb-2">
               <div class="table-responsive p-3">
-                <table class="table align-items-center mb-0">
-                  <thead>
+                <table class="table table-striped" class="table align-items-center mb-0">
+                  <thead id="violationTableBody">
                     <tr>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Exam Title</th>
@@ -154,11 +154,22 @@
       </div>
     </div>
   </main>
-  <script type="module">
+<script type="module">
+  // Firebase imports
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+  import {
+    getFirestore,
+    collectionGroup,
+    getDocs,
+    query,
+    where
+  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+  // Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
     authDomain: "proctored-system.firebaseapp.com",
@@ -168,37 +179,71 @@
     appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
 
+  // When user is logged in, load their violations
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return (window.location.href = "../index.html");
+    if (!user) {
+      // Redirect if not logged in
+      window.location.href = "../index.html";
+      return;
+    }
 
     const userEmail = user.email;
-    const violationsRef = collectionGroup(db, "violations");
-    const q = query(violationsRef, where("studentEmail", "==", userEmail));
-    const snapshot = await getDocs(q);
-
     const tbody = document.getElementById("violationTableBody");
-    if (snapshot.empty) {
-      tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-3">No violations recorded.</td></tr>`;
-    } else {
-      let index = 1;
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td class="align-middle text-sm px-3">${index++}</td>
-          <td class="align-middle text-sm">${data.examTitle || 'N/A'}</td>
-          <td class="align-middle text-sm text-danger">${data.event || 'TAB_SWITCH'}</td>
-          <td class="align-middle text-sm">${new Date(data.detectedAt).toLocaleString()}</td>
-        `;
-        tbody.appendChild(row);
-      });
+
+    try {
+      // Query all "violations" subcollections across all exams
+      const violationsQuery = query(
+        collectionGroup(db, "violations"),
+        where("studentEmail", "==", userEmail)
+      );
+
+      const snapshot = await getDocs(violationsQuery);
+
+      // Clear existing content
+      tbody.innerHTML = "";
+
+      if (snapshot.empty) {
+        // No violations
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center text-secondary py-3">
+              No violations recorded.
+            </td>
+          </tr>`;
+      } else {
+        // Render each violation
+        let index = 1;
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td class="align-middle text-sm px-3">${index++}</td>
+            <td class="align-middle text-sm">${data.examTitle || 'Unknown Exam'}</td>
+            <td class="align-middle text-sm text-danger">${data.event || 'Unknown'}</td>
+            <td class="align-middle text-sm">${new Date(data.detectedAt).toLocaleString()}</td>
+          `;
+
+          tbody.appendChild(row);
+        });
+      }
+    } catch (error) {
+      console.error("Error loading violations:", error);
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center text-danger py-3">
+            Failed to load violations.
+          </td>
+        </tr>`;
     }
   });
 </script>
+
 
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
