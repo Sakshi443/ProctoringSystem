@@ -6,7 +6,7 @@
     "nodemon": "^3.1.10"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node app.js"
   },
   "name": "proctor",
   "description": "��#\u0000 \u0000p\u0000r\u0000o\u0000c\u0000t\u00001\u0000\r\u0000 \u0000",
