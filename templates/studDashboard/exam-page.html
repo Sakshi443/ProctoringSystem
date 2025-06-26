@@ -164,31 +164,53 @@
       </div>
     </div>
   </main>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    where
+  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-      authDomain: "proctored-system.firebaseapp.com",
-      projectId: "proctored-system",
-      storageBucket: "proctored-system.appspot.com",
-      messagingSenderId: "512898908874",
-      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+    authDomain: "proctored-system.firebaseapp.com",
+    projectId: "proctored-system",
+    storageBucket: "proctored-system.appspot.com",
+    messagingSenderId: "512898908874",
+    appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore();
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore();
+  const auth = getAuth();
 
-    const examTableBody = document.getElementById("examTableBody");
+  const examTableBody = document.getElementById("examTableBody");
+  let currentUserEmail = "";
 
-    async function loadExams() {
-      const querySnapshot = await getDocs(collection(db, "exams"));
-      querySnapshot.forEach((doc) => {
-        const exam = doc.data();
-        const row = document.createElement("tr");
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      alert("Please login first.");
+      window.location.href = "index.html";
+    } else {
+      currentUserEmail = user.email;
+      loadExams();
+    }
+  });
 
-        row.innerHTML = `
+  async function loadExams() {
+    const querySnapshot = await getDocs(collection(db, "exams"));
+    querySnapshot.forEach((doc) => {
+      const exam = doc.data();
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
         <td><p class="text-sm mb-0">${exam.testName}</p></td>
         <td><p class="text-sm mb-0">${exam.subject || 'N/A'}</p></td>
         <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
@@ -196,17 +218,25 @@
           <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${doc.id}')">Select</button>
         </td>
       `;
-        examTableBody.appendChild(row);
-      });
-    }
+      examTableBody.appendChild(row);
+    });
+  }
 
-    window.selectExam = function (examId) {
+  window.selectExam = async function (examId) {
+    // Check if user has already submitted this exam
+    const submissionsRef = collection(db, `exams/${examId}/submissions`);
+    const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      alert("❌ You have already given this exam.");
+    } else {
       localStorage.setItem("currentExamId", examId);
       window.location.href = "startExam.html";
     }
+  }
+</script>
 
-    loadExams();
-  </script>
 
 
   <script>
