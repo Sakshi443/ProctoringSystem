@@ -122,48 +122,46 @@
       </div>
     </nav>
     <!-- End Navbar -->
-    <!-- <div class="container-fluid py-2"> -->
-    <!-- <div class="row"> -->
-    <!-- add the Main Content here dont change sidebar, navbar, toggle, footer-->
-    <div class="col-11">
-      <div class="card my-4">
-        <div class="card-header p-3">
-          <h6 class="mb-0 text-2xl font-bold text-red-500">🚫 Your Exam Violations</h6>
-          <p class="text-sm mb-0 text-secondary">Below are the violations detected during your proctored exams.</p>
-        </div>
-        <!-- Student Violations Page -->
-        <!-- <div class="p-4 sm:ml-64 mt-16"> -->
-        <!-- <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700"> -->
-        <!-- Header -->
-        <!-- <div class="bg-white shadow p-4 flex justify-between items-center">
+    <div class="container-fluid py-2">
+      <div class="row">
+        <!-- add the Main Content here dont change sidebar, navbar, toggle, footer-->
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header p-3">
+              <h6 class="mb-0 text-2xl font-bold text-red-500">🚫 Your Exam Violations</h6>
+              <p class="text-sm mb-0 text-secondary">Below are the violations detected during your proctored exams.</p>
+            </div>
+            <!-- Student Violations Page -->
+            <!-- <div class="p-4 sm:ml-64 mt-16"> -->
+            <!-- <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700"> -->
+            <!-- Header -->
+            <!-- <div class="bg-white shadow p-4 flex justify-between items-center">
                   <h1 class="text-2xl font-bold text-red-500">🚫 My Violations</h1>
                 </div> -->
-        <!-- Table Container -->
-        <div class="p-6 overflow-x-auto">
-          <table class="min-w-full text-sm text-left bg-white rounded shadow border border-gray-500 border-collapse">
-            <thead class="bg-red-400 text-gray-800">
-              <tr>
-                <th class="p-2 border border-gray-500">#</th>
-                <th class="p-2 border border-gray-500">Exam Name</th>
-                <th class="p-2 border border-gray-500">Violation</th>
-                <th class="p-2 border border-gray-500">Time</th>
-                <th class="p-2 border border-gray-500">Description</th>
-              </tr>
-            </thead>
-            <tbody id="studentViolationTableBody">
-              <!-- Example row (can be dynamically inserted by JS) -->
 
-              <!-- More rows added dynamically -->
-            </tbody>
-          </table>
+            <!-- Table Container -->
+            <div class="p-6 overflow-x-auto">
+              <table class="min-w-full text-sm text-left bg-white rounded shadow">
+                <thead class="bg-red-400 text-gray-800">
+                  <tr>
+                    <th class="p-2">#</th>
+                    <th class="p-2">Exam Name</th>
+                    <th class="p-2">Violation</th>
+                    <th class="p-2">Time</th>
+                    <th class="p-2">Description</th>
+                  </tr>
+                </thead>
+                <tbody id="studentViolationTableBody">
+                  <!-- Filled dynamically -->
+                </tbody>
+              </table>
+              <!-- </div> -->
+              <!-- </div> -->
+            </div>
+          </div>
         </div>
 
-
       </div>
-    </div>
-    </div>
-
-    </div>
     </div>
   </main>
   <script type="module">
@@ -208,11 +206,11 @@
             const tr = document.createElement("tr");
             tr.className = "border-b hover:bg-gray-50";
             tr.innerHTML = `
-            <td class="px-3 py-1 border border-gray-500">${count++}</td>
-            <td class="px-6 py-1 border border-gray-500">${examData.testName}</td>
-            <td class="px-6 py-1 border border-gray-500">${v.event}</td>
-            <td class="px-6 py-1 border border-gray-500">${new Date(v.detectedAt).toLocaleString()}</td>
-            <td class="px-6 py-1 border border-gray-500">${v.description || '-'}</td>
+            <td class="p-1">${count++}</td>
+            <td class="p-1">${examData.testName}</td>
+            <td class="p-1">${v.event}</td>
+            <td class="p-1">${new Date(v.detectedAt).toLocaleString()}</td>
+            <td class="p-1">${v.description || '-'}</td>
           `;
             tableBody.appendChild(tr);
           }
