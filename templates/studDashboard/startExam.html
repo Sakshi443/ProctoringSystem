@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -134,24 +135,38 @@
                                         Carefully read the following instructions before starting the exam
                                     </h6>
                                     <p class="mb-0 text-white ps-3">
-                                        Follow the instructions, otherwise your exam can be terminated.
+                                        Violation of any rules may lead to termination of your test and
+                                        disqualification.
                                     </p>
                                 </div>
                             </div>
                             <div class="card-body px-5 pt-4 pb-5">
-                                <h4 class="text-center font-weight-bold mb-4">📋 Exam Instructions</h4>
+                                <h4 class="text-center font-weight-bold mb-4">📋 Online Exam Instructions</h4>
                                 <ul class="text-dark text-lg ps-4">
-                                    <li class="mb-3">✅ Ensure your face is clearly visible at all times.</li>
-                                    <li class="mb-3">🚫 Avoid looking away from the screen for more than 20 seconds.
-                                    </li>
-                                    <li class="mb-3">🚫 Switching tabs or minimizing the window is not allowed.</li>
-                                    <li class="mb-3">🚫 Multiple faces in front of the camera will lead to
-                                        disqualification.</li>
-                                    <li class="mb-3">🚫 Covering or disabling the webcam will auto-cancel the exam.</li>
-                                    <li class="mb-3">⚠ You will receive warnings before any termination due to
-                                        violations.</li>
-                                    <li class="mb-3">📸 Any violation will be logged and a snapshot will be captured.
-                                    </li>
+                                    <li class="mb-3">✅ Make sure you are in a well-lit, quiet environment with a stable
+                                        internet connection.</li>
+                                    <li class="mb-3">📸 Ensure your face is clearly visible on camera at all times. Face
+                                        detection will be continuously monitored.</li>
+                                    <li class="mb-3">🚫 Do not look away from the screen repeatedly or for more than a
+                                        few seconds. "Looking away" will be treated as suspicious behavior.</li>
+                                    <li class="mb-3">🚫 Do not switch tabs, minimize the window, or open new browser
+                                        windows. Each such action will be logged as a violation.</li>
+                                    <li class="mb-3">🚫 Use of headphones, Bluetooth devices, or mobile phones during
+                                        the exam is strictly prohibited.</li>
+                                    <li class="mb-3">🚫 Presence of multiple people in front of the webcam will result
+                                        in automatic disqualification.</li>
+                                    <li class="mb-3">🚫 Avoid copying, taking screenshots, or screen recording the exam
+                                        content. Such actions will be logged and flagged.</li>
+                                    <li class="mb-3">⚠️ A warning will be shown on the screen for every violation.
+                                        Repeated violations may auto-submit your exam or mark it invalid.</li>
+                                    <li class="mb-3">📝 Use the in-browser tools only. Any attempt to access dev tools
+                                        (Ctrl+Shift+I), view source, or print screen will be blocked and logged.</li>
+                                    <li class="mb-3">📸 A snapshot of the webcam will be captured for every violation
+                                        for audit purposes.</li>
+                                    <li class="mb-3">🕒 The exam will be auto-submitted when the timer runs out. You
+                                        cannot pause or restart it once started.</li>
+                                    <li class="mb-3">✅ Click the “Start Exam” button only when you're fully ready. You
+                                        won’t be able to retake it after submission.</li>
                                 </ul>
                                 <div class="text-center mt-4">
                                     <button onclick="startExam()" class="btn bg-gradient-info text-white px-5 py-2">
@@ -162,13 +177,24 @@
                         </div>
                     </div>
                 </div>
-
             </div>
+        </div>
+
     </main>
 
     <script>
         function startExam() {
-            window.location.href = "exam.html"; // 👈 Change this to your exam page path
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen();
+            } else if (docElm.webkitRequestFullscreen) { /* Safari */
+                docElm.webkitRequestFullscreen();
+            } else if (docElm.msRequestFullscreen) { /* IE11 */
+                docElm.msRequestFullscreen();
+            }
+
+            // Now show exam content or navigate to exam.html
+            window.location.href = "exam.html";  // or show/hide container
         }
     </script>
 
