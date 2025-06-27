@@ -128,25 +128,35 @@
         <div class="col-12">
           <div class="card my-4">
             <div class="card-header p-3">
-              <h6 class="mb-0">Your Exam Violations</h6>
+              <h6 class="mb-0 text-2xl font-bold text-red-500">🚫 Your Exam Violations</h6>
               <p class="text-sm mb-0 text-secondary">Below are the violations detected during your proctored exams.</p>
             </div>
-            <div class="card-body px-0 pt-0 pb-2">
-              <div class="table-responsive p-3">
-                <table class="table table-striped" class="table align-items-center mb-0">
-                  <thead id="violationTableBody">
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Exam Title</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody id="violationTableBody">
-                    <!-- Rows will be populated by Firebase -->
-                  </tbody>
-                </table>
-              </div>
+            <!-- Student Violations Page -->
+            <!-- <div class="p-4 sm:ml-64 mt-16"> -->
+            <!-- <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700"> -->
+            <!-- Header -->
+            <!-- <div class="bg-white shadow p-4 flex justify-between items-center">
+                  <h1 class="text-2xl font-bold text-red-500">🚫 My Violations</h1>
+                </div> -->
+
+            <!-- Table Container -->
+            <div class="p-6 overflow-x-auto">
+              <table class="min-w-full text-sm text-left bg-white rounded shadow">
+                <thead class="bg-red-400 text-gray-800">
+                  <tr>
+                    <th class="p-2">#</th>
+                    <th class="p-2">Exam Name</th>
+                    <th class="p-2">Violation</th>
+                    <th class="p-2">Time</th>
+                    <th class="p-2">Description</th>
+                  </tr>
+                </thead>
+                <tbody id="studentViolationTableBody">
+                  <!-- Filled dynamically -->
+                </tbody>
+              </table>
+              <!-- </div> -->
+              <!-- </div> -->
             </div>
           </div>
         </div>
@@ -154,96 +164,72 @@
       </div>
     </div>
   </main>
-<script type="module">
-  // Firebase imports
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-  import {
-    getFirestore,
-    collectionGroup,
-    getDocs,
-    query,
-    where
-  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-  import {
-    getAuth,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+  <script type="module">
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-  // Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-    authDomain: "proctored-system.firebaseapp.com",
-    projectId: "proctored-system",
-    storageBucket: "proctored-system.appspot.com",
-    messagingSenderId: "512898908874",
-    appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.appspot.com",
+      messagingSenderId: "512898908874",
+      appId: "1:512898898874:web:23584b6cad04eb9e0c2a33",
+      measurementId: "G-3SL8C6C8RD"
+    };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
 
-  // When user is logged in, load their violations
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      // Redirect if not logged in
-      window.location.href = "../index.html";
-      return;
-    }
+    async function loadStudentViolations(email) {
+      const tableBody = document.getElementById("studentViolationTableBody");
+      const examSnap = await getDocs(collection(db, "exams"));
+      let count = 1;
 
-    const userEmail = user.email;
-    const tbody = document.getElementById("violationTableBody");
+      for (const examDoc of examSnap.docs) {
+        const examId = examDoc.id;
+        const examData = examDoc.data();
+        const violationsSnap = await getDocs(collection(db, `exams/${examId}/violations`));
 
-    try {
-      // Query all "violations" subcollections across all exams
-      const violationsQuery = query(
-        collectionGroup(db, "violations"),
-        where("studentEmail", "==", userEmail)
-      );
-
-      const snapshot = await getDocs(violationsQuery);
-
-      // Clear existing content
-      tbody.innerHTML = "";
-
-      if (snapshot.empty) {
-        // No violations
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="4" class="text-center text-secondary py-3">
-              No violations recorded.
-            </td>
-          </tr>`;
-      } else {
-        // Render each violation
-        let index = 1;
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          const row = document.createElement("tr");
-
-          row.innerHTML = `
-            <td class="align-middle text-sm px-3">${index++}</td>
-            <td class="align-middle text-sm">${data.examTitle || 'Unknown Exam'}</td>
-            <td class="align-middle text-sm text-danger">${data.event || 'Unknown'}</td>
-            <td class="align-middle text-sm">${new Date(data.detectedAt).toLocaleString()}</td>
+        violationsSnap.forEach((doc) => {
+          const v = doc.data();
+          if (v.studentEmail === email) {
+            const tr = document.createElement("tr");
+            tr.className = "border-b hover:bg-gray-50";
+            tr.innerHTML = `
+            <td class="p-1">${count++}</td>
+            <td class="p-1">${examData.testName}</td>
+            <td class="p-1">${v.event}</td>
+            <td class="p-1">${new Date(v.detectedAt).toLocaleString()}</td>
+            <td class="p-1">${v.description || '-'}</td>
           `;
-
-          tbody.appendChild(row);
+            tableBody.appendChild(tr);
+          }
         });
       }
-    } catch (error) {
-      console.error("Error loading violations:", error);
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="4" class="text-center text-danger py-3">
-            Failed to load violations.
-          </td>
-        </tr>`;
-    }
-  });
-</script>
 
+      if (count === 1) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="5" class="text-center py-4 text-gray-500">✅ No violations recorded.</td>`;
+        tableBody.appendChild(tr);
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return location.href = "/index.html";
+      const studentEmail = user.email;
+      loadStudentViolations(studentEmail);
+    });
+  </script>
 
   <script>
     var win = navigator.platform.indexOf('Win') > -1;

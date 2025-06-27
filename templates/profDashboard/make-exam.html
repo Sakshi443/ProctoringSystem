@@ -11,6 +11,16 @@
   <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
 </head>
 
+<style>
+  .optionInput.selected {
+    border: 2px solid #22c55e;
+    /* green border */
+    background-color: #f0fdf4;
+    /* light green */
+  }
+</style>
+
+
 <body class="g-sidenav-show  bg-gray-100">
   <nav class="fixed top-0 z-50 w-full bg-white border-gray-50  dark:bg-gray-50 dark:border-gray-600">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
@@ -65,40 +75,41 @@
     <div class="h-full px-3 pb-4 overflow-y-auto bg-black dark:bg-gray-200">
       <ul class="space-y-2 font-medium">
         <li>
-                    <a href="./professorDashboard.html"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <span class="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="./make-exam.html"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <span class="flex-1 ms-3 whitespace-nowrap">Make paper</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="./admin-panel.html"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="./violations.html"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <span class="flex-1 ms-3 whitespace-nowrap">Violations</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/templates/index.html" onclick="logout()"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <svg class="shrink-0 w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-800 group-hover:text-gray-400 dark:group-hover:text-white"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
-                        </svg>
-                        <span class="flex-1 ms-3 whitespace-nowrap">Logout</span>
-                    </a>
-                </li>
+          <a href="./professorDashboard.html"
+            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+            <span class="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="./make-exam.html"
+            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+            <span class="flex-1 ms-3 whitespace-nowrap">Make paper</span>
+          </a>
+        </li>
+        <li>
+          <a href="./admin-panel.html"
+            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+            <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
+          </a>
+        </li>
+        <li>
+          <a href="./violations.html"
+            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+            <span class="flex-1 ms-3 whitespace-nowrap">Violations</span>
+          </a>
+        </li>
+        <li>
+          <a href="/templates/index.html" onclick="logout()"
+            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+            <svg
+              class="shrink-0 w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-800 group-hover:text-gray-400 dark:group-hover:text-white"
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+            </svg>
+            <span class="flex-1 ms-3 whitespace-nowrap">Logout</span>
+          </a>
+        </li>
       </ul>
     </div>
   </aside>
@@ -157,8 +168,7 @@
           <label class="block">Question Type</label>
           <select id="qType" class="w-full border rounded px-3 py-2">
             <option value="mcq_single">MCQ (Single)</option>
-            <option value="mcq_multiple">MCQ (Multiple)</option>
-            <option value="subjective">Subjective</option>
+            <option value="mcq_multiple">MSQ (Multiple)</option>
           </select>
         </div>
         <div>
@@ -177,15 +187,17 @@
           </select>
         </div>
         <div>
-          <label class="block">Options</label>
-          <input type="text" id="qOpt1" placeholder="Option 1" class="w-full border rounded px-3 py-1 mb-1" />
-          <input type="text" id="qOpt2" placeholder="Option 2" class="w-full border rounded px-3 py-1 mb-1" />
-          <input type="text" id="qOpt3" placeholder="Option 3" class="w-full border rounded px-3 py-1 mb-1" />
-          <input type="text" id="qOpt4" placeholder="Option 4" class="w-full border rounded px-3 py-1 mb-1" />
-        </div>
-        <div>
-          <label class="block">Correct Option Index (1 to 4)</label>
-          <input type="number" id="qCorrect" min="1" max="4" class="w-full border rounded px-3 py-2" />
+          <label class="block mb-1">Options (Click to select correct)</label>
+          <div id="optionInputs" class="grid grid-cols-2 gap-2">
+            <input type="text" id="qOpt1" data-opt-index="1" placeholder="Option 1"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt2" data-opt-index="2" placeholder="Option 2"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt3" data-opt-index="3" placeholder="Option 3"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt4" data-opt-index="4" placeholder="Option 4"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+          </div>
         </div>
       </div>
       <div class="flex justify-end mt-6">
@@ -193,39 +205,94 @@
       </div>
     </div>
   </div>
-
   <script type="module">
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc", authDomain: "proctored-system.firebaseapp.com", projectId: "proctored-system", storageBucket: "proctored-system.firebasestorage.app", messagingSenderId: "512898908874", appId: "1:512898908874:web:23584b6cad04eb9e0c2a33", measurementId: "G-3SL8C6C8RD" };
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    // ✅ Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.appspot.com",
+      messagingSenderId: "512898908874",
+      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
+      measurementId: "G-3SL8C6C8RD"
+    };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
 
     let editIndex = -1;
 
-    document.getElementById("logoutBtn").onclick = async () => {
-      await signOut(auth);
-      window.location.href = "../../index.html";
-    };
-
+    // ✅ Open modal
     document.getElementById("openModalBtn").onclick = () => {
       editIndex = -1;
       document.getElementById("questionModal").classList.remove("hidden");
+      document.querySelectorAll(".optionInput").forEach(el => el.classList.remove("selected"));
     };
 
-    document.getElementById("closeModalBtn").onclick = () => document.getElementById("questionModal").classList.add("hidden");
+    // ✅ Close modal
+    document.getElementById("closeModalBtn").onclick = () => {
+      document.getElementById("questionModal").classList.add("hidden");
+    };
 
+    // ✅ Update selection logic based on question type
+    document.getElementById("qType").addEventListener("change", () => {
+      const type = document.getElementById("qType").value;
+      document.querySelectorAll(".optionInput").forEach(input => {
+        input.classList.remove("selected");
+      });
+    });
+
+    // ✅ Handle selection by clicking input
+    const optionInputs = document.querySelectorAll(".optionInput");
+    optionInputs.forEach(input => {
+      input.addEventListener("click", () => {
+        const type = document.getElementById("qType").value;
+        if (type === "mcq_single") {
+          optionInputs.forEach(i => i.classList.remove("selected"));
+          input.classList.add("selected");
+        } else {
+          input.classList.toggle("selected");
+        }
+      });
+    });
+
+    // ✅ Save question
     document.getElementById("saveQuestionBtn").onclick = () => {
       const text = document.getElementById("qText").value;
       const marks = document.getElementById("qMarks").value;
       const neg = document.getElementById("qNegative").value;
-      const correct = document.getElementById("qCorrect").value;
       const options = ["qOpt1", "qOpt2", "qOpt3", "qOpt4"].map(id => document.getElementById(id).value).join(", ");
+      const type = document.getElementById("qType").value;
 
-      const rowHTML = `<td class='border px-2 py-1'>${text}</td><td class='border px-2 py-1'>${marks}</td><td class='border px-2 py-1'>${neg}</td><td class='border px-2 py-1'>${options}</td><td class='border px-2 py-1'>${correct}</td><td class='border px-2 py-1'><button onclick="editQuestion(this)" class="text-blue-600">Edit</button> | <button onclick="deleteQuestion(this)" class="text-red-600">Delete</button></td>`;
+      const selectedCorrect = Array.from(document.querySelectorAll(".optionInput.selected"))
+        .map(input => parseInt(input.dataset.optIndex));
+
+      if (type === "mcq_single" && selectedCorrect.length !== 1) {
+        alert("Please select exactly one correct option for MCQ.");
+        return;
+      }
+
+      if (type === "mcq_multiple" && selectedCorrect.length < 1) {
+        alert("Please select at least one correct option for MSQ.");
+        return;
+      }
+
+      const rowHTML = `
+  <td class='border px-2 py-1'>${text}</td>
+  <td class='border px-2 py-1'>${marks}</td>
+  <td class='border px-2 py-1'>${neg}</td>
+  <td class='border px-2 py-1'>${options}</td>
+  <td class='border px-2 py-1'>${selectedCorrect.join(",")}</td>
+  <td class='border px-2 py-1'>
+    <button onclick="editQuestion(this)" class="text-blue-600">Edit</button> |
+    <button onclick="deleteQuestion(this)" class="text-red-600">Delete</button>
+    </td>`;
 
       const tr = document.createElement("tr");
       tr.innerHTML = rowHTML;
@@ -240,24 +307,37 @@
       document.getElementById("questionModal").classList.add("hidden");
     };
 
+    // ✅ Edit question
     window.editQuestion = function (btn) {
       const tr = btn.closest("tr");
       editIndex = Array.from(tr.parentNode.children).indexOf(tr);
       const tds = tr.querySelectorAll("td");
+
       document.getElementById("qText").value = tds[0].innerText;
       document.getElementById("qMarks").value = tds[1].innerText;
       document.getElementById("qNegative").value = tds[2].innerText;
+
       const opts = tds[3].innerText.split(", ");
       opts.forEach((val, idx) => document.getElementById(`qOpt${idx + 1}`).value = val);
-      document.getElementById("qCorrect").value = tds[4].innerText;
+
+      const corrects = tds[4].innerText.split(",").map(i => parseInt(i.trim()));
+      document.querySelectorAll(".optionInput").forEach(input => {
+        input.classList.remove("selected");
+        if (corrects.includes(parseInt(input.dataset.optIndex))) {
+          input.classList.add("selected");
+        }
+      });
+
       document.getElementById("questionModal").classList.remove("hidden");
     };
 
+    // ✅ Delete question
     window.deleteQuestion = function (btn) {
       const tr = btn.closest("tr");
       tr.remove();
     };
 
+    // ✅ Save full exam
     document.getElementById("saveExamBtn").addEventListener("click", async () => {
       const user = auth.currentUser;
       if (!user) return alert("You're not logged in!");
@@ -280,7 +360,7 @@
           marks: parseInt(tds[1].innerText),
           negativeMarking: tds[2].innerText === "yes",
           options: tds[3].innerText.split(",").map(opt => opt.trim()),
-          correct: parseInt(tds[4].innerText)
+          correct: tds[4].innerText.split(",").map(opt => parseInt(opt.trim()))
         });
       });
 
@@ -301,6 +381,7 @@
         alert("❌ Failed to save exam.");
       }
     });
+
   </script>
 </body>
 

@@ -156,9 +156,19 @@
   </main>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
       authDomain: "proctored-system.firebaseapp.com",
@@ -168,37 +178,50 @@
       appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
+    // On user login
     onAuthStateChanged(auth, async (user) => {
       if (!user) return window.location.href = "../index.html";
 
       const studentEmail = user.email;
-      const q = query(collection(db, "exam_submissions"), where("studentEmail", "==", studentEmail));
-      const snapshot = await getDocs(q);
+      const q = query(
+        collection(db, "exam_submissions"),
+        where("studentEmail", "==", studentEmail)
+      );
 
+      const snapshot = await getDocs(q);
       const tableBody = document.getElementById("resultTableBody");
 
       if (snapshot.empty) {
-        tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-3">No results found.</td></tr>`;
+        tableBody.innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center text-secondary py-3">
+            No results found.
+          </td>
+        </tr>`;
       } else {
         let i = 1;
         snapshot.forEach(doc => {
           const data = doc.data();
           const row = document.createElement("tr");
+
           row.innerHTML = `
           <td class="align-middle text-sm px-3">${i++}</td>
           <td class="align-middle text-sm">${data.examTitle || "N/A"}</td>
           <td class="align-middle text-sm text-success fw-bold">${data.totalScore}</td>
           <td class="align-middle text-sm">${new Date(data.submittedAt).toLocaleString()}</td>
         `;
+
           tableBody.appendChild(row);
         });
       }
     });
   </script>
+
 
 
   <script>
