@@ -44,9 +44,9 @@
   </style>
 </head>
 
-<body class="bg-gray-100" onload="enterFullscreen()">
+<body class="bg-gray-100">
 
-  <!-- block back navigation -->
+  <!-- Block back navigation -->
   <script>
     history.pushState(null, null, location.href);
     window.addEventListener('popstate', () => history.pushState(null, null, location.href));
@@ -60,16 +60,15 @@
   <!-- Violation Alert Toast -->
   <div id="violationAlert"
     class="fixed top-6 left-6 bg-red-600 text-white text-sm px-4 py-3 rounded shadow-lg hidden z-50">
-    ⚠️ Violation Detected
+    ⚠ Violation Detected
   </div>
-
 
   <div id="examContainer" class="max-w-4xl mx-auto py-10 px-4">
     <div class="bg-white p-6 rounded shadow">
       <h1 id="examTitle" class="text-2xl font-bold mb-6 text-center">Loading Exam…</h1>
       <form id="examForm" class="space-y-6">
         <div id="questionContainer" class="space-y-6"></div>
-        <button id="submitBtn" type="submit"
+        <button id="submitBtn" type="submit" onclick="submitExam()"
           class="mt-8 px-6 py-3 bg-green-600 text-white rounded text-lg font-semibold hover:bg-green-700">
           Submit Exam
         </button>
@@ -77,14 +76,14 @@
     </div>
   </div>
 
-  <div id="confirmationScreen" class="fixed inset-0 bg-white flex items-center justify-center flex-col z-50">
+  <!-- <div id="confirmationScreen" class="fixed inset-0 bg-white flex items-center justify-center flex-col z-50">
     <h2 class="text-3xl font-bold text-green-600 mb-4">✅ Exam Submitted!</h2>
     <p class="text-lg mb-6">Your responses were saved successfully.</p>
     <button onclick="goToDashboard()"
       class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">
       OK
     </button>
-  </div>
+  </div> -->
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -92,7 +91,7 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { Client } from "https://esm.sh/@gradio/client";
 
-    // ─── Firebase Setup ─────────────────────────────────────────────────────────
+    // ─── Firebase Setup ───────────────────────────────────────────────────────
     const firebaseConfig = {
       apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
       authDomain: "proctored-system.firebaseapp.com",
@@ -104,11 +103,11 @@
     initializeApp(firebaseConfig);
     const db = getFirestore(), auth = getAuth();
 
-    // ─── Cloudinary Unsigned Upload Preset ──────────────────────────────────────
+    // ─── Cloudinary Unsigned Upload Preset ────────────────────────────────────
     const CLOUD_NAME = 'dsu1pjwyp';
     const UPLOAD_PRESET = 'procted';
 
-    // ─── State ───────────────────────────────────────────────────────────────────
+    // ─── State ────────────────────────────────────────────────────────────────
     let numberClient, trackClient;
     let studentName = "", studentEmail = "", examData = null;
     let violationCount = 0;
@@ -118,7 +117,7 @@
       location.href = "studentDashboard.html";
     }
 
-    // ─── Webcam Init ─────────────────────────────────────────────────────────────
+    // ─── Webcam Init ─────────────────────────────────────────────────────────
     (async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -128,33 +127,13 @@
       }
     })();
 
-    // ─── enter Full screen ─────────────────────────────────────────────────────────────
-    function enterFullscreen() {
-      const el = document.documentElement;
-      if (el.requestFullscreen) {
-        el.requestFullscreen();
-      } else if (el.webkitRequestFullscreen) {
-        el.webkitRequestFullscreen();
-      } else if (el.msRequestFullscreen) {
-        el.msRequestFullscreen();
-      }
-    }
-
-    document.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement) {
-        logViolation("EXITED_FULLSCREEN");
-        showViolationAlert("Do not exit fullscreen during the exam!");
-      }
-    });
-
-
-    // ─── Gradio Clients ──────────────────────────────────────────────────────────
+    // ─── Gradio Clients ───────────────────────────────────────────────────────
     async function initClients() {
       numberClient = await Client.connect("Sakshi4/facenumber");
       trackClient = await Client.connect("Sakshi4/Facetracking");
     }
 
-    // ─── Cloudinary Upload ───────────────────────────────────────────────────────
+    // ─── Cloudinary Upload ───────────────────────────────────────────────────
     async function uploadToCloudinary(blob) {
       const form = new FormData();
       form.append('file', blob);
@@ -167,7 +146,7 @@
       return (await res.json()).secure_url;
     }
 
-    // ─── Violation Logger ───────────────────────────────────────────────────────
+    // ─── Violation Logger ────────────────────────────────────────────────────
     async function logViolation(eventType, imageBlob = null) {
       violationCount++;
       showViolationAlert(eventType);
@@ -181,10 +160,13 @@
           console.error("Cloudinary error:", err);
         }
       }
-      await addDoc(collection(db, `exams/${examId}/violations`), docData);
+      await addDoc(
+        collection(db, `exams/${examId}/violations`),
+        docData
+      );
     }
 
-    // ─── Frame Analyzer ─────────────────────────────────────────────────────────
+    // ─── Frame Analyzer ──────────────────────────────────────────────────────
     async function analyzeFrame() {
       try {
         if (!numberClient || !trackClient) await initClients();
@@ -203,7 +185,7 @@
 
         console.log("API outputs:", numRes.data, trackRes.data);
 
-        // only *these* two trigger image upload
+        // only these two trigger image upload
         const faceCount = numRes.data;
         if (faceCount !== 1) {
           const ev = faceCount === 0 ? "No Face Detected" : "Multiple Faces Detected";
@@ -214,14 +196,13 @@
         if (gaze === "Looking Away") {
           await logViolation("Looking Away", blob);
         }
-      }
-      catch (e) {
+      } catch (e) {
         console.error("analyzeFrame error:", e);
       }
       setTimeout(analyzeFrame, 2000);
     }
 
-    // ─── Timer & Loop ────────────────────────────────────────────────────────────
+    // ─── Timer & Loop ───────────────────────────────────────────────────────
     function startLoop() { analyzeFrame(); }
 
     function fmt(sec) {
@@ -242,7 +223,7 @@
       }, 1000);
     }
 
-    // ─── Auth + Exam Load ───────────────────────────────────────────────────────
+    // ─── Auth + Exam Load ───────────────────────────────────────────────────
     onAuthStateChanged(auth, async user => {
       if (!user) return location.href = "/index.html";
       studentName = user.displayName || "Student";
@@ -270,35 +251,27 @@
       startLoop();
     });
 
-    // ─── Submit Handler ─────────────────────────────────────────────────────────
+    // ─── Submit Handler ─────────────────────────────────────────────────────
     document.getElementById("examForm").addEventListener("submit", async e => {
       e.preventDefault();
       let score = 0, resp = [];
       document.querySelectorAll("input[type=radio]:checked").forEach(ans => {
         const idx = +ans.name.slice(1), sel = ans.value;
         const corr = examData.questions[idx].options[examData.questions[idx].correct];
-        const awd = (sel === corr) ? 1 : 0;
-        score += awd; resp.push({
-          question: examData.questions[idx].questionText,
-          selected: sel,
-          correct: corr,
-          awarded: awd
-        });
+        const awd = sel === corr ? 1 : 0;
+        score += awd;
+        resp.push({ question: examData.questions[idx].questionText, selected: sel, correct: corr, awarded: awd });
       });
-      await addDoc(collection(db, `exams/${examId}/submissions`), {
-        studentName, studentEmail, examId,
-        examTitle: examData.testName,         // ✅ For display in results
-        submittedAt: new Date().toISOString(),
-        totalScore: score,                    // ✅ Match with results UI
-        responses: resp
-      });
-      document.getElementById("examContainer").style.display = "none";
-      document.getElementById("confirmationScreen").style.display = "flex";
+      await addDoc(
+        collection(db, `exams/${examId}/submissions`),
+        { studentName, studentEmail, examId, examTitle: examData.testName, submittedAt: new Date().toISOString(), totalScore: score, responses: resp }
+      );
+      window.location.href = "submitexam.html";
     });
 
     function goToDashboard() { location.href = "studentDashboard.html"; }
 
-    // ─── Other “violations” (no image) ─────────────────────────────────────────
+    // ─── Other “violations” (no image) ───────────────────────────────────────
     document.addEventListener("visibilitychange", async () => {
       if (document.hidden) await logViolation("TAB_SWITCH");
     });
@@ -316,31 +289,18 @@
       }
     });
 
-    // ─── Other “violations” (alert) ─────────────────────────────────────────
+    // ─── Violation Toast ──────────────────────────────────────────────────────
     function showViolationAlert(reason) {
-      const alertBox = document.getElementById("violationAlert");
-      alertBox.innerText = `⚠️ Violation Detected: ${reason}`;
-      alertBox.classList.remove("hidden");
-
-      // Auto-hide after 4 seconds
-      setTimeout(() => {
-        alertBox.classList.add("hidden");
-      }, 4000);
+      const box = document.getElementById("violationAlert");
+      box.innerText = `⚠ Violation: ${reason}`;
+      box.classList.remove("hidden");
+      setTimeout(() => box.classList.add("hidden"), 4000);
     }
 
-    // Start webcam immediately
-    (async function initWebcam() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        document.getElementById("webcam").srcObject = stream;
-      } catch {
-        alert("❌ Please allow webcam access to proceed.");
-      }
-    })();
-
-    function goToDashboard() {
-      window.location.href = "/templates/studDashboard/studentDashboard.html";
+    function submitExam() {
+      document.getElementById("examForm").requestSubmit(); // Triggers the actual form submission
     }
+
   </script>
 </body>
 

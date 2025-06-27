@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exam Submitted</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div id="confirmationScreen" class="bg-white p-10 rounded shadow-lg text-center">
+    <h2 class="text-3xl font-bold text-green-600 mb-4">✅ Exam Submitted!</h2>
+    <p class="text-lg mb-6">Your responses were saved successfully.</p>
+    <button onclick="goToDashboard()"
+      class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">
+      Go to Dashboard
+    </button>
+  </div>
+
+  <script>
+    function goToDashboard() {
+      window.location.href = "studentDashboard.html"; // Adjust path if needed
+    }
+  </script>
+</body>
+
+</html>
