@@ -6,57 +6,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Violation Reports</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
 </head>
 <!-- <body class="bg-gray-100 text-gray-900"> -->
 
 <body class="g-sidenav-show  bg-gray-100">
-    <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
-        <div class="max-w-screen-xl flex items-center justify-between mx-auto p-4">
-            <a href="#" class="text-2xl font-bold text-gray-800">Proctor</a>
-            <div class="relative">
-                <button type="button"
-                    class="flex items-center gap-2 text-sm bg-gray-800 text-white px-4 py-2 rounded-full focus:outline-none"
-                    data-dropdown-toggle="dropdown-user">
-                    <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                        viewBox="0 0 20 20">
-                        <path
-                            d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
-                    </svg>
-                    Profile
-                </button>
-                <div id="dropdown-user"
-                    class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
-                    <div class="px-4 py-2 text-sm text-gray-700">
-                        <p id="currentUserName" class="font-medium">Professor</p>
-                        <p id="currentUserEmail" class="text-xs text-gray-500">professor@example.com</p>
+    <nav class="fixed top-0 z-50 w-full bg-white border-gray-50  dark:bg-gray-50 dark:border-gray-600">
+        <div class="px-3 py-3 lg:px-5 lg:pl-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center justify-start rtl:justify-end">
+                    <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+                        <span
+                            class="self-center text-2xl font-semibold whitespace-nowrap dark:text-black">Proctor</span>
+                    </a>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center ms-3">
+                        <button type="button"
+                            class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                            aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                            <span class="sr-only">Open user menu</span>
+                            <a href="#"
+                                class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg text-gray-500 border-gray-500 bg-gray-100 hover:bg-gray-100  hover:text-gray-800 hover:border-gray-800 group">
+                                <svg class="w-4 h-4 me-2 text-gray-500 group-hover:text-gray-800" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
+                                </svg>
+                                Profile
+                            </a>
+
+                            <!-- <img class="w-8 h-8 rounded-full"
+                                src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo"> -->
+                        </button>
+                        <div id="dropdown-user"
+                            class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600">
+                            <div class="px-4 py-3">
+                                <p id="currentUserName" class="text-sm text-gray-500 dark:text-white">Professor</p>
+                                <p id="currentUserEmail"
+                                    class="text-sm font-medium text-gray-500 truncate dark:text-gray-300">
+                                    professor@example.com</p>
+                            </div>
+                            <ul>
+                                <li>
+                                    <a href="#"
+                                        class="block px-4 py-2 text-sm text-gray-100 hover:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-300 dark:hover:text-gray-800"
+                                        onclick="logout()">Sign out</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="border-t border-gray-100"></div>
-                    <a href="/templates/index.html" onclick="logout()"
-                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
                 </div>
             </div>
         </div>
     </nav>
-
-    <aside id="logo-sidebar" class="fixed top-0 left-0 w-64 h-full bg-white border-r border-gray-200 pt-20">
-        <div class="h-full px-3 pb-4 overflow-y-auto">
-            <ul class="space-y-2 text-gray-700">
-                <li><a href="./professorDashboard.html" class="block p-2 rounded hover:bg-gray-100">Dashboard</a></li>
-                <li><a href="./make-exam.html" class="block p-2 rounded hover:bg-gray-100">Make paper</a></li>
-                <li><a href="./admin-panel.html" class="block p-2 rounded hover:bg-gray-100">Admin panel</a></li>
-                <li><a href="./violations.html" class="block p-2 rounded hover:bg-gray-100">Violations</a></li>
+    <aside id="logo-sidebar"
+        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-gray-300 border-r border-gray-200 sm:translate-x-0 dark:bg-gray-400 dark:border-gray-500"
+        aria-label="Sidebar">
+        <div class="h-full px-3 pb-4 overflow-y-auto bg-black dark:bg-gray-200">
+            <ul class="space-y-2 font-medium">
                 <li>
-                    <a href="../login.html" onclick="logout()"
-                        class="flex items-center p-2 text-gray-800 hover:bg-gray-300 rounded">
-                        <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
+                    <a href="./professorDashboard.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+                        <span class="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="./make-exam.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+                        <span class="flex-1 ms-3 whitespace-nowrap">Make paper</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="./admin-panel.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+                        <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="./violations.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+                        <span class="flex-1 ms-3 whitespace-nowrap">Violations</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/templates/index.html" onclick="logout()"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
+                        <svg class="shrink-0 w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-800 group-hover:text-gray-400 dark:group-hover:text-white"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
                         </svg>
-                        Logout
+                        <span class="flex-1 ms-3 whitespace-nowrap">Logout</span>
                     </a>
                 </li>
             </ul>
@@ -77,7 +117,7 @@
                 <table class="min-w-full text-sm text-left bg-white rounded shadow">
                     <thead class="bg-red-400 text-gray-800">
                         <tr>
-                            <th class="p-1">Sr. No.</th>
+                            <th class="p-2">#</th>
                             <th class="p-2">Student Name</th>
                             <th class="p-2">Email</th>
                             <th class="p-2">Exam Name</th>
@@ -135,18 +175,18 @@
                     const tr = document.createElement("tr");
                     tr.className = "border-b hover:bg-gray-50";
                     tr.innerHTML = `
-                        <td class="p-1">${count++}</td>
-                        <td class="p-1">${v.studentName}</td>
-                        <td class="p-1">${v.studentEmail}</td>
-                        <td class="p-1">${examData.testName}</td>
-                        <td class="p-1">${v.event}</td>
-                        <td class="p-1">${new Date(v.detectedAt).toLocaleString()}</td>
-                        <td class="p-1">${v.description || '-'}</td>
-                        <td class="p-2 text-center">
-                            <button class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm" onclick="approveViolation('${examId}', '${violationDoc.id}')">Approve</button>
-                            <button class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm ml-2" onclick="denyViolation('${examId}', '${violationDoc.id}', '${v.studentEmail}')">Block</button>
-                        </td>
-                    `;
+            <td class="p-1">${count++}</td>
+            <td class="p-1">${v.studentName}</td>
+            <td class="p-1">${v.studentEmail}</td>
+            <td class="p-1">${examData.testName}</td>
+            <td class="p-1">${v.event}</td>
+            <td class="p-1">${new Date(v.detectedAt).toLocaleString()}</td>
+            <td class="p-1">${v.description || '-'}</td>
+            <td class="p-1 text-center">
+                <button class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm" onclick="approveViolation('${examId}', '${violationDoc.id}')">Approve</button>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm ml-2" onclick="denyViolation('${examId}', '${violationDoc.id}', '${v.studentEmail}')">Block</button>
+            </td>
+          `;
                     tableBody.appendChild(tr);
                 });
             }
@@ -158,69 +198,13 @@
             location.reload();
         };
 
-        // window.denyViolation = async (examId, vioId, studentEmail) => {
-        //     await updateDoc(doc(db, "users", studentEmail), { denied: true });
-        //     alert("Student blocked from further exams.");
-        // };
         window.denyViolation = async (examId, vioId, studentEmail) => {
-            try {
-                // Step 1: Get the user document by email
-                const usersRef = collection(db, "users");
-                const userQuery = query(usersRef, where("email", "==", studentEmail));
-                const userSnap = await getDocs(userQuery);
-
-                if (!userSnap.empty) {
-                    const userDoc = userSnap.docs[0];
-                    const userId = userDoc.id;
-
-                    // Step 2: Mark user as denied
-                    await updateDoc(doc(db, "users", userId), { denied: true });
-
-                    // Step 3: Remove user from exam's assignedTo array
-                    const examRef = doc(db, "exams", examId);
-                    const examDoc = await getDoc(examRef);
-
-                    if (examDoc.exists()) {
-                        const assignedTo = examDoc.data().assignedTo || [];
-                        const updatedList = assignedTo.filter(id => id !== userId);
-                        await updateDoc(examRef, { assignedTo: updatedList });
-                    }
-
-                    // Step 4: Remove the violation
-                    await deleteDoc(doc(db, `exams/${examId}/violations`, vioId));
-
-                    alert("Student blocked and removed from the exam.");
-                    location.reload();
-                } else {
-                    alert("❌ Student not found.");
-                }
-            } catch (error) {
-                console.error("Error denying violation:", error);
-                alert("Error occurred while blocking student.");
-            }
+            await updateDoc(doc(db, "users", studentEmail), { denied: true });
+            alert("Student blocked from further exams.");
         };
-
 
         loadViolations();
     </script>
-    <script>
-        const toggler = document.getElementById('iconNavbarSidenav');
-        const sidebar = document.getElementById('logo-sidebar');
-
-        toggler?.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-        });
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                // Redirect to login page
-                window.location.href = "../index.html";
-            }).catch((error) => {
-                console.error("Logout failed:", error);
-                alert("Logout failed!");
-            });
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 
 </html>
