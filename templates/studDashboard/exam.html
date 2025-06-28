@@ -44,9 +44,9 @@
   </style>
 </head>
 
-<body class="bg-gray-100" onload="enterFullscreen()">
+<body class="bg-gray-100">
 
-  <!-- block back navigation -->
+  <!-- Block back navigation -->
   <script>
     history.pushState(null, null, location.href);
     window.addEventListener('popstate', () => history.pushState(null, null, location.href));
@@ -60,9 +60,8 @@
   <!-- Violation Alert Toast -->
   <div id="violationAlert"
     class="fixed top-6 left-6 bg-red-600 text-white text-sm px-4 py-3 rounded shadow-lg hidden z-50">
-    ⚠️ Violation Detected
+    ⚠ Violation Detected
   </div>
-
 
   <div id="examContainer" class="max-w-4xl mx-auto py-10 px-4">
     <div class="bg-white p-6 rounded shadow">
@@ -87,14 +86,16 @@
   </div>
 
   <script type="module">
+    // ─── Firebase Setup ───────────────────────────────────────────────────────
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import {
-  getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, addDoc
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+    // ─── Gradio Client ────────────────────────────────────────────────────────
     import { Client } from "https://esm.sh/@gradio/client";
 
-    // ─── Firebase Setup ─────────────────────────────────────────────────────────
+
+    // ─── Firebase Setup ───────────────────────────────────────────────────────
     const firebaseConfig = {
       apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
       authDomain: "proctored-system.firebaseapp.com",
@@ -106,11 +107,11 @@
     initializeApp(firebaseConfig);
     const db = getFirestore(), auth = getAuth();
 
-    // ─── Cloudinary Unsigned Upload Preset ──────────────────────────────────────
+    // ─── Cloudinary Unsigned Upload Preset ────────────────────────────────────
     const CLOUD_NAME = 'dsu1pjwyp';
     const UPLOAD_PRESET = 'procted';
 
-    // ─── State ───────────────────────────────────────────────────────────────────
+    // ─── State ────────────────────────────────────────────────────────────────
     let numberClient, trackClient;
     let studentName = "", studentEmail = "", examData = null;
     let violationCount = 0;
@@ -120,7 +121,7 @@
       location.href = "studentDashboard.html";
     }
 
-    // ─── Webcam Init ─────────────────────────────────────────────────────────────
+    // ─── Webcam Init ─────────────────────────────────────────────────────────
     (async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -130,33 +131,13 @@
       }
     })();
 
-    // ─── enter Full screen ─────────────────────────────────────────────────────────────
-    function enterFullscreen() {
-      const el = document.documentElement;
-      if (el.requestFullscreen) {
-        el.requestFullscreen();
-      } else if (el.webkitRequestFullscreen) {
-        el.webkitRequestFullscreen();
-      } else if (el.msRequestFullscreen) {
-        el.msRequestFullscreen();
-      }
-    }
-
-    document.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement) {
-        logViolation("EXITED_FULLSCREEN");
-        showViolationAlert("Do not exit fullscreen during the exam!");
-      }
-    });
-
-
-    // ─── Gradio Clients ──────────────────────────────────────────────────────────
+    // ─── Gradio Clients ───────────────────────────────────────────────────────
     async function initClients() {
       numberClient = await Client.connect("Sakshi4/facenumber");
       trackClient = await Client.connect("Sakshi4/Facetracking");
     }
 
-    // ─── Cloudinary Upload ───────────────────────────────────────────────────────
+    // ─── Cloudinary Upload ───────────────────────────────────────────────────
     async function uploadToCloudinary(blob) {
       const form = new FormData();
       form.append('file', blob);
@@ -169,7 +150,7 @@
       return (await res.json()).secure_url;
     }
 
-    // ─── Violation Logger ───────────────────────────────────────────────────────
+    // ─── Violation Logger ────────────────────────────────────────────────────
     async function logViolation(eventType, imageBlob = null) {
       violationCount++;
       showViolationAlert(eventType);
@@ -183,47 +164,144 @@
           console.error("Cloudinary error:", err);
         }
       }
-      await addDoc(collection(db, `exams/${examId}/violations`), docData);
+      await addDoc(
+        collection(db, `exams/${examId}/violations`),
+        docData
+      );
     }
 
-    // ─── Frame Analyzer ─────────────────────────────────────────────────────────
+    // ─── Frame Analyzer (updated)──────────────────────────────────────────────────────
     async function analyzeFrame() {
       try {
         if (!numberClient || !trackClient) await initClients();
         const vid = document.getElementById("webcam");
-        if (!vid.videoWidth) return;
+        if (!vid.videoWidth || !vid.videoHeight) {
+          setTimeout(analyzeFrame, 2000);
+          return;
+        }
+
+        // Capture current frame
         const canvas = document.createElement("canvas");
         canvas.width = vid.videoWidth;
         canvas.height = vid.videoHeight;
         canvas.getContext("2d").drawImage(vid, 0, 0);
-        const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg"));
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
+        const fileInput = new File([blob], "frame.jpg", { type: "image/jpeg" });
 
+        // 🔍 Call Gradio APIs
         const [numRes, trackRes] = await Promise.all([
-          numberClient.predict("/predict", { image_input: blob }),
-          trackClient.predict("/predict", { frame: blob })
+          numberClient.predict("/predict", { image_input: fileInput }),
+          trackClient.predict("/predict", { frame: fileInput })
         ]);
 
-        console.log("API outputs:", numRes.data, trackRes.data);
-
-        // only *these* two trigger image upload
         const faceCount = numRes.data;
-        if (faceCount !== 1) {
-          const ev = faceCount === 0 ? "No Face Detected" : "Multiple Faces Detected";
-          await logViolation(ev, blob);
+        const { violation, multiple_faces, looking_away, image } = trackRes.data;
+
+        // 🎯 Determine Violation Reason
+        if (violation) {
+          let reason = "Unknown Violation";
+          if (faceCount === 0) reason = "No Face Detected";
+          else if (faceCount > 1 || multiple_faces) reason = "Multiple Faces Detected";
+          else if (looking_away) reason = "Looking Away";
+
+          // 🚨 Show warning and annotated image
+          showViolationAlert(reason);
+          showViolationImage(image);
+
+          // 🔄 Upload raw frame and log violation
+          await logViolation(reason, blob);
         }
 
-        const gaze = trackRes.data.gaze_direction;
-        if (gaze === "Looking Away") {
-          await logViolation("Looking Away", blob);
-        }
-      }
-      catch (e) {
+      } catch (e) {
         console.error("analyzeFrame error:", e);
       }
+
+      // Repeat every 2s
       setTimeout(analyzeFrame, 2000);
     }
 
-    // ─── Timer & Loop ────────────────────────────────────────────────────────────
+    // async function analyzeFrame() {
+    //   try {
+    //     if (!numberClient || !trackClient) await initClients();
+    //     const vid = document.getElementById("webcam");
+    //     if (!vid.videoWidth) return;
+    //     const canvas = document.createElement("canvas");
+    //     canvas.width = vid.videoWidth;
+    //     canvas.height = vid.videoHeight;
+    //     canvas.getContext("2d").drawImage(vid, 0, 0);
+    //     const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg"));
+
+    //     const [numRes, trackRes] = await Promise.all([
+    //       numberClient.predict("/predict", { image_input: blob }),
+    //       trackClient.predict("/predict", { frame: blob })
+    //     ]);
+
+    //     console.log("API outputs:", numRes.data, trackRes.data);
+
+    //     // only these two trigger image upload
+    //     const faceCount = numRes.data;
+    //     if (faceCount !== 1) {
+    //       const ev = faceCount === 0 ? "No Face Detected" : "Multiple Faces Detected";
+    //       await logViolation(ev, blob);
+    //     }
+
+    //     const gaze = trackRes.data.gaze_direction;
+    //     if (gaze === "Looking Away") {
+    //       await logViolation("Looking Away", blob);
+    //     }
+    //   } catch (e) {
+    //     console.error("analyzeFrame error:", e);
+    //   }
+    //   setTimeout(analyzeFrame, 2000);
+    // }
+
+
+    // -----------simple logic-----------------
+    // ─── Fullscreen Logic ────────────────────────────────────────────────────────
+
+    // ✅ Request Fullscreen
+    function requestFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(err => console.warn("Fullscreen failed:", err));
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      } else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen();
+      }
+    }
+
+    // ✅ Enter fullscreen on page load if flagged from startExam
+    window.addEventListener("load", () => {
+      if (localStorage.getItem("startExam") === "true") {
+        localStorage.removeItem("startExam");
+        setTimeout(() => requestFullscreen(), 300); // Wait briefly
+      }
+    });
+
+    // ✅ Detect fullscreen exit and prompt to re-enter
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        logViolation("EXITED_FULLSCREEN");
+        showViolationAlert("You exited fullscreen!");
+
+        setTimeout(() => {
+          const retry = confirm("You exited fullscreen. Click OK to re-enter and continue the exam.");
+          if (retry) requestFullscreen(); // Re-enter
+        }, 400);
+      }
+    });
+
+    // ✅ Block F11 and Esc keys
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "F11" || e.key === "Escape") {
+        e.preventDefault();
+        logViolation("BLOCKED_KEY_" + e.key);
+        showViolationAlert(`Blocked key: ${e.key}`);
+      }
+    });
+
+    // ─── Timer & Loop ───────────────────────────────────────────────────────
     function startLoop() { analyzeFrame(); }
 
     function fmt(sec) {
@@ -244,11 +322,13 @@
       }, 1000);
     }
 
-    // ─── Auth + Exam Load ───────────────────────────────────────────────────────
+
+    // ─── Auth + Exam Load ───────────────────────────────────────────────────
     onAuthStateChanged(auth, async user => {
       if (!user) return location.href = "/index.html";
       studentName = user.displayName || "Student";
       studentEmail = user.email;
+      analyzeFrame();
       const snap = await getDoc(doc(db, "exams", examId));
       if (!snap.exists()) return location.href = "studentDashboard.html";
       examData = snap.data();
@@ -272,35 +352,36 @@
       startLoop();
     });
 
-    // ─── Submit Handler ─────────────────────────────────────────────────────────
+
+    // ─── Submit Handler ─────────────────────────────────────────────────────
+    // Submit handler
     document.getElementById("examForm").addEventListener("submit", async e => {
       e.preventDefault();
       let score = 0, resp = [];
       document.querySelectorAll("input[type=radio]:checked").forEach(ans => {
         const idx = +ans.name.slice(1), sel = ans.value;
         const corr = examData.questions[idx].options[examData.questions[idx].correct];
-        const awd = (sel === corr) ? 1 : 0;
-        score += awd; resp.push({
-          question: examData.questions[idx].questionText,
-          selected: sel,
-          correct: corr,
-          awarded: awd
-        });
+        const awd = sel === corr ? 1 : 0;
+        score += awd;
+        resp.push({ question: examData.questions[idx].questionText, selected: sel, correct: corr, awarded: awd });
       });
-      await addDoc(collection(db, `exams/${examId}/submissions`), {
-        studentName, studentEmail, examId,
-        examTitle: examData.testName,         // ✅ For display in results
-        submittedAt: new Date().toISOString(),
-        totalScore: score,                    // ✅ Match with results UI
-        responses: resp
-      });
-      document.getElementById("examContainer").style.display = "none";
-      document.getElementById("confirmationScreen").style.display = "flex";
+
+      await addDoc(
+        collection(db, `exams/${examId}/submissions`),
+        {
+          studentName,
+          studentEmail,
+          examId,
+          examTitle: examData.testName,
+          submittedAt: new Date().toISOString(),
+          totalScore: score,
+          responses: resp
+        }
+      );
+      window.location.href = "submitExam.html";
     });
 
-    function goToDashboard() { location.href = "studentDashboard.html"; }
-
-    // ─── Other “violations” (no image) ─────────────────────────────────────────
+    // ─── Other “violations” (no image) ───────────────────────────────────────
     document.addEventListener("visibilitychange", async () => {
       if (document.hidden) await logViolation("TAB_SWITCH");
     });
@@ -318,30 +399,60 @@
       }
     });
 
-    // ─── Other “violations” (alert) ─────────────────────────────────────────
-    function showViolationAlert(reason) {
-      const alertBox = document.getElementById("violationAlert");
-      alertBox.innerText = `⚠️ Violation Detected: ${reason}`;
-      alertBox.classList.remove("hidden");
+    // ─── Detect Tab Switch or Window Blur ───────────────────────────────────────
+    document.addEventListener("visibilitychange", async () => {
+      if (document.hidden) {
+        await logViolation("TAB_SWITCH");
+        showViolationAlert("Tab switch detected!");
+      }
+    });
 
-      // Auto-hide after 4 seconds
-      setTimeout(() => {
-        alertBox.classList.add("hidden");
-      }, 4000);
+    window.addEventListener("blur", async () => {
+      await logViolation("WINDOW_BLUR");
+      showViolationAlert("Window lost focus!");
+    });
+    // ─── Violation Toast (updated)──────────────────────────────────────────────────────
+    function showViolationAlert(reason) {
+      const box = document.getElementById("violationAlert");
+      box.innerText = `⚠ Violation: ${reason}`;
+      box.classList.remove("hidden");
+      setTimeout(() => box.classList.add("hidden"), 4000);
     }
 
-    // Start webcam immediately
-    (async function initWebcam() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        document.getElementById("webcam").srcObject = stream;
-      } catch {
-        alert("❌ Please allow webcam access to proceed.");
-      }
-    })();
+    function showViolationImage(base64Img) {
+      const box = document.getElementById("violationImageBox");
+      const img = document.getElementById("violationImage");
+      img.src = base64Img;
+      box.classList.remove("hidden");
+      setTimeout(() => box.classList.add("hidden"), 8000);
+    }
 
-    function goToDashboard() {
-      window.location.href = "/templates/studDashboard/studentDashboard.html";
+
+    // function showViolationAlert(reason) {
+    //   const box = document.getElementById("violationAlert");
+    //   box.innerText = `⚠ Violation: ${reason}`;
+    //   box.classList.remove("hidden");
+    //   setTimeout(() => box.classList.add("hidden"), 4000);
+    // }
+    // ─── submit exam logic for result calculation ──────────────────────────────────────────────────────
+    async function submitExam() {
+      const user = auth.currentUser;
+      if (!user) return alert("Not logged in");
+
+      const examId = localStorage.getItem("currentExamId"); // dynamically fetch if needed
+      const sessionId = crypto.randomUUID(); // or any unique value
+
+      const score = calculateScore(); // You should implement this
+      const docRef = doc(db, `exams/${examId}/submissions/${submissionId}`);
+
+      await setDoc(docRef, {
+        studentEmail: user.email,
+        totalScore: score,
+        submittedAt: serverTimestamp()
+      });
+
+      alert("Exam submitted successfully!");
+      window.location.href = "results.html";
     }
   </script>
 </body>
