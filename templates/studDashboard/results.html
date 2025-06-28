@@ -154,7 +154,7 @@
       </div>
     </div>
   </main>
-<!--   <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import {
       getFirestore,
@@ -220,99 +220,7 @@
         });
       }
     });
-  </script> -->
-
-
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    query,
-    where,
-  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-  import {
-    getAuth,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-    authDomain: "proctored-system.firebaseapp.com",
-    projectId: "proctored-system",
-    storageBucket: "proctored-system.appspot.com",
-    messagingSenderId: "512898908874",
-    appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-
-  onAuthStateChanged(auth, async (user) => {
-    const tbody = document.getElementById("resultTableBody");
-    tbody.innerHTML = "";
-
-    if (!user) {
-      alert("You are not logged in. Redirecting to login...");
-      window.location.href = "index.html";
-      return;
-    }
-
-    const email = user.email;
-    let i = 1;
-
-    try {
-      // Get all exams
-      const examsSnapshot = await getDocs(collection(db, "exams"));
-
-      for (const examDoc of examsSnapshot.docs) {
-        const examId = examDoc.id;
-        const examData = examDoc.data();
-
-        // Get only current user's submissions
-        const submissionsQuery = query(
-          collection(db, "exams", examId, "submissions"),
-          where("studentEmail", "==", email)
-        );
-
-        const submissionsSnapshot = await getDocs(submissionsQuery);
-
-        for (const subDoc of submissionsSnapshot.docs) {
-          const subData = subDoc.data();
-
-          const score = subData.score || subData.totalScore || "-";
-          const submittedAt = subData.submittedAt
-            ? new Date(subData.submittedAt).toLocaleString()
-            : "-";
-
-          const examTitle = examData.testName || examData.title || examId;
-          const examDate = examData.createdAt
-            ? new Date(examData.createdAt.seconds * 1000).toLocaleDateString()
-            : "-";
-
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td class="px-3 py-1 border border-gray-500">${i++}</td>
-            <td class="px-3 py-1 border border-gray-500">${examTitle}</td>
-            <td class="px-3 py-1 border border-gray-500">${examDate}</td>
-            <td class="px-3 py-1 border border-gray-500 font-semibold text-green-600">${score}</td>
-            <td class="px-3 py-1 border border-gray-500">${submittedAt}</td>
-          `;
-          tbody.appendChild(row);
-        }
-      }
-
-      if (i === 1) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">No results found.</td></tr>`;
-      }
-    } catch (err) {
-      console.error("Error fetching results:", err);
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600 p-4">Error fetching results.</td></tr>`;
-    }
-  });
-</script>
+  </script>
 
 
 
