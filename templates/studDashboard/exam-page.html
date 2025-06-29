@@ -39,13 +39,13 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link active bg-gradient-dark text-white" href="studentDashboard.html">
+          <a class="nav-link text-dark" href="studentDashboard.html" onclick="showSection('studentDashboard')">
             <i class="material-symbols-rounded opacity-5">dashboard</i>
             <span class="nav-link-text ms-1">Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-dark" href="./exam-page.html" onclick="showSection('exams')">
+          <a class="nav-link active bg-gradient-dark text-white" href="./exam-page.html" onclick="showSection('exams')">
             <i class="material-symbols-rounded opacity-5">table_view</i>
             <span class="nav-link-text ms-1">My Exams</span>
           </a>
@@ -97,7 +97,7 @@
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a>
             </li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Violations</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">My Exams</li>
           </ol>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
@@ -164,53 +164,53 @@
       </div>
     </div>
   </main>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    query,
-    where
-  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-  import {
-    getAuth,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-    authDomain: "proctored-system.firebaseapp.com",
-    projectId: "proctored-system",
-    storageBucket: "proctored-system.appspot.com",
-    messagingSenderId: "512898908874",
-    appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.appspot.com",
+      messagingSenderId: "512898908874",
+      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore();
-  const auth = getAuth();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore();
+    const auth = getAuth();
 
-  const examTableBody = document.getElementById("examTableBody");
-  let currentUserEmail = "";
+    const examTableBody = document.getElementById("examTableBody");
+    let currentUserEmail = "";
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      alert("Please login first.");
-      window.location.href = "index.html";
-    } else {
-      currentUserEmail = user.email;
-      loadExams();
-    }
-  });
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        alert("Please login first.");
+        window.location.href = "index.html";
+      } else {
+        currentUserEmail = user.email;
+        loadExams();
+      }
+    });
 
-  async function loadExams() {
-    const querySnapshot = await getDocs(collection(db, "exams"));
-    querySnapshot.forEach((doc) => {
-      const exam = doc.data();
-      const row = document.createElement("tr");
+    async function loadExams() {
+      const querySnapshot = await getDocs(collection(db, "exams"));
+      querySnapshot.forEach((doc) => {
+        const exam = doc.data();
+        const row = document.createElement("tr");
 
-      row.innerHTML = `
+        row.innerHTML = `
         <td><p class="text-sm mb-0">${exam.testName}</p></td>
         <td><p class="text-sm mb-0">${exam.subject || 'N/A'}</p></td>
         <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
@@ -218,24 +218,24 @@
           <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${doc.id}')">Select</button>
         </td>
       `;
-      examTableBody.appendChild(row);
-    });
-  }
-
-  window.selectExam = async function (examId) {
-    // Check if user has already submitted this exam
-    const submissionsRef = collection(db, `exams/${examId}/submissions`);
-    const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      alert("❌ You have already given this exam.");
-    } else {
-      localStorage.setItem("currentExamId", examId);
-      window.location.href = "startExam.html";
+        examTableBody.appendChild(row);
+      });
     }
-  }
-</script>
+
+    window.selectExam = async function (examId) {
+      // Check if user has already submitted this exam
+      const submissionsRef = collection(db, `exams/${examId}/submissions`);
+      const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        alert("❌ You have already given this exam.");
+      } else {
+        localStorage.setItem("currentExamId", examId);
+        window.location.href = "startExam.html";
+      }
+    }
+  </script>
 
 
 
