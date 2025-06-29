@@ -6,6 +6,9 @@
   <title>Proctored Exam</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+  <!-- ONNX Runtime & Silero VAD -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.24/dist/bundle.min.js"></script>
   <style>
     html, body { height: 100%; margin: 0; padding: 0; }
     #startOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
@@ -107,7 +110,6 @@
   const examId = localStorage.getItem('currentExamId');
   if (!examId) location.href = 'studentDashboard.html';
 
-  // Enable start button only when rules agreed
   document.getElementById('agreeRules').addEventListener('change', function() {
     document.getElementById('startBtn').disabled = !this.checked;
   });
@@ -122,8 +124,7 @@
     const video = document.getElementById('webcam');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = stream;
-      video.play();
+      video.srcObject = stream; video.play();
     } catch {
       alert('Please allow webcam access.');
       return;
@@ -135,9 +136,8 @@
     await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
 
     analyzeFrame();     // face-based violations
-    initMicDetection(); // voice-based violations
+    initMicDetection();// Silero VAD-based voice violations
 
-    // Fetch exam and render
     onAuthStateChanged(auth, async user => {
       if (!user) return location.href = '/index.html';
       studentName = user.displayName || 'Student';
@@ -173,10 +173,8 @@
     const el = document.getElementById('timer');
     setInterval(() => {
       if (rem <= 0) return location.href = 'studentDashboard.html';
-      const m = Math.floor(rem / 60),
-            s = rem % 60;
-      el.innerText = `${m}:${s.toString().padStart(2,'0')}`;
-      rem--;
+      const m = Math.floor(rem/60), s = rem%60;
+      el.innerText = `${m}:${s.toString().padStart(2,'0')}`; rem--;
     }, 1000);
   }
 
@@ -187,48 +185,39 @@
     const det = await faceapi
       .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks(true);
-    const multi = det.length > 1;
 
-    let away = false;
-    if (det.length) {
+    if (det.length === 0) {
+      await showViolation('NO_FACE');
+    } else if (det.length > 1) {
+      await showViolation('MULTIPLE_FACES');
+    } else {
+      // exactly one face, check looking away
       const lm = det[0].landmarks;
       const nose = lm.getNose()[0];
       const l = lm.getLeftEye()[0];
       const r = lm.getRightEye()[3];
-      away = Math.abs((nose.x - (l.x + r.x) / 2) / video.videoWidth) > 0.1;
-    } else {
-      away = true;
+      const away = Math.abs((nose.x - (l.x+r.x)/2) / video.videoWidth) > 0.1;
+      if (away) await showViolation('LOOKING_AWAY');
     }
 
-    if (multi) await showViolation('MULTIPLE_FACES');
-    else if (away) await showViolation('LOOKING_AWAY');
     setTimeout(analyzeFrame, 2000);
   }
 
-  // 🎤 Voice activity detection
+  // 🎤 Silero-based Voice Activity Detection
   async function initMicDetection() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createMediaStreamSource(stream);
-      const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
-
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      source.connect(analyser);
-
-      function detectVolume() {
-        analyser.getByteFrequencyData(dataArray);
-        const avg = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        if (avg > 30) {
-          console.log('🎤 Voice activity detected');
+      const myvad = await vad.MicVAD.new({
+        onSpeechStart: () => {
+          console.log('🎤 Voice start detected');
           showViolation('VOICE_ACTIVITY');
+        },
+        onSpeechEnd: () => {
+          console.log('🎤 Voice end detected');
         }
-        requestAnimationFrame(detectVolume);
-      }
-      detectVolume();
+      });
+      myvad.start();
     } catch (err) {
-      console.warn('Microphone access denied or error:', err);
+      console.warn('VAD init failed:', err);
     }
   }
 
@@ -239,13 +228,11 @@
     box.style.display = 'block';
     setTimeout(() => box.style.display = 'none', 3000);
 
-    // capture image
+    // capture webcam snapshot
     const vid = document.getElementById('webcam');
     const c = document.createElement('canvas');
-    c.width = vid.videoWidth;
-    c.height = vid.videoHeight;
+    c.width = vid.videoWidth; c.height = vid.videoHeight;
     c.getContext('2d').drawImage(vid, 0, 0);
-
     c.toBlob(async b => {
       try {
         const url = await uploadToCloudinary(b);
@@ -264,13 +251,11 @@
     e.preventDefault();
     let score = 0, resp = [];
     document.querySelectorAll('input[type=radio]:checked').forEach(ans => {
-      const i = +ans.name.slice(1);
-      const sel = ans.value;
+      const i = +ans.name.slice(1), sel = ans.value;
       const corr = examData.questions[i].options[examData.questions[i].correct];
       if (sel === corr) score++;
       resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
     });
-
     await addDoc(collection(db, `exams/${examId}/submissions`), {
       studentName,
       studentEmail,
@@ -280,7 +265,6 @@
       totalScore: score,
       responses: resp
     });
-
     document.getElementById('examContainer').style.display = 'none';
     document.getElementById('confirmationScreen').style.display = 'flex';
     setTimeout(() => location.href = 'studentDashboard.html', 1000);
