@@ -165,7 +165,7 @@
     let away = false;
     if (det.length) {
       const lm = det[0].landmarks, nose=lm.getNose()[0], l=lm.getLeftEye()[0], r=lm.getRightEye()[3];
-      away = Math.abs((nose.x - (l.x+r.x)/2)/video.videoWidth) > 0.2;
+      away = Math.abs((nose.x - (l.x+r.x)/2)/video.videoWidth) > 0.1;
     } else away = true;
     if (multi) await showViolation('MULTIPLE_FACES');
     else if (away) await showViolation('LOOKING_AWAY');
