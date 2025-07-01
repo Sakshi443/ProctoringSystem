@@ -39,7 +39,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link active bg-gradient-dark text-white" href="studentDashboard.html">
+          <a class="nav-link text-dark" href="studentDashboard.html" onclick="showSection('studentDashboard')">
             <i class="material-symbols-rounded opacity-5">dashboard</i>
             <span class="nav-link-text ms-1">Dashboard</span>
           </a>
@@ -51,13 +51,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-dark" href="./startExam.html">
-            <i class="material-symbols-rounded opacity-5">table_view</i>
-            <span class="nav-link-text ms-1">Start Exam</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="./results.html" onclick="showSection('results')">
+          <a class="nav-link active bg-gradient-dark text-white" href="./results.html" onclick="showSection('results')">
             <i class="material-symbols-rounded opacity-5">receipt_long</i>
             <span class="nav-link-text ms-1">Result</span>
           </a>
@@ -97,7 +91,7 @@
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a>
             </li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Violations</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Results</li>
           </ol>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
@@ -124,27 +118,29 @@
     <!-- End Navbar -->
     <div class="container-fluid py-2">
       <div class="row">
-        <!-- add the Main Content here dont change sidebar, navbar, toggle, footer-->
-        <div class="col-12">
+        <div class="col-11">
           <div class="card my-4">
             <div class="card-header p-3">
-              <h6 class="mb-0">Your Exam Results</h6>
-              <p class="text-sm text-secondary mb-0">Below is the list of all exams you’ve attempted and your scores.
-              </p>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-              <div class="table-responsive p-3">
-                <table class="table align-items-center mb-0">
-                  <thead>
+              <div class="px-4">
+                <h1 class="text-2xl font-bold mb-2 text-green-600">📊 Exam Results</h1>
+                <p class="mb-3 text-sm text-gray-500">Here are your exam titles, scores and submission times.</p>
+              </div>
+              <div class="p-4 overflow-x-auto">
+                <table
+                  class="min-w-full text-sm text-left bg-white rounded shadow border border-gray-500 border-collapse">
+                  <thead class="bg-green-100 text-gray-800">
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Exam Title</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Score</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Submitted At</th>
+                      <th class="p-2 border border-gray-500">Sr. no.</th>
+                      <th class="p-2 border border-gray-500">Exam Title</th>
+                      <th class="p-2 border border-gray-500">Exam Date</th>
+                      <th class="p-2 border border-gray-500">Score</th>
+                      <th class="p-2 border border-gray-500">Submitted At</th>
                     </tr>
                   </thead>
                   <tbody id="resultTableBody">
-                    <!-- Data populated from Firebase -->
+                    <tr>
+                      <td colspan="5" class="text-center p-4">Loading your results...</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -153,22 +149,22 @@
         </div>
       </div>
     </div>
+
   </main>
-  <script type="module">
+  <!-- <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import {
       getFirestore,
       collection,
-      query,
-      where,
-      getDocs
+      getDocs,
+      doc,
+      getDoc
     } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import {
       getAuth,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
       authDomain: "proctored-system.firebaseapp.com",
@@ -178,51 +174,158 @@
       appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // On user login
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return window.location.href = "../index.html";
+      const tbody = document.getElementById("resultTableBody");
+      tbody.innerHTML = "";
 
-      const studentEmail = user.email;
-      const q = query(
-        collection(db, "exam_submissions"),
-        where("studentEmail", "==", studentEmail)
-      );
+      if (!user) {
+        alert("You are not logged in. Redirecting to login...");
+        window.location.href = "index.html";
+        return;
+      }
 
-      const snapshot = await getDocs(q);
-      const tableBody = document.getElementById("resultTableBody");
+      const email = user.email;
+      let i = 1;
 
-      if (snapshot.empty) {
-        tableBody.innerHTML = `
-        <tr>
-          <td colspan="4" class="text-center text-secondary py-3">
-            No results found.
-          </td>
-        </tr>`;
-      } else {
-        let i = 1;
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const row = document.createElement("tr");
+      try {
+        // 🔁 Get all exams
+        const examsSnapshot = await getDocs(collection(db, "exams"));
 
-          row.innerHTML = `
-          <td class="align-middle text-sm px-3">${i++}</td>
-          <td class="align-middle text-sm">${data.examTitle || "N/A"}</td>
-          <td class="align-middle text-sm text-success fw-bold">${data.totalScore}</td>
-          <td class="align-middle text-sm">${new Date(data.submittedAt).toLocaleString()}</td>
-        `;
+        for (const examDoc of examsSnapshot.docs) {
+          const examId = examDoc.id;
+          const examData = examDoc.data();
 
-          tableBody.appendChild(row);
-        });
+          // 🔍 Check for submissions for this user
+          const submissionsSnapshot = await getDocs(collection(db, "exams", examId, "submissions"));
+          for (const subDoc of submissionsSnapshot.docs) {
+            const subData = subDoc.data();
+            if (subData.studentEmail !== email) continue;
+
+            const score = subData.score || subData.totalScore || "-";
+            const submittedAt = subData.submittedAt
+              ? new Date(subData.submittedAt).toLocaleString()
+              : "-";
+
+            const examTitle = examData.testName || examData.title || examId;
+            const examDate = examData.createdAt
+              ? new Date(examData.createdAt.seconds * 1000).toLocaleDateString()
+              : "-";
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td class="px-3 py-1 border border-gray-500">${i++}</td>
+              <td class="px-3 py-1 border border-gray-500">${examTitle}</td>
+              <td class="px-3 py-1 border border-gray-500">${examDate}</td>
+              <td class="px-3 py-1 border border-gray-500 font-semibold text-green-600">${score}</td>
+              <td class="px-3 py-1 border border-gray-500">${submittedAt}</td>
+            `;
+            tbody.appendChild(row);
+          }
+        }
+
+        if (i === 1) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">No results found.</td></tr>`;
+        }
+      } catch (err) {
+        console.error("Error fetching results:", err);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600 p-4">Error fetching results.</td></tr>`;
+      }
+    });
+  </script> -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      where,
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.appspot.com",
+      messagingSenderId: "512898908874",
+      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      const tbody = document.getElementById("resultTableBody");
+      tbody.innerHTML = "";
+
+      if (!user) {
+        alert("You are not logged in. Redirecting to login...");
+        window.location.href = "index.html";
+        return;
+      }
+
+      const email = user.email;
+      let i = 1;
+
+      try {
+        // Get all exams
+        const examsSnapshot = await getDocs(collection(db, "exams"));
+
+        for (const examDoc of examsSnapshot.docs) {
+          const examId = examDoc.id;
+          const examData = examDoc.data();
+
+          // Get only current user's submissions
+          const submissionsQuery = query(
+            collection(db, "exams", examId, "submissions"),
+            where("studentEmail", "==", email)
+          );
+
+          const submissionsSnapshot = await getDocs(submissionsQuery);
+
+          for (const subDoc of submissionsSnapshot.docs) {
+            const subData = subDoc.data();
+
+            const score = subData.score || subData.totalScore || "-";
+            const submittedAt = subData.submittedAt
+              ? new Date(subData.submittedAt).toLocaleString()
+              : "-";
+
+            const examTitle = examData.testName || examData.title || examId;
+            const examDate = examData.createdAt
+              ? new Date(examData.createdAt.seconds * 1000).toLocaleDateString()
+              : "-";
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td class="px-3 py-1 border border-gray-500">${i++}</td>
+            <td class="px-3 py-1 border border-gray-500">${examTitle}</td>
+            <td class="px-3 py-1 border border-gray-500">${examDate}</td>
+            <td class="px-3 py-1 border border-gray-500 font-semibold text-green-600">${score}</td>
+            <td class="px-3 py-1 border border-gray-500">${submittedAt}</td>
+          `;
+            tbody.appendChild(row);
+          }
+        }
+
+        if (i === 1) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">No results found.</td></tr>`;
+        }
+      } catch (err) {
+        console.error("Error fetching results:", err);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-600 p-4">Error fetching results.</td></tr>`;
       }
     });
   </script>
-
-
 
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
@@ -252,15 +355,20 @@
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
 
-    function logout() {
-      firebase.auth().signOut().then(() => {
-        // Redirect to login page
-        window.location.href = "../index.html";
-      }).catch((error) => {
-        console.error("Logout failed:", error);
-        alert("Logout failed!");
-      });
-    }
+    window.logout = async () => {
+      await signOut(auth);
+      localStorage.clear();
+      location.href = "index.html";
+    };
+    // function logout() {
+    //   firebase.auth().signOut().then(() => {
+    //     // Redirect to login page
+    //     window.location.href = "../index.html";
+    //   }).catch((error) => {
+    //     console.error("Logout failed:", error);
+    //     alert("Logout failed!");
+    //   });
+    // }
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

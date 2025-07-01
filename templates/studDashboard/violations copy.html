@@ -120,49 +120,42 @@
     <!-- <div class="container-fluid py-2"> -->
     <!-- <div class="row"> -->
     <!-- add the Main Content here dont change sidebar, navbar, toggle, footer-->
-    <div class="px-2 col-11">
+    <div class="col-11">
       <div class="card my-4">
         <div class="card-header p-3">
           <h6 class="mb-0 text-2xl font-bold text-red-500">🚫 Your Exam Violations</h6>
           <p class="text-sm mb-0 text-secondary">Below are the violations detected during your proctored exams.</p>
         </div>
-
-
-        <div class="px-12 py-4 flex justify-center">
-          <div class="flex flex-row items-center gap-4">
-            <label for="examSelect" class="font-semibold text-gray-700">Select Exam:</label>
-            <select id="examSelect" class="border border-gray-300 rounded px-3 py-2 w-64">
-              <option value="">-- Choose an Exam --</option>
-            </select>
-            <button id="showViolationsBtn"
-              class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-600 transition duration-150">
-              Show Violations
-            </button>
-          </div>
-        </div>
-
-
+        <!-- Student Violations Page -->
+        <!-- <div class="p-4 sm:ml-64 mt-16"> -->
+        <!-- <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700"> -->
+        <!-- Header -->
+        <!-- <div class="bg-white shadow p-4 flex justify-between items-center">
+                  <h1 class="text-2xl font-bold text-red-500">🚫 My Violations</h1>
+                </div> -->
         <!-- Table Container -->
-        <div class="px-6 py-2 overflow-x-auto">
-          <div id="violationSection" style="display: none;">
-            <table class="w-full text-sm text-left border border-gray-400 mt-4">
-              <thead class="bg-gray-200">
-                <tr>
-                  <th class="px-3 py-2 border border-gray-400">Sr. No.</th>
-                  <th class="px-6 py-2 border border-gray-400">Violation Type</th>
-                  <th class="px-6 py-2 border border-gray-400">Time</th>
-                  <th class="px-6 py-2 border border-gray-400">Description</th>
-                  <th class="px-6 py-2 border border-gray-400">Total</th>
-                </tr>
-              </thead>
-              <tbody id="studentViolationTableBody">
-                <!-- Violations will be inserted here -->
-              </tbody>
-            </table>
-          </div>
+        <div class="p-6 overflow-x-auto">
+          <table class="min-w-full text-sm text-left bg-white rounded shadow border border-gray-500 border-collapse">
+            <thead class="bg-red-400 text-gray-800">
+              <tr>
+                <th class="p-2 border border-gray-500">#</th>
+                <th class="p-2 border border-gray-500">Exam Name</th>
+                <th class="p-2 border border-gray-500">Violation</th>
+                <th class="p-2 border border-gray-500">Time</th>
+                <th class="p-2 border border-gray-500">Description</th>
+              </tr>
+            </thead>
+            <tbody id="studentViolationTableBody">
+              <!-- Example row (can be dynamically inserted by JS) -->
+
+              <!-- More rows added dynamically -->
+            </tbody>
+          </table>
         </div>
+
 
       </div>
+    </div>
     </div>
 
     </div>
@@ -173,8 +166,6 @@
       getFirestore,
       collection,
       getDocs,
-      getDoc,
-      doc
     } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import {
@@ -188,114 +179,65 @@
       projectId: "proctored-system",
       storageBucket: "proctored-system.appspot.com",
       messagingSenderId: "512898908874",
-      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
+      appId: "1:512898898874:web:23584b6cad04eb9e0c2a33",
+      measurementId: "G-3SL8C6C8RD"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
+    const auth = getAuth();
 
-    let currentStudentEmail = "";
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user) return location.href = "/index.html";
-      currentStudentEmail = user.email;
-      loadExamList(currentStudentEmail);
-    });
-
-    async function loadExamList(email) {
-      const examSelect = document.getElementById("examSelect");
+    async function loadStudentViolations(email) {
+      const tableBody = document.getElementById("studentViolationTableBody");
       const examSnap = await getDocs(collection(db, "exams"));
-      examSelect.innerHTML = `<option value="">-- Choose an Exam --</option>`;
+      let count = 1;
 
       for (const examDoc of examSnap.docs) {
         const examId = examDoc.id;
+        const examData = examDoc.data();
         const violationsSnap = await getDocs(collection(db, `exams/${examId}/violations`));
 
-        let participated = false;
-        violationsSnap.forEach(doc => {
+        violationsSnap.forEach((doc) => {
           const v = doc.data();
-          if (v.studentEmail === email) participated = true;
+          if (v.studentEmail === email) {
+            //   const tr = document.createElement("tr");
+            //   tr.className = "border-b hover:bg-gray-50";
+            //   tr.innerHTML = `
+            //   <td class="px-3 py-1 border border-gray-500">${count++}</td>
+            //   <td class="px-6 py-1 border border-gray-500">${examData.testName}</td>
+            //   <td class="px-6 py-1 border border-gray-500">${v.event}</td>
+            //   <td class="px-6 py-1 border border-gray-500">${new Date(v.detectedAt).toLocaleString()}</td>
+            //   <td class="px-6 py-1 border border-gray-500">${v.description || '-'}</td>
+            // `;
+            //   tableBody.appendChild(tr);
+            const tr = document.createElement("tr");
+            tr.className = "border-b hover:bg-gray-50";
+            tr.innerHTML = `
+            <td class="px-3 py-1 border border-gray-500">${count++}</td>
+            <td class="px-6 py-1 border border-gray-500">${examData.testName || '-'}</td>
+            <td class="px-6 py-1 border border-gray-500">${v.type || '-'}</td>
+            <td class="px-6 py-1 border border-gray-500">${v.timestamp ? new Date(v.timestamp).toLocaleString() : '-'}</td >
+            <td class="px-6 py-1 border border-gray-500">${v.description || '-'}</td>
+          `;
+            tableBody.appendChild(tr);
+
+          }
         });
-
-        if (participated) {
-          const data = examDoc.data();
-          const opt = document.createElement("option");
-          opt.value = examId;
-          opt.textContent = data.testName || examId;
-          examSelect.appendChild(opt);
-        }
-      }
-    }
-
-    document.getElementById("showViolationsBtn").addEventListener("click", () => {
-      const selectedId = document.getElementById("examSelect").value;
-      if (!selectedId) {
-        alert("Please select an exam first.");
-        return;
-      }
-      loadViolationsByExam(currentStudentEmail, selectedId);
-    });
-
-    async function loadViolationsByExam(email, examId) {
-      const tableBody = document.getElementById("studentViolationTableBody");
-      const tableSection = document.getElementById("violationSection");
-
-      tableBody.innerHTML = "";
-      tableSection.style.display = "block";  // ✅ SHOW THE HIDDEN SECTION
-
-      const examRef = doc(db, "exams", examId);
-      const examSnap = await getDoc(examRef);
-      if (!examSnap.exists()) return;
-
-      const examData = examSnap.data();
-      const violationsSnap = await getDocs(collection(db, `exams/${examId}/violations`));
-      const studentViolations = [];
-
-      violationsSnap.forEach(doc => {
-        const v = doc.data();
-        if (v.studentEmail === email) studentViolations.push(v);
-      });
-
-      if (studentViolations.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">✅ No violations recorded for this exam.</td></tr>`;
-        return;
       }
 
-      let count = 1;
-      const typeCounts = {};
-
-      studentViolations.forEach(v => {
-        const type = v.event || v.type || "UNKNOWN";
-        const ts = v.detectedAt?.toDate?.() || new Date(v.timestamp || null);
-        typeCounts[type] = (typeCounts[type] || 0) + 1;
-
+      if (count === 1) {
         const tr = document.createElement("tr");
-        tr.className = "border-b hover:bg-gray-50";
-        tr.innerHTML = `
-      <td class="px-3 py-1 border border-gray-500">${count++}</td>
-      <td class="px-6 py-1 border border-gray-500">${type}</td>
-      <td class="px-6 py-1 border border-gray-500">${ts.toLocaleString()}</td>
-      <td class="px-6 py-1 border border-gray-500">Exam Status: Terminated</td>
-      <td class="px-6 py-1 border border-gray-500">-</td>
-    `;
+        tr.innerHTML = `< td colspan = "5" class="text-center py-4 text-gray-500" >✅ No violations recorded.</td >`;
         tableBody.appendChild(tr);
-      });
-
-      // Add summary row
-      const summary = Object.entries(typeCounts).map(([k, v]) => `${v}×${k}`).join(', ');
-      const tr = document.createElement("tr");
-      tr.className = "font-semibold bg-red-100";
-      tr.innerHTML = `
-    <td colspan="4" class="px-6 py-2 border border-gray-500 text-right">Total Violations</td>
-    <td class="px-6 py-2 border border-gray-500">${studentViolations.length} (${summary})</td>
-  `;
-      tableBody.appendChild(tr);
+      }
     }
 
-
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return location.href = "/index.html";
+      const studentEmail = user.email;
+      loadStudentViolations(studentEmail);
+    });
   </script>
-
 
   <script>
     var win = navigator.platform.indexOf('Win') > -1;

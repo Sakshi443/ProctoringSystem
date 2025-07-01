@@ -2,12 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Violation Reports</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
 </head>
-<!-- <body class="bg-gray-100 text-gray-900"> -->
 
 <body class="g-sidenav-show  bg-gray-100">
     <nav class="fixed top-0 z-50 w-full bg-white border-gray-50  dark:bg-gray-50 dark:border-gray-600">
@@ -82,12 +82,12 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
                     </a>
                 </li>
-                <!-- <li>
+                <li>
                     <a href="./violations.html"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
                         <span class="flex-1 ms-3 whitespace-nowrap">Violations</span>
                     </a>
-                </li> -->
+                </li>
                 <li>
                     <a href="/templates/index.html" onclick="logout()"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
@@ -103,40 +103,36 @@
         </div>
     </aside>
     <!-- end of Navbar -->
-    <div class="p-4 sm:ml-64 mt-16">
-        <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-            <!-- Header -->
-            <div class="bg-white shadow p-4 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-red-500">🚫 Flagged Violations</h1>
-                <!-- <button onclick="logout()" -->
-                <!-- class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Logout</button> -->
-            </div>
+    <!-- <header class="bg-white shadow-md py-11 px-6 flex justify-between items-center">
+        <div class="flex gap-4">
+            <button onclick="location.href='professorDashboard.html'"
+            class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Dashboard</button>
+            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+            <button onclick="location.reload()"
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Refresh</button>
+        </div>
+    </header> -->
 
-            <!-- Table Container -->
-            <div class="p-6 overflow-x-auto">
-                <table class="min-w-full text-sm text-left bg-white rounded shadow">
-                    <thead class="bg-red-400 text-gray-800">
-                        <tr>
-                            <th class="p-2">#</th>
-                            <th class="p-2">Student Name</th>
-                            <th class="p-2">Email</th>
-                            <th class="p-2">Exam Name</th>
-                            <th class="p-2">Violation</th>
-                            <th class="p-2">Time</th>
-                            <th class="p-2">Description</th>
-                            <th class="p-2 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="violationTableBody">
-                        <!-- Populated dynamically -->
-                    </tbody>
-                </table>
+    <main class="max-w-6xl mx-auto p-8">
+        <!-- <div class="container px-4 py-4 mx-auto"> -->
+        <div class="px-12 py-6 sm:ml-20">
+            <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+
+                <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+                <section class="mb-10">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Pending Teacher Approvals</h2>
+                    <div id="pendingTeachers" class="grid gap-4"></div>
+                </section>
+                <section>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Exam Violations</h2>
+                    <div id="violationList" class="grid gap-4"></div>
+                </section>
             </div>
         </div>
-    </div>
+    </main>
 
     <script type="module">
-        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
@@ -154,47 +150,77 @@
         const db = getFirestore(app);
         const auth = getAuth();
 
-        window.logout = async () => {
-            await signOut(auth);
-            localStorage.clear();
-            location.href = "../../index.html";
+        async function loadPendingTeachers() {
+            const container = document.getElementById("pendingTeachers");
+            container.innerHTML = "<p class='text-gray-500'>Some candidates caught while violating exams. </p>";
+            const q = query(collection(db, "users"), where("role", "==", "teacher"), where("adminApproved", "!=", true));
+            const snap = await getDocs(q);
+            container.innerHTML = "";
+
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement("div");
+                div.className = "bg-white p-4 rounded shadow flex flex-col sm:flex-row justify-between items-start sm:items-center";
+                div.innerHTML = `
+                    <div>
+                        <h3 class="font-semibold text-lg text-gray-800">${data.username}</h3>
+                        <p class="text-gray-600 text-sm">${data.email}</p>
+                    </div>
+                    <div class="flex gap-2 mt-2 sm:mt-0">
+                        <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded" onclick="approveTeacher('${docSnap.id}')">Approve</button>
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded" onclick="denyTeacher('${docSnap.id}')">Deny</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.approveTeacher = async (uid) => {
+            await updateDoc(doc(db, "users", uid), { adminApproved: true, denied: false });
+            alert("Teacher approved.");
+            location.reload();
+        };
+
+        window.denyTeacher = async (uid) => {
+            await updateDoc(doc(db, "users", uid), { denied: true, adminApproved: false });
+            alert("Teacher denied.");
+            location.reload();
         };
 
         async function loadViolations() {
             const examSnap = await getDocs(collection(db, "exams"));
-            const tableBody = document.getElementById("violationTableBody");
-            let count = 1;
+            const container = document.getElementById("violationList");
+            container.innerHTML = "<p class='text-gray-500'>Loading...</p>";
+            container.innerHTML = "";
 
             for (const examDoc of examSnap.docs) {
                 const examId = examDoc.id;
-                const examData = examDoc.data();
+                const data = examDoc.data();
                 const violationsSnap = await getDocs(collection(db, `exams/${examId}/violations`));
 
-                violationsSnap.forEach((violationDoc) => {
+                violationsSnap.forEach(async (violationDoc) => {
                     const v = violationDoc.data();
-                    const tr = document.createElement("tr");
-                    tr.className = "border-b hover:bg-gray-50";
-                    tr.innerHTML = `
-            <td class="p-1">${count++}</td>
-            <td class="p-1">${v.studentName}</td>
-            <td class="p-1">${v.studentEmail}</td>
-            <td class="p-1">${examData.testName}</td>
-            <td class="p-1">${v.event}</td>
-            <td class="p-1">${new Date(v.detectedAt).toLocaleString()}</td>
-            <td class="p-1">${v.description || '-'}</td>
-            <td class="p-1 text-center">
-                <button class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm" onclick="approveViolation('${examId}', '${violationDoc.id}')">Approve</button>
-                <button class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm ml-2" onclick="denyViolation('${examId}', '${violationDoc.id}', '${v.studentEmail}')">Block</button>
-            </td>
-          `;
-                    tableBody.appendChild(tr);
+                    const div = document.createElement("div");
+                    div.className = "bg-white p-4 rounded shadow border-l-4 border-red-500";
+                    div.innerHTML = `
+                        <h3 class="font-semibold text-md text-red-700">${data.testName}</h3>
+                        <p class="text-sm text-gray-800">${v.studentName} (${v.studentEmail})</p>
+                        <p class="text-sm text-gray-700">Violation: ${v.event}</p>
+                        <p class="text-xs text-gray-600">${new Date(v.detectedAt).toLocaleString()}</p>
+                        <p class="text-sm italic text-gray-500">${v.description || "-"}</p>
+                        <div class="flex gap-2 mt-2">
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded" onclick="approveViolation('${examId}', '${violationDoc.id}')">Approve</button>
+                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded" onclick="denyViolation('${examId}', '${violationDoc.id}', '${v.studentEmail}')">Deny</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
                 });
             }
         }
 
         window.approveViolation = async (examId, vioId) => {
             await deleteDoc(doc(db, `exams/${examId}/violations`, vioId));
-            alert("Violation approved. Removed from records.");
+            alert("Violation removed. Student can continue.");
             location.reload();
         };
 
@@ -203,6 +229,13 @@
             alert("Student blocked from further exams.");
         };
 
+        window.logout = async () => {
+            await signOut(auth);
+            localStorage.clear();
+            location.href = "../../index.html";
+        };
+
+        loadPendingTeachers();
         loadViolations();
     </script>
 </body>

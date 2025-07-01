@@ -7,6 +7,12 @@
     <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    <style>
+        #studentModal>div {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -82,12 +88,12 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
                     </a>
                 </li>
-                <li>
+                <!-- <li>
                     <a href="./violations.html"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
                         <span class="flex-1 ms-3 whitespace-nowrap">Violations</span>
                     </a>
-                </li>
+                </li> -->
                 <li>
                     <a href="/templates/index.html" onclick="logout()"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
@@ -103,131 +109,265 @@
         </div>
     </aside>
     <!-- end of Navbar -->
-    <!-- <header class="bg-white shadow-md py-11 px-6 flex justify-between items-center">
-        <div class="flex gap-4">
-            <button onclick="location.href='professorDashboard.html'"
-            class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Dashboard</button>
-            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
-            <button onclick="location.reload()"
-            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Refresh</button>
-        </div>
-    </header> -->
-
     <main class="max-w-6xl mx-auto p-8">
         <!-- <div class="container px-4 py-4 mx-auto"> -->
-        <div class="p-6 sm:ml-64">
+        <div class="px-12 py-6 sm:ml-20">
             <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-
                 <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-                <section class="mb-10">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Pending Teacher Approvals</h2>
-                    <div id="pendingTeachers" class="grid gap-4"></div>
-                </section>
-                <section>
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Exam Violations</h2>
-                    <div id="violationList" class="grid gap-4"></div>
+                <div class="p-4 flex justify-center">
+                    <div class="flex flex-row items-center gap-4">
+                        <label for="examSelect" class="font-semibold text-gray-700">Select Exam:</label>
+                        <select id="examSelect" class="border border-gray-300 rounded px-3 py-2 w-64">
+                            <option value="">-- Choose an Exam --</option>
+                        </select>
+                        <button id="loadExamDetailsBtn"
+                            class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500">
+                            Load Exam Data
+                        </button>
+                    </div>
+                </div>
+                <section id="examDetails" class="hidden">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Student Violations for
+                        Selected
+                        Exam</h2>
+                    <div id="studentViolationTable" class="overflow-x-auto"></div>
                 </section>
             </div>
         </div>
+
+        <!-- Student Modal -->
+        <!-- Student Modal -->
+        <div id="studentModal"
+            class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-center overflow-y-auto">
+            <div class="bg-white rounded-lg p-6 w-full max-w-2xl shadow-lg my-8 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-xl font-bold mb-2" id="modalStatusTitle">User Status</h2>
+                <div id="modalStudentInfo" class="mb-4 text-gray-800"></div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-300 mb-4">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-2 border">Violation Type</th>
+                                <th class="p-2 border">Time</th>
+                                <th class="p-2 border">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="violationDetailsTable"></tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-3">
+                    <button id="approveBtn"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Approve</button>
+                    <button id="denyBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Deny</button>
+                    <button id="closeModalBtn"
+                        class="ml-auto px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">Close</button>
+                </div>
+            </div>
+        </div>
+
+
     </main>
 
-    <script type="module">
-        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    <!-- // Add in <section> for Exam selection -->
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import {
+            getFirestore, collection, getDocs, query, where, doc, updateDoc
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import {
+            getAuth, onAuthStateChanged, signOut
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
             authDomain: "proctored-system.firebaseapp.com",
             projectId: "proctored-system",
-            storageBucket: "proctored-system.firebasestorage.app",
+            storageBucket: "proctored-system.appspot.com",
             messagingSenderId: "512898908874",
-            appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
-            measurementId: "G-3SL8C6C8RD"
+            appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth();
+        const auth = getAuth(app);
 
-        async function loadPendingTeachers() {
-            const container = document.getElementById("pendingTeachers");
-            container.innerHTML = "<p class='text-gray-500'>Some candidates caught while violating exams. </p>";
-            const q = query(collection(db, "users"), where("role", "==", "teacher"), where("adminApproved", "!=", true));
-            const snap = await getDocs(q);
-            container.innerHTML = "";
+        const examSelect = document.getElementById("examSelect");
+        const loadBtn = document.getElementById("loadExamDetailsBtn");
+        const examDetailsSection = document.getElementById("examDetails");
+        const tableContainer = document.getElementById("studentViolationTable");
+        const studentModal = document.getElementById("studentModal");
+        const modalTitle = document.getElementById("modalStatusTitle");
+        const modalInfo = document.getElementById("modalStudentInfo");
+        const modalTable = document.getElementById("violationDetailsTable");
+        const approveBtn = document.getElementById("approveBtn");
+        const denyBtn = document.getElementById("denyBtn");
+        const closeBtn = document.getElementById("closeModalBtn");
 
-            snap.forEach(docSnap => {
+        let currentUserUID = null;
+        let currentExamId = "";
+        let currentViolations = [];
+        let submissionsMap = {};
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return location.href = "/index.html";
+            currentUserUID = user.uid;
+            await populateExamDropdown();
+        });
+
+        async function populateExamDropdown() {
+            const examsQuery = query(collection(db, "exams"), where("createdBy", "==", currentUserUID));
+            const examsSnap = await getDocs(examsQuery);
+
+            examSelect.innerHTML = `<option value="">-- Choose an Exam --</option>`;
+            examsSnap.forEach(docSnap => {
                 const data = docSnap.data();
-                const div = document.createElement("div");
-                div.className = "bg-white p-4 rounded shadow flex flex-col sm:flex-row justify-between items-start sm:items-center";
-                div.innerHTML = `
-                    <div>
-                        <h3 class="font-semibold text-lg text-gray-800">${data.username}</h3>
-                        <p class="text-gray-600 text-sm">${data.email}</p>
-                    </div>
-                    <div class="flex gap-2 mt-2 sm:mt-0">
-                        <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded" onclick="approveTeacher('${docSnap.id}')">Approve</button>
-                        <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded" onclick="denyTeacher('${docSnap.id}')">Deny</button>
-                    </div>
-                `;
-                container.appendChild(div);
+                const option = document.createElement("option");
+                option.value = docSnap.id;
+                option.textContent = data.testName || docSnap.id;
+                examSelect.appendChild(option);
             });
         }
 
-        window.approveTeacher = async (uid) => {
-            await updateDoc(doc(db, "users", uid), { adminApproved: true, denied: false });
-            alert("Teacher approved.");
-            location.reload();
+        loadBtn.addEventListener("click", async () => {
+            const examId = examSelect.value;
+            if (!examId) return alert("Please select an exam.");
+            currentExamId = examId;
+            currentViolations = [];
+            submissionsMap = {};
+
+            const violationsSnap = await getDocs(collection(db, `exams/${examId}/violations`));
+            const scoreSnap = await getDocs(collection(db, `exams/${examId}/submissions`));
+
+            const studentMap = {};
+
+            violationsSnap.forEach(doc => {
+                const v = doc.data();
+                const email = v.studentEmail;
+                currentViolations.push({ ...v, id: doc.id });
+                if (!studentMap[email]) studentMap[email] = { name: v.studentName, email, violations: {}, totalViolations: 0 };
+                const type = v.event || v.type || "UNKNOWN";
+                studentMap[email].violations[type] = (studentMap[email].violations[type] || 0) + 1;
+                studentMap[email].totalViolations++;
+            });
+
+            scoreSnap.forEach(doc => {
+                const s = doc.data();
+                const email = s.studentEmail;
+                submissionsMap[email] = doc.id;
+                if (!studentMap[email]) studentMap[email] = { name: "Unknown", email, violations: {}, totalViolations: 0 };
+                studentMap[email].score = s.score || "-";
+                studentMap[email].status = s.examAccessStatus || "pending";
+            });
+
+            let html = `<table class="min-w-full text-sm text-left bg-white rounded shadow border border-gray-400">
+        <thead class="bg-gray-100">
+        <tr>
+            <th class="p-2 border">Name</th>
+            <th class="p-2 border">Email</th>
+            <th class="p-2 border">Violation Types</th>
+            <th class="p-2 border">Total Violations</th>
+            <th class="p-2 border">Score</th>
+            <th class="p-2 border">Action</th>
+        </tr>
+        </thead><tbody>`;
+
+            Object.values(studentMap).forEach(s => {
+                const vioSummary = Object.entries(s.violations).map(([k, v]) => `${v}×${k}`).join(', ');
+                const rowId = `row-${s.email.replace(/[^a-zA-Z0-9]/g, '')}`;
+                let rowColor = "";
+                if (s.status === "approved") rowColor = "text-green-600 font-bold";
+                else if (s.status === "denied") rowColor = "text-red-600 font-bold";
+
+                html += `<tr id="${rowId}" class="${rowColor}">
+            <td class="p-2 border">${s.name}</td>
+            <td class="p-2 border">${s.email}</td>
+            <td class="p-2 border">${vioSummary}</td>
+            <td class="p-2 border">${s.totalViolations}</td>
+            <td class="p-2 border">${s.score}</td>
+            <td class="p-2 border">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded" onclick="showStudentModal('${s.email}')">View</button>
+            </td>
+        </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            tableContainer.innerHTML = html;
+            examDetailsSection.classList.remove("hidden");
+        });
+
+        window.showStudentModal = (email) => {
+            const filtered = currentViolations.filter(v => v.studentEmail === email);
+            if (!filtered.length) return alert("No violations found.");
+
+            const s = filtered[0];
+            const submissionId = submissionsMap[email];
+            approveBtn.dataset.email = email;
+            denyBtn.dataset.email = email;
+            approveBtn.dataset.submissionId = submissionId;
+            denyBtn.dataset.submissionId = submissionId;
+
+            modalTitle.textContent = `User status: ${s.examAccessStatus?.toUpperCase() || 'PENDING'}`;
+            modalInfo.innerHTML = `
+        <div><b>${s.studentName}</b> (${s.studentEmail})</div>
+        <div>Total Violations: ${filtered.length}</div>`;
+
+            let table = "";
+            filtered.forEach(v => {
+                table += `
+        <tr>
+            <td class="p-2 border">${v.event || '-'}</td>
+            <td class="p-2 border">${new Date(v.detectedAt).toLocaleString()}</td>
+            <td class="p-2 border">${v.description || '-'}</td>
+        </tr>`;
+            });
+
+            modalTable.innerHTML = table;
+            studentModal.classList.remove("hidden");
         };
 
-        window.denyTeacher = async (uid) => {
-            await updateDoc(doc(db, "users", uid), { denied: true, adminApproved: false });
-            alert("Teacher denied.");
-            location.reload();
-        };
+        approveBtn.addEventListener("click", async () => {
+            const email = approveBtn.dataset.email;
+            const submissionId = approveBtn.dataset.submissionId;
+            const rowId = `row-${email.replace(/[^a-zA-Z0-9]/g, '')}`;
+            const row = document.getElementById(rowId);
 
-        async function loadViolations() {
-            const examSnap = await getDocs(collection(db, "exams"));
-            const container = document.getElementById("violationList");
-            container.innerHTML = "<p class='text-gray-500'>Loading...</p>";
-            container.innerHTML = "";
+            await updateDoc(doc(db, `exams/${currentExamId}/submissions`, submissionId), {
+                examAccessStatus: "approved"
+            });
 
-            for (const examDoc of examSnap.docs) {
-                const examId = examDoc.id;
-                const data = examDoc.data();
-                const violationsSnap = await getDocs(collection(db, `exams/${examId}/violations`));
-
-                violationsSnap.forEach(async (violationDoc) => {
-                    const v = violationDoc.data();
-                    const div = document.createElement("div");
-                    div.className = "bg-white p-4 rounded shadow border-l-4 border-red-500";
-                    div.innerHTML = `
-                        <h3 class="font-semibold text-md text-red-700">${data.testName}</h3>
-                        <p class="text-sm text-gray-800">${v.studentName} (${v.studentEmail})</p>
-                        <p class="text-sm text-gray-700">Violation: ${v.event}</p>
-                        <p class="text-xs text-gray-600">${new Date(v.detectedAt).toLocaleString()}</p>
-                        <p class="text-sm italic text-gray-500">${v.description || "-"}</p>
-                        <div class="flex gap-2 mt-2">
-                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded" onclick="approveViolation('${examId}', '${violationDoc.id}')">Approve</button>
-                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded" onclick="denyViolation('${examId}', '${violationDoc.id}', '${v.studentEmail}')">Deny</button>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
+            if (row) {
+                row.classList.remove("text-red-600");
+                row.classList.add("text-green-600", "font-bold");
             }
-        }
 
-        window.approveViolation = async (examId, vioId) => {
-            await deleteDoc(doc(db, `exams/${examId}/violations`, vioId));
-            alert("Violation removed. Student can continue.");
-            location.reload();
-        };
+            modalTitle.textContent = "User is APPROVED for the exam";
+            studentModal.classList.add("hidden");
+        });
 
-        window.denyViolation = async (examId, vioId, studentEmail) => {
-            await updateDoc(doc(db, "users", studentEmail), { denied: true });
-            alert("Student blocked from further exams.");
-        };
+        denyBtn.addEventListener("click", async () => {
+            const email = denyBtn.dataset.email;
+            const submissionId = denyBtn.dataset.submissionId;
+            const rowId = `row-${email.replace(/[^a-zA-Z0-9]/g, '')}`;
+            const row = document.getElementById(rowId);
+
+            await updateDoc(doc(db, `exams/${currentExamId}/submissions`, submissionId), {
+                examAccessStatus: "denied"
+            });
+
+            if (row) {
+                row.classList.remove("text-green-600");
+                row.classList.add("text-red-600", "font-bold");
+            }
+
+            modalTitle.textContent = "User is DENIED for the exam";
+            studentModal.classList.add("hidden");
+        });
+
+        closeBtn.addEventListener("click", () => {
+            studentModal.classList.add("hidden");
+        });
 
         window.logout = async () => {
             await signOut(auth);
@@ -235,9 +375,9 @@
             location.href = "../../index.html";
         };
 
-        loadPendingTeachers();
-        loadViolations();
     </script>
+
+
 </body>
 
 </html>

@@ -40,31 +40,33 @@
         <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active bg-gradient-dark text-white" href="./studentDashboard.html">
+                    <a class="nav-link text-dark" href="studentDashboard.html"
+                        onclick="showSection('studentDashboard')">
                         <i class="material-symbols-rounded opacity-5">dashboard</i>
                         <span class="nav-link-text ms-1">Dashboard</span>
                     </a>
                 </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link text-dark" href="./exam.html">
-                        <i class="material-symbols-rounded opacity-5">table_view</i>
-                        <span class="nav-link-text ms-1">Exams</span>
-                    </a>
-                </li> -->
                 <li class="nav-item">
-                    <a class="nav-link text-dark" href="./exam-page.html">
+                    <a class="nav-link active bg-gradient-dark text-white" href="./exam-page.html"
+                        onclick="showSection('exams')">
                         <i class="material-symbols-rounded opacity-5">table_view</i>
                         <span class="nav-link-text ms-1">My Exams</span>
                     </a>
                 </li>
+                <!-- <li class="nav-item">
+          <a class="nav-link text-dark" href="./startExam.html">
+            <i class="material-symbols-rounded opacity-5">table_view</i>
+            <span class="nav-link-text ms-1">Start Exam</span>
+          </a>
+        </li> -->
                 <li class="nav-item">
-                    <a class="nav-link text-dark" href="./results.html">
+                    <a class="nav-link text-dark" href="./results.html" onclick="showSection('results')">
                         <i class="material-symbols-rounded opacity-5">receipt_long</i>
                         <span class="nav-link-text ms-1">Result</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark" href="./violations.html">
+                    <a class="nav-link text-dark" href="./violations.html" onclick="showSection('violations')">
                         <i class="material-symbols-rounded opacity-5">view_in_ar</i>
                         <span class="nav-link-text ms-1">Violations</span>
                     </a>
@@ -81,12 +83,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark" href="#" onclick="logout()">
-                        <i class="material-symbols-rounded opacity-5">logout</i>
-                        <span class="nav-link-text ms-1">Logout</span>
+                    <a class="nav-link text-dark" href="../index.html" onclick="logout()">
+                        <i class="material-symbols-rounded opacity-5">assignment</i>
+                        <span class="nav-link-text ms-1">Sign out</span>
                     </a>
                 </li>
-
             </ul>
         </div>
     </aside>
@@ -99,7 +100,7 @@
                     <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                         <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a>
                         </li>
-                        <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Dashboard</li>
+                        <li class="breadcrumb-item text-sm text-dark active" aria-current="page">My Exams</li>
                     </ol>
                 </nav>
                 <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
@@ -135,13 +136,12 @@
                                         Carefully read the following instructions before starting the exam
                                     </h6>
                                     <p class="mb-0 text-white ps-3">
-                                        Violation of any rules may lead to termination of your test and
-                                        disqualification.
+                                        Follow the instructions, otherwise your exam can be terminated.
                                     </p>
                                 </div>
                             </div>
                             <div class="card-body px-5 pt-4 pb-5">
-                                <h4 class="text-center font-weight-bold mb-4">📋 Online Exam Instructions</h4>
+                                <h4 class="text-center font-weight-bold mb-4">📋 Exam Instructions</h4>
                                 <ul class="text-dark text-lg ps-4">
                                     <li class="mb-3">✅ Make sure you are in a well-lit, quiet environment with a stable
                                         internet connection.</li>
@@ -170,31 +170,20 @@
                                 </ul>
                                 <div class="text-center mt-4">
                                     <button onclick="startExam()" class="btn bg-gradient-info text-white px-5 py-2">
-                                        Start Exam
+                                        Next
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
+            </div>
     </main>
 
     <script>
         function startExam() {
-            const docElm = document.documentElement;
-            if (docElm.requestFullscreen) {
-                docElm.requestFullscreen();
-            } else if (docElm.webkitRequestFullscreen) { /* Safari */
-                docElm.webkitRequestFullscreen();
-            } else if (docElm.msRequestFullscreen) { /* IE11 */
-                docElm.msRequestFullscreen();
-            }
-
-            // Now show exam content or navigate to exam.html
-            window.location.href = "exam.html";  // or show/hide container
+            window.location.href = "exam.html"; // 👈 Change this to your exam page path
         }
     </script>
 
@@ -219,7 +208,7 @@
         function logout() {
             firebase.auth().signOut().then(() => {
                 // Redirect to login page
-                window.location.href = "index.html";
+                window.location.href = "../index.html";
             }).catch((error) => {
                 console.error("Logout failed:", error);
                 alert("Logout failed!");

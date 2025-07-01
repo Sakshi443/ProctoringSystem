@@ -89,12 +89,12 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
                     </a>
                 </li>
-                <li>
+                <!-- <li>
                     <a href="./violations.html"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
                         <span class="flex-1 ms-3 whitespace-nowrap">Violations</span>
                     </a>
-                </li>
+                </li> -->
                 <li>
                     <a href="/templates/index.html" onclick="logout()"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+    <!-- <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
         <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
             <h3 class="text-lg font-semibold mb-4">Select Students to Assign</h3>
             <div id="studentCheckboxes" class="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto"></div>
@@ -126,7 +126,29 @@
                 <button id="confirmAssignBtn" class="px-4 py-2 bg-blue-600 text-white rounded">Assign</button>
             </div>
         </div>
+    </div> -->
+    <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h3 class="text-lg font-semibold mb-4">Select Students to Assign</h3>
+
+            <!-- ✅ Select All Checkbox -->
+            <div class="mb-2">
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="selectAllStudents" class="form-checkbox border-2 border-black rounded-sm">
+                    <span class="text-sm font-medium text-gray-700">Select All Students</span>
+                </label>
+            </div>
+
+            <div id="studentCheckboxes" class="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto border p-2 rounded">
+            </div>
+
+            <div class="flex justify-end gap-4 mt-6">
+                <button id="cancelModalBtn" class="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
+                <button id="confirmAssignBtn" class="px-4 py-2 bg-blue-600 text-white rounded">Assign</button>
+            </div>
+        </div>
     </div>
+
 
     <script type="module">
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
@@ -179,12 +201,25 @@
             usersSnap.forEach(userDoc => {
                 const data = userDoc.data();
                 const checkbox = document.createElement("div");
-                checkbox.innerHTML = `<label class='flex items-center gap-2'><input type='checkbox' value='${userDoc.id}' class='student-checkbox border-2 border-black rounded-sm'>${data.username || data.name || "Unnamed"} (${data.email})</label>`;
+                checkbox.innerHTML = `
+      <label class='flex items-center gap-2'>
+        <input type='checkbox' value='${userDoc.id}' class='student-checkbox border-2 border-black rounded-sm'>
+        ${data.username || data.name || "Unnamed"} (${data.email})
+      </label>`;
                 checkboxes.appendChild(checkbox);
+            });
+
+            // ✅ Bind "Select All" checkbox logic here
+            const selectAllBox = document.getElementById("selectAllStudents");
+            selectAllBox.checked = false; // Reset before opening modal
+            selectAllBox.addEventListener("change", () => {
+                const studentCheckboxes = document.querySelectorAll(".student-checkbox");
+                studentCheckboxes.forEach(cb => cb.checked = selectAllBox.checked);
             });
 
             document.getElementById("studentModal").classList.remove("hidden");
         };
+
 
         document.getElementById("cancelModalBtn").addEventListener("click", () => {
             document.getElementById("studentModal").classList.add("hidden");
