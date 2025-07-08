@@ -32,7 +32,8 @@ The **AI-Powered Proctoring System** is a web-based application that:
 
 | Exam Start Page | Live Proctoring | Violation Report |
 |-----------------|-----------------|------------------|
-| *(Add screenshots here: ``)* | *(screenshots/proctoring.png)* | *(screenshots/violations.png)* |
+| *![My Exams Screenshot](![Screenshot 2025-06-30 152034](https://github.com/user-attachments/assets/905faa09-25bd-4600-a3fa-2f38bbffdf65)
+)* | *(screenshots/proctoring.png)* | *(screenshots/violations.png)* |
 
 ## 📝 How to Use
 
