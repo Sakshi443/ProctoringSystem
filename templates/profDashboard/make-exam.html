@@ -299,48 +299,50 @@
     });
 
     document.getElementById('saveExamBtn').addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user) return alert("You're not logged in!");
+
       const testName = document.getElementById('testName').value.trim();
       const duration = parseFloat(document.getElementById('testDuration').value);
-      const start = document.getElementById('startDateTime').value;
-      const end = document.getElementById('endDateTime').value;
+      const startDateTime = document.getElementById('startDateTime').value;
+      const endDateTime = document.getElementById('endDateTime').value;
       const description = document.getElementById('testDescription').value.trim();
 
-      if (!testName || isNaN(duration) || duration <= 0 || !start || !end || questionTableBody.children.length === 0) {
+      if (!testName || isNaN(duration) || duration <= 0 || !startDateTime || !endDateTime || questionTableBody.children.length === 0) {
         alert('❌ Please complete all exam details and add at least one question.');
         return;
       }
 
-      const questions = Array.from(questionTableBody.children).map(row => {
-        const cells = row.querySelectorAll('td');
-        return {
-          text: cells[0].innerText,
-          marks: parseFloat(cells[1].innerText),
-          negative: cells[2].innerText,
-          options: cells[3].innerText.split(', '),
-          correct: cells[4].innerText.split(','),
-        };
+      const questions = [];
+      document.querySelectorAll("#questionTable tbody tr").forEach(tr => {
+        const tds = tr.querySelectorAll("td");
+        questions.push({
+          questionText: tds[0].innerText,
+          marks: parseInt(tds[1].innerText),
+          negativeMarking: tds[2].innerText === "yes",
+          options: tds[3].innerText.split(",").map(opt => opt.trim()),
+          correct: tds[4].innerText.split(",").map(opt => parseInt(opt.trim()))
+        });
       });
 
-      const examData = {
-        name: testName,
-        duration,
-        start,
-        end,
-        description,
-        questions,
-        createdBy: auth.currentUser?.uid || 'unknown',
-        createdAt: serverTimestamp(),
-      };
-
       try {
-        await addDoc(collection(db, 'exams'), examData);
-        alert('✅ Exam saved successfully!');
-        location.reload();
+        await addDoc(collection(db, "exams"), {
+          testName,
+          duration,
+          startDateTime,
+          endDateTime,
+          description,
+          questions,
+          createdBy: user.uid,
+          createdAt: serverTimestamp()
+        });
+        alert("✅ Exam saved successfully!");
+        window.location.reload();
       } catch (err) {
         console.error('❌ Error saving exam:', err);
-        alert('❌ Failed to save exam. Please try again.');
+        alert("❌ Failed to save exam. Please try again.");
       }
-    });
+    });  
 
   </script>
 
