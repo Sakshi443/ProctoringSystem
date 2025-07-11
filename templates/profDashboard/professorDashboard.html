@@ -135,15 +135,15 @@
     </div>
 
     <script type="module">
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
             authDomain: "proctored-system.firebaseapp.com",
             projectId: "proctored-system",
-            storageBucket: "proctored-system.appspot.com",   // ✅ Fixed URL
+            storageBucket: "proctored-system.appspot.com",
             messagingSenderId: "512898908874",
             appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
             measurementId: "G-3SL8C6C8RD"
@@ -168,23 +168,28 @@
             return `${day}/${month}/${year} ${displayHoursStr}:${minutes}:00 ${ampm}`;
         }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                localStorage.setItem("username", user.displayName || "Professor");
-                localStorage.setItem("email", user.email);
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "../../index.html";
+                return;
+            }
 
-                document.getElementById("currentUserName").textContent = localStorage.getItem("username");
-                document.getElementById("currentUserEmail").textContent = localStorage.getItem("email");
+            localStorage.setItem("username", user.displayName || "Professor");
+            localStorage.setItem("email", user.email);
 
-                const examsSnap = await getDocs(query(collection(db, "exams"), where("createdBy", "==", user.uid)));
-                const examList = document.getElementById("examList");
+            document.getElementById("currentUserName").textContent = localStorage.getItem("username");
+            document.getElementById("currentUserEmail").textContent = localStorage.getItem("email");
+
+            const examList = document.getElementById("examList");
+            const examsRef = query(collection(db, "exams"), where("createdBy", "==", user.uid));
+
+            onSnapshot(examsRef, (snapshot) => {
                 examList.innerHTML = "";
-
-                examsSnap.forEach(exam => {
+                snapshot.forEach(exam => {
                     const data = exam.data();
-                    const submittedCount = data.assignedTo ? `${data.assignedTo.length} Candidate(s) Submitted` : 'Not Assigned Yet';
-                    const start = formatDateTime(data.startDateTime);
-                    const end = formatDateTime(data.endDateTime);
+                    const submittedCount = data.assignedTo ? `${data.assignedTo.length} Candidate(s) Assigned` : 'Not Assigned Yet';
+                    const start = formatDateTime(data.start || data.startDateTime);
+                    const end = formatDateTime(data.end || data.endDateTime);
                     const totalQuestions = data.totalQuestions ?? (Array.isArray(data.questions) ? data.questions.length : 0);
                     const duration = data.duration ?? data.testDuration ?? 0;
 
@@ -192,33 +197,28 @@
                     card.className = "bg-white rounded-xl shadow p-6 flex items-center justify-between mb-4";
 
                     card.innerHTML = `
-                <div class="flex-1">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-2">${data.testName || "Untitled Test"}</h2>
-                    <div class="flex flex-col text-sm text-gray-600 space-y-1">
-                        <div class="flex items-center gap-8">
-                            <p><strong>Started at:</strong> ${start}</p>
-                            <p>${submittedCount}</p>
+                        <div class="flex-1">
+                            <h2 class="text-lg font-semibold text-gray-800 mb-2">${data.name || data.testName || "Untitled Test"}</h2>
+                            <div class="flex flex-col text-sm text-gray-600 space-y-1">
+                                <div class="flex items-center gap-8">
+                                    <p><strong>Started at:</strong> ${start}</p>
+                                    <p>${submittedCount}</p>
+                                </div>
+                                <div class="flex items-center gap-8">
+                                    <p><strong>Ends at:</strong> ${end}</p>
+                                    <p>${totalQuestions} Questions, ${duration} minutes</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-8">
-                            <p><strong>Ends at:</strong> ${end}</p>
-                            <p>${totalQuestions} Questions, ${duration} minutes</p>
+                        <div class="flex flex-col gap-2 ml-6">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium" onclick="window.loadStudents('${exam.id}')">
+                                Assign Test
+                            </button>
                         </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-2 ml-6">
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium"
-                        onclick="window.loadStudents('${exam.id}')">
-                        Assign Test
-                    </button>
-                </div>
-            `;
-
+                    `;
                     examList.appendChild(card);
                 });
-            } else {
-                window.location.href = "../../index.html";
-            }
+            });
         });
 
         window.loadStudents = async (examId) => {
@@ -231,23 +231,21 @@
                 const data = userDoc.data();
                 const checkbox = document.createElement("div");
                 checkbox.innerHTML = `
-                <label class='flex items-center gap-2'>
-                    <input type='checkbox' value='${userDoc.id}' class='student-checkbox border-2 border-black rounded-sm'>
-                    ${data.username || data.name || "Unnamed"} (${data.email || "No Email"})
-                </label>`;
+                    <label class='flex items-center gap-2'>
+                        <input type='checkbox' value='${userDoc.id}' class='student-checkbox border-2 border-black rounded-sm'>
+                        ${data.username || data.name || "Unnamed"} (${data.email || "No Email"})
+                    </label>`;
                 checkboxes.appendChild(checkbox);
             });
 
             const selectAllBox = document.getElementById("selectAllStudents");
             selectAllBox.checked = false;
 
-            // ✅ Remove any previous listeners to avoid duplicates
             const newSelectAllBox = selectAllBox.cloneNode(true);
             selectAllBox.parentNode.replaceChild(newSelectAllBox, selectAllBox);
 
             newSelectAllBox.addEventListener("change", () => {
-                const studentCheckboxes = document.querySelectorAll(".student-checkbox");
-                studentCheckboxes.forEach(cb => cb.checked = newSelectAllBox.checked);
+                document.querySelectorAll(".student-checkbox").forEach(cb => cb.checked = newSelectAllBox.checked);
             });
 
             document.getElementById("studentModal").classList.remove("hidden");
@@ -273,6 +271,7 @@
             localStorage.clear();
             location.href = "../../index.html";
         };
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
