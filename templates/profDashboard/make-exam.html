@@ -1,5 +1,4 @@
 <!-- make-exam.html -->
-<!-- make-exam.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -116,211 +115,7 @@
   </aside>
   <!-- end of Navbar -->
 
-  <!-- Main Content
-  <div class="p-6 sm:ml-64">
-    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-      <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
-      <div id="examForm">
-        <div class="mb-6">
-          <label class="block mb-2 font-medium">Test Name</label>
-          <input type="text" id="testName" class="w-full border rounded px-3 py-2" placeholder="e.g., My Sample Test"
-            required />
-
-          <label class="block mt-4 mb-2 font-medium">Test Duration (minutes)</label>
-          <input type="number" id="testDuration" class="w-full border rounded px-3 py-2" min="1" required />
-
-          <label class="block mt-4 mb-2 font-medium">Start Date & Time</label>
-          <input type="datetime-local" id="testDateTime" class="w-full border rounded px-3 py-2" required />
-
-          <label class="block mt-4 mb-2 font-medium">Test Description</label>
-          <textarea id="testDescription" class="w-full border rounded px-3 py-2" rows="3"
-            placeholder="Enter exam details here..."></textarea>
-        </div>
-
-        <button id="openModalBtn" class="bg-blue-500 text-white px-4 py-2 rounded">➕ Add Question</button>
-        <table class="min-w-full border text-sm mt-4" id="questionTable">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="border px-2 py-1">Question</th>
-              <th class="border px-2 py-1">Marks</th>
-              <th class="border px-2 py-1">Negative</th>
-              <th class="border px-2 py-1">Options</th>
-              <th class="border px-2 py-1">Correct</th>
-              <th class="border px-2 py-1">Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <button id="saveExamBtn" class="bg-green-600 text-white px-6 py-2 rounded mt-4">Save Exam</button>
-      </div>
-    </div>
-  </div>
-
-  Question Modal
-  <div id="questionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-xl p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold">Add New Question</h3>
-        <button id="closeModalBtn" class="text-gray-600 hover:text-black">&times;</button>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="block">Question Type</label>
-          <select id="qType" class="w-full border rounded px-3 py-2">
-            <option value="mcq_single">MCQ (Single)</option>
-            <option value="mcq_multiple">MSQ (Multiple)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block">Question Text</label>
-          <textarea id="qText" class="w-full border rounded px-3 py-2" rows="3"></textarea>
-        </div>
-        <div>
-          <label class="block">Marks</label>
-          <input type="number" id="qMarks" class="w-full border rounded px-3 py-2" />
-        </div>
-        <div>
-          <label class="block">Negative Marking</label>
-          <select id="qNegative" class="w-full border rounded px-3 py-2">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-1">Options (Click to select correct)</label>
-          <div id="optionInputs" class="grid grid-cols-2 gap-2">
-            <input type="text" id="qOpt1" data-opt-index="1" placeholder="Option 1"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt2" data-opt-index="2" placeholder="Option 2"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt3" data-opt-index="3" placeholder="Option 3"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt4" data-opt-index="4" placeholder="Option 4"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-          </div>
-        </div>
-      </div>
-      <div class="flex justify-end mt-6">
-        <button id="saveQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Save Question</button>
-      </div>
-    </div>
-  </div> -->
-
   <!-- Main Content -->
-  <!-- <div class="p-6 sm:ml-64">
-    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14 bg-white shadow">
-      <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
-
-      <div id="examForm">
-
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <div>
-            <label class="block mb-2 font-medium">Test Name</label>
-            <input type="text" id="testName" class="w-full border rounded px-3 py-2" placeholder="e.g., My Sample Test"
-              required />
-          </div>
-
-          <div>
-            <label class="block mb-2 font-medium">Test Duration (minutes)</label>
-            <input type="number" id="testDuration" class="w-full border rounded px-3 py-2" min="1" required />
-          </div>
-
-          <div>
-            <label class="block mb-2 font-medium">Start Date & Time</label>
-            <input type="datetime-local" id="startDateTime" class="w-full border rounded px-3 py-2" required />
-          </div>
-
-          <div>
-            <label class="block mb-2 font-medium">End Date & Time</label>
-            <input type="datetime-local" id="endDateTime" class="w-full border rounded px-3 py-2" required />
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block mb-2 font-medium">Test Description</label>
-            <textarea id="testDescription" class="w-full border rounded px-3 py-2" rows="3"
-              placeholder="Enter exam details here..."></textarea>
-          </div>
-        </div>
-
-        <button id="openModalBtn" class="bg-blue-500 text-white px-4 py-2 rounded">➕ Add Question</button>
-
-        <div class="mt-4">
-          <table class="min-w-full border text-sm" id="questionTable">
-            <thead class="bg-gray-100">
-              <tr>
-                <th class="border px-2 py-1">Question</th>
-                <th class="border px-2 py-1">Marks</th>
-                <th class="border px-2 py-1">Negative</th>
-                <th class="border px-2 py-1">Options</th>
-                <th class="border px-2 py-1">Correct</th>
-                <th class="border px-2 py-1">Actions</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-
-        <p class="mt-2 text-sm text-gray-600">Total Questions: <span id="questionCount" class="font-semibold">0</span>
-        </p>
-
-        <button id="saveExamBtn" class="bg-green-600 text-white px-6 py-2 rounded mt-4">Save Exam</button>
-
-      </div>
-    </div>
-  </div> -->
-
-  <!-- Question Modal -->
-  <!-- <div id="questionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-xl p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold">Add New Question</h3>
-        <button id="closeModalBtn" class="text-gray-600 hover:text-black">&times;</button>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="block">Question Type</label>
-          <select id="qType" class="w-full border rounded px-3 py-2">
-            <option value="mcq_single">MCQ (Single)</option>
-            <option value="mcq_multiple">MSQ (Multiple)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block">Question Text</label>
-          <textarea id="qText" class="w-full border rounded px-3 py-2" rows="3"></textarea>
-        </div>
-        <div>
-          <label class="block">Marks</label>
-          <input type="number" id="qMarks" class="w-full border rounded px-3 py-2" />
-        </div>
-        <div>
-          <label class="block">Negative Marking</label>
-          <select id="qNegative" class="w-full border rounded px-3 py-2">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-1">Options (Click to select correct)</label>
-          <div id="optionInputs" class="grid grid-cols-2 gap-2">
-            <input type="text" id="qOpt1" data-opt-index="1" placeholder="Option 1"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt2" data-opt-index="2" placeholder="Option 2"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt3" data-opt-index="3" placeholder="Option 3"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt4" data-opt-index="4" placeholder="Option 4"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-          </div>
-        </div>
-      </div>
-      <div class="flex justify-end mt-6">
-        <button id="saveQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Save Question</button>
-      </div>
-    </div>
-  </div> -->
-
   <div class="p-6 sm:ml-64">
     <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14 bg-white shadow">
       <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
@@ -438,7 +233,7 @@
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
@@ -453,6 +248,34 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
+
+    // ✅ Update profile name & email on login
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const username = user.displayName || "Professor";
+            const email = user.email || "Not Available";
+
+            localStorage.setItem("username", username);
+            localStorage.setItem("email", email);
+
+            const nameElement = document.getElementById("currentUserName");
+            const emailElement = document.getElementById("currentUserEmail");
+
+            if (nameElement) nameElement.textContent = username;
+            if (emailElement) emailElement.textContent = email;
+
+        } else {
+            // Not logged in ➔ Redirect to login page
+            window.location.href = "../../index.html";
+        }
+    });
+
+    // ✅ Logout function
+    window.logout = async () => {
+        await signOut(auth);
+        localStorage.clear();
+        window.location.href = "../../index.html";
+    };
 
     let editIndex = -1;
 
@@ -553,4 +376,5 @@
   </script>
 
 </body>
+
 </html>
