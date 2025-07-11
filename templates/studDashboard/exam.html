@@ -198,8 +198,10 @@
 
       // Load face-api models
       const MODEL_URL = './models';
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
+      ]);
 
       analyzeFrame();     // face-based violations
       initMicDetection();// Silero VAD-based voice violations
@@ -269,47 +271,51 @@
     //   setTimeout(analyzeFrame, 2000);
     // }
 
-    let awayCounter = 0; // Global counter to track consecutive looking away
+    let awayCounter = 0;
 
     async function analyzeFrame() {
       const video = document.getElementById('webcam');
       if (video.readyState !== 4) return setTimeout(analyzeFrame, 2000);
 
-      const det = await faceapi
-        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks(true);
+      try {
+        const detections = await faceapi
+          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks(true);
 
-      if (det.length === 0) {
-        awayCounter = 0;
-        await showViolation('NO_FACE');
-      } else if (det.length > 1) {
-        awayCounter = 0;
-        await showViolation('MULTIPLE_FACES');
-      } else {
-        // exactly one face, check looking away
-        const lm = det[0].landmarks;
-        const nose = lm.getNose()[0];
-        const l = lm.getLeftEye()[0];
-        const r = lm.getRightEye()[3];
+        const faceCount = detections.length;
 
-        const faceCenterX = (l.x + r.x) / 2;
-        const deviation = Math.abs((nose.x - faceCenterX) / video.videoWidth);
+        if (faceCount === 0) {
+          awayCounter = 0;
+          await showViolation('NO_FACE');
+        } else if (faceCount === 1) {
+          const lm = detections[0].landmarks;
+          const nose = lm.getNose()[0];
+          const l = lm.getLeftEye()[0];
+          const r = lm.getRightEye()[3];
 
-        if (deviation > 0.1) {
-          awayCounter++;
-          if (awayCounter >= 2) {
-            await showViolation('LOOKING_AWAY');
-            awayCounter = 0; // Reset after logging
+          const faceCenterX = (l.x + r.x) / 2;
+          const deviation = Math.abs((nose.x - faceCenterX) / video.videoWidth);
+
+          if (deviation > 0.1) {
+            awayCounter++;
+            if (awayCounter >= 2) {
+              await showViolation('LOOKING_AWAY');
+              awayCounter = 0;
+            }
+          } else {
+            awayCounter = 0;
           }
-        } else {
-          awayCounter = 0; // Reset if looking normally
+
+        } else if (faceCount > 1) {
+          awayCounter = 0;
+          await showViolation('MULTIPLE_FACES');
         }
+      } catch (e) {
+        console.error("Face detection error:", e);
       }
 
-      setTimeout(analyzeFrame, 2000);
+      setTimeout(analyzeFrame, 2000); // recursive loop
     }
-
-
     // 🎤 Silero-based Voice Activity Detection
     async function initMicDetection() {
       try {
