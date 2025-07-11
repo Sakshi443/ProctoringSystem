@@ -124,39 +124,28 @@
     <!-- End Navbar -->
     <div class="container-fluid py-2">
       <div class="row">
-        <!-- add the Main Content here dont change sidebar, navbar, toggle, footer-->
-        <!-- <div class="max-w-4xl mx-auto py-10">
-          <div class="bg-white p-6 rounded shadow">
-            <h1 id="examTitle" class="text-2xl font-bold mb-4">Loading...</h1>
-            <div id="questionContainer" class="space-y-6"></div>
-            <button id="submitBtn" class="mt-6 px-4 py-2 bg-green-600 text-white rounded">Submit Exam</button>
-          </div>
-        </div> -->
-        <!-- Replace the main content area inside your existing Material Dashboard layout -->
-        <div class="container-fluid py-2">
-          <div class="row">
-            <div class="col-12">
-              <div class="card my-4">
-                <div class="card-header pb-0">
-                  <h6 class="mb-0">Available Exams</h6>
-                </div>
-                <div class="card-body px-4 pt-0 pb-2">
-                  <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                      <thead>
-                        <tr>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Exam Name</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Subject</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Duration</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody id="examTableBody">
-                        <!-- Exams will be populated here -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header pb-0">
+              <h6 class="mb-0">Available Exams</h6>
+            </div>
+            <div class="card-body px-4 pt-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Exam Name</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Starts At</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Ends At</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Questions</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Duration (min)</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="examTableBody">
+                    <!-- Exams will be populated here -->
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -204,26 +193,40 @@
       }
     });
 
-    async function loadExams() {
-      const querySnapshot = await getDocs(collection(db, "exams"));
+    async function loadExams(userId) {
+      const querySnapshot = await getDocs(query(collection(db, "exams"), where("assignedTo", "array-contains", currentUserEmail)));
+      const now = new Date();
+
       querySnapshot.forEach((doc) => {
         const exam = doc.data();
+
+        const startDate = new Date(exam.startDateTime);
+        const endDate = new Date(exam.endDateTime);
+
+        let actionButton = '<button class="btn btn-secondary btn-sm" disabled>Not Started</button>';
+
+        if (now >= startDate && now <= endDate) {
+          actionButton = `<button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${doc.id}')">Start Exam</button>`;
+        } else if (now > endDate) {
+          actionButton = '<button class="btn btn-danger btn-sm" disabled>Closed</button>';
+        }
+
         const row = document.createElement("tr");
 
         row.innerHTML = `
-        <td><p class="text-sm mb-0">${exam.testName}</p></td>
-        <td><p class="text-sm mb-0">${exam.subject || 'N/A'}</p></td>
-        <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
-        <td class="align-middle text-center">
-          <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${doc.id}')">Select</button>
-        </td>
-      `;
+          <td><p class="text-sm mb-0">${exam.testName}</p></td>
+          <td><p class="text-sm mb-0">${startDate.toLocaleString()}</p></td>
+          <td><p class="text-sm mb-0">${endDate.toLocaleString()}</p></td>
+          <td><p class="text-sm mb-0">${exam.totalQuestions || '0'}</p></td>
+          <td><p class="text-sm mb-0">${exam.duration || 'N/A'}</p></td>
+          <td class="align-middle text-center">${actionButton}</td>
+        `;
+
         examTableBody.appendChild(row);
       });
     }
 
     window.selectExam = async function (examId) {
-      // Check if user has already submitted this exam
       const submissionsRef = collection(db, `exams/${examId}/submissions`);
       const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
       const snapshot = await getDocs(q);
@@ -237,7 +240,16 @@
     }
   </script>
 
-
+  <script>
+    function logout() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "../index.html";
+      }).catch((error) => {
+        console.error("Logout failed:", error);
+        alert("Logout failed!");
+      });
+    }
+  </script>
 
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
@@ -255,28 +267,6 @@
   <script src="/static/assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="/static/assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="/static/assets/js/plugins/chartjs.min.js"></script>
-  <script>
-
-  </script>
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-
-    function logout() {
-      firebase.auth().signOut().then(() => {
-        // Redirect to login page
-        window.location.href = "../index.html";
-      }).catch((error) => {
-        console.error("Logout failed:", error);
-        alert("Logout failed!");
-      });
-    }
-  </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
