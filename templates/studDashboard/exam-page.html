@@ -212,15 +212,16 @@
 
     async function loadExams() {
       const querySnapshot = await getDocs(collection(db, "exams"));
-      querySnapshot.forEach((docSnap) => {
-        const exam = docSnap.data();
-        const totalMarks = exam.questions ? exam.questions.reduce((sum, q) => sum + (q.marks || 0), 0) : 0;
+      examTableBody.innerHTML = "";  // Clear existing rows
 
+      querySnapshot.forEach((doc) => {
+        const exam = doc.data();
+        const createdByDisplay = exam.createdByName || exam.createdBy || 'Unknown';  // Show name or UID or fallback
         const row = document.createElement("tr");
 
         row.innerHTML = `
         <td><p class="text-sm mb-0">${exam.testName}</p></td>
-        <td><p class="text-sm mb-0">${totalMarks || 'N/A'}</p></td>
+        <td><p class="text-sm mb-0">${createdByDisplay || 'N/A'}</p></td>
         <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
         <td class="align-middle text-center">
           <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${docSnap.id}')">Select</button>
