@@ -1,28 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Proctored Exam</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.24/dist/bundle.min.js"></script>
   <style>
-    html, body { height:100%; margin:0; padding:0; }
-    #startOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.8);
-      display:flex; align-items:center; justify-content:center; z-index:1000; }
-    #startBox { background:#fff; padding:2rem; border-radius:8px; text-align:center; max-width:400px; }
-    #webcamBox { position:fixed; top:1rem; right:1rem; width:200px; height:150px;
-      border:2px solid #4B5563; border-radius:.5rem; overflow:hidden; background:black; z-index:50; }
-    video { width:100%; height:100%; object-fit:cover; }
-    #timer { position:fixed; top:10px; right:150px; background:#000; color:#fff;
-      padding:8px 12px; font-weight:bold; border-radius:8px; z-index:9999; }
-    #violationAlert { position:fixed; top:6rem; left:1rem; background:#e53e3e; color:#fff;
-      padding:8px 12px; border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,.3);
-      display:none; z-index:100; }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #startOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #startBox {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    #webcamBox {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 200px;
+      height: 150px;
+      border: 2px solid #4B5563;
+      border-radius: .5rem;
+      overflow: hidden;
+      background: black;
+      z-index: 50;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #timer {
+      position: fixed;
+      top: 10px;
+      right: 150px;
+      background: #000;
+      color: #fff;
+      padding: 8px 12px;
+      font-weight: bold;
+      border-radius: 8px;
+      z-index: 9999;
+    }
+
+    #violationAlert {
+      position: fixed;
+      top: 6rem;
+      left: 1rem;
+      background: #e53e3e;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+      display: none;
+      z-index: 100;
+    }
   </style>
 </head>
+
 <body class="bg-gray-100">
 
   <script>
@@ -43,7 +101,7 @@
     <div id="startBox">
       <h2 class="text-xl font-bold mb-4">Ready to Begin?</h2>
       <label class="flex items-center mb-4">
-        <input type="checkbox" id="agreeRules" class="mr-2"/>
+        <input type="checkbox" id="agreeRules" class="mr-2" />
         <span>I have read and agree to all rules and conditions.</span>
       </label>
       <!-- make this a button type so it doesn't act like a form submit -->
@@ -71,7 +129,7 @@
   </div>
 
   <div id="confirmationScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50"
-       style="display:none;">
+    style="display:none;">
     <h2 class="text-3xl font-bold text-green-600 mb-4">✅ Exam Submitted!</h2>
     <p class="text-lg mb-6">Your responses were saved successfully.</p>
     <button onclick="goToDashboard()"
@@ -96,12 +154,12 @@
       messagingSenderId: '512898908874',
       appId: '1:512898908874:web:6cad04eb9e0c2a33'
     };
-    const app  = initializeApp(firebaseConfig);
-    const db   = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
     const auth = getAuth(app);
 
     // ─── Cloudinary helper ─────────────────────────────────────────────────────
-    const CLOUD_NAME    = 'dsu1pjwyp';
+    const CLOUD_NAME = 'dsu1pjwyp';
     const UPLOAD_PRESET = 'procted';
     async function uploadToCloudinary(blob) {
       const form = new FormData();
@@ -109,8 +167,8 @@
       form.append('upload_preset', UPLOAD_PRESET);
       // *ensure URL is a string*
       const res = await fetch(
-        https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload,
-        { method:'POST', body: form }
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: form }
       );
       if (!res.ok) throw new Error('Cloudinary upload failed');
       return (await res.json()).secure_url;
@@ -131,7 +189,7 @@
       isShowing = true;
       const msg = violationQueue.shift();
       const box = document.getElementById('violationAlert');
-      box.innerText = ⚠ Violation: ${msg};
+      box.innerText = `⚠ Violation: ${msg}`;
       box.style.display = 'block';
       setTimeout(() => {
         box.style.display = 'none';
@@ -165,7 +223,7 @@
       // 1) Start webcam
       const video = document.getElementById('webcam');
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video:true });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
         await video.play();
       } catch {
@@ -189,7 +247,7 @@
           console.error('User not logged in, redirecting');
           return location.href = '/index.html';
         }
-        studentName  = user.displayName || 'Student';
+        studentName = user.displayName || 'Student';
         studentEmail = user.email;
         console.log('Authenticated as', studentEmail);
 
@@ -203,16 +261,16 @@
         // render title & questions
         document.getElementById('examTitle').innerText = examData.testName;
         const qc = document.getElementById('questionContainer');
-        examData.questions.forEach((q,i) => {
+        examData.questions.forEach((q, i) => {
           const div = document.createElement('div');
           div.className = 'bg-gray-50 p-4 rounded';
           div.innerHTML = `
-            <p class="font-medium mb-2">${i+1}. ${q.questionText}</p>
+            <p class="font-medium mb-2">${i + 1}. ${q.questionText}</p>
             ${q.options.map(opt =>
-              `<label class="block mb-1">
+            `<label class="block mb-1">
                  <input type="radio" name="q${i}" value="${opt}" class="mr-2"/> ${opt}
                </label>`
-            ).join('')}
+          ).join('')}
           `;
           qc.append(div);
         });
@@ -229,8 +287,8 @@
       const el = document.getElementById('timer');
       setInterval(() => {
         if (rem <= 0) return location.href = 'studentDashboard.html';
-        const m = Math.floor(rem/60), s = rem%60;
-        el.innerText = ${m}:${s.toString().padStart(2,'0')};
+        const m = Math.floor(rem / 60), s = rem % 60;
+        el.innerText = `${m}:${s.toString().padStart(2, '0')}`;
         rem--;
       }, 1000);
     }
@@ -242,44 +300,44 @@
       if (vid.readyState !== 4) return setTimeout(analyzeFrame, 2000);
       try {
         const det = await faceapi
-          .detectAllFaces(vid, new faceapi.TinyFaceDetectorOptions({ inputSize:256, scoreThreshold:0.5 }))
+          .detectAllFaces(vid, new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 }))
           .withFaceLandmarks(true);
         const count = det.length;
         if (count === 0) {
           awayCount = 0;
-          await logAndAlert('NO_FACE','No Face Detected');
+          await logAndAlert('NO_FACE', 'No Face Detected');
         } else if (count > 1) {
           awayCount = 0;
-          await logAndAlert('MULTIPLE_FACES','Multiple Faces Detected');
+          await logAndAlert('MULTIPLE_FACES', 'Multiple Faces Detected');
         } else {
           const lm = det[0].landmarks;
           const nose = lm.getNose()[0];
           const l = lm.getLeftEye()[0], r = lm.getRightEye()[3];
-          const center = (l.x+r.x)/2;
-          const dev = Math.abs((nose.x-center)/vid.videoWidth);
-          if (dev>0.1) {
+          const center = (l.x + r.x) / 2;
+          const dev = Math.abs((nose.x - center) / vid.videoWidth);
+          if (dev > 0.1) {
             awayCount++;
-            if (awayCount>=2) {
-              await logAndAlert('LOOKING_AWAY','Looking Away');
-              awayCount=0;
+            if (awayCount >= 2) {
+              await logAndAlert('LOOKING_AWAY', 'Looking Away');
+              awayCount = 0;
             }
-          } else awayCount=0;
+          } else awayCount = 0;
         }
-      } catch(e){
-        console.error('Face error:',e);
+      } catch (e) {
+        console.error('Face error:', e);
       }
-      setTimeout(analyzeFrame,2000);
+      setTimeout(analyzeFrame, 2000);
     }
 
     // ─── Voice detection ─────────────────────────────────────────────────────────
     async function initMicDetection() {
       try {
         const myvad = await vad.MicVAD.new({
-          onSpeechStart:()=>logAndAlert('VOICE_ACTIVITY','Voice Detected'),
-          onSpeechEnd: ()=>{}
+          onSpeechStart: () => logAndAlert('VOICE_ACTIVITY', 'Voice Detected'),
+          onSpeechEnd: () => { }
         });
         myvad.start();
-      } catch(err){
+      } catch (err) {
         console.warn('VAD init failed:', err);
       }
     }
@@ -290,65 +348,66 @@
       // capture snapshot
       const vid = document.getElementById('webcam');
       const c = document.createElement('canvas');
-      c.width=vid.videoWidth; c.height=vid.videoHeight;
-      c.getContext('2d').drawImage(vid,0,0);
-      c.toBlob(async blob=>{
+      c.width = vid.videoWidth; c.height = vid.videoHeight;
+      c.getContext('2d').drawImage(vid, 0, 0);
+      c.toBlob(async blob => {
         try {
           const url = await uploadToCloudinary(blob);
-          await addDoc(collection(db, exams/${examId}/violations), {
-            studentName, studentEmail, type, imageUrl:url, timestamp:new Date().toISOString()
+          await addDoc(collection(db, `exams/${examId}/violations`), {
+            studentName, studentEmail, type, imageUrl: url, timestamp: new Date().toISOString()
           });
-        } catch{} 
-      },'image/jpeg');
+        } catch { }
+      }, 'image/jpeg');
     }
 
     // ─── Submit handler ─────────────────────────────────────────────────────────
     async function submitExam(e) {
       e.preventDefault();
-      let score=0, resp=[];
-      document.querySelectorAll('input[type=radio]:checked').forEach(ans=>{
-        const i=+ans.name.slice(1), sel=ans.value;
-        const corr=examData.questions[i].options[examData.questions[i].correct];
-        if(sel===corr) score++;
-        resp.push({question:examData.questions[i].questionText, selected:sel, correct:corr});
+      let score = 0, resp = [];
+      document.querySelectorAll('input[type=radio]:checked').forEach(ans => {
+        const i = +ans.name.slice(1), sel = ans.value;
+        const corr = examData.questions[i].options[examData.questions[i].correct];
+        if (sel === corr) score++;
+        resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
       });
-      await addDoc(collection(db, exams/${examId}/submissions), {
-        studentName, studentEmail, examId, examTitle:examData.testName,
-        submittedAt:new Date().toISOString(), totalScore:score, responses:resp
+      await addDoc(collection(db, `exams/${examId}/submissions`), {
+        studentName, studentEmail, examId, examTitle: examData.testName,
+        submittedAt: new Date().toISOString(), totalScore: score, responses: resp
       });
-      document.getElementById('examContainer').style.display='none';
-      document.getElementById('confirmationScreen').style.display='flex';
-      setTimeout(()=>location.href='studentDashboard.html',1000);
+      document.getElementById('examContainer').style.display = 'none';
+      document.getElementById('confirmationScreen').style.display = 'flex';
+      setTimeout(() => location.href = 'studentDashboard.html', 1000);
     }
 
     // ─── Helpers & blocks ────────────────────────────────────────────────────────
-    function goToDashboard() { location.href='studentDashboard.html'; }
+    function goToDashboard() { location.href = 'studentDashboard.html'; }
 
-    document.addEventListener('fullscreenchange',()=>{
-      if(!document.fullscreenElement){
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
         showViolationAlert('Exited Fullscreen');
-        setTimeout(()=>{
-          if(confirm('You exited fullscreen. Click OK to re-enter.')) openTestFullscreen();
-        },300);
+        setTimeout(() => {
+          if (confirm('You exited fullscreen. Click OK to re-enter.')) openTestFullscreen();
+        }, 300);
       }
     });
-    document.addEventListener('visibilitychange',()=>{
-      if(document.hidden) showViolationAlert('Tab Switch Detected');
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) showViolationAlert('Tab Switch Detected');
     });
-    window.addEventListener('blur',()=>showViolationAlert('Window Lost Focus'));
+    window.addEventListener('blur', () => showViolationAlert('Window Lost Focus'));
 
-    ['copy','paste','cut','contextmenu'].forEach(evt=>{
-      document.addEventListener(evt,e=>{
+    ['copy', 'paste', 'cut', 'contextmenu'].forEach(evt => {
+      document.addEventListener(evt, e => {
         e.preventDefault();
-        showViolationAlert(Blocked action: ${evt});
+        showViolationAlert(`Blocked action: ${evt}`);
       });
     });
-    document.addEventListener('keydown',e=>{
-      if(e.ctrlKey && ['c','v','x','u'].includes(e.key.toLowerCase())){
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey && ['c', 'v', 'x', 'u'].includes(e.key.toLowerCase())) {
         e.preventDefault();
-        showViolationAlert(Blocked key: Ctrl+${e.key.toUpperCase()});
+        showViolationAlert(`Blocked key: Ctrl+${e.key.toUpperCase()}`);
       }
     });
   </script>
 </body>
+
 </html>
