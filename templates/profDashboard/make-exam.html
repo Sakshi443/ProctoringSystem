@@ -328,7 +328,7 @@
         end,
         description,
         questions,
-        createdBy: auth.currentUser?.email || 'unknown',
+        createdBy: auth.currentUser?.uid || 'unknown',
         createdAt: serverTimestamp(),
       };
 
