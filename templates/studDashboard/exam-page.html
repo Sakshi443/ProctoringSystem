@@ -217,23 +217,26 @@
       for (const docSnap of querySnapshot.docs) {
         const exam = docSnap.data();
         const creatorId = exam.createdBy || '';
+        console.log("Creator ID:", creatorId);
 
         let creatorEmail = 'Unknown';
 
         if (creatorId) {
           try {
             // Directly get the user document using creatorId as the document ID (more efficient)
-            const userRef = doc(db, "users", creatorId);
-            const userSnap = await getDoc(userRef);
+            const userRef = doc(db, "users");
+            const q = query(usersRef, where("uid", "==", creatorId));
+            const querySnapshot = await getDocs(q);
 
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            creatorEmail = userData.email || 'Unknown';
-          }
-        } catch (error) {
-          console.error("Error fetching creator email:", error);
-        }
-      } 
+          querySnapshot.forEach((userDoc) => {
+          const userData = userDoc.data();
+          creatorEmail = userData.email || 'Unknown';
+        });
+
+      } catch (error) {
+        console.error("Error fetching creator email:", error);
+      }
+    }
 
       const row = document.createElement("tr");
       row.innerHTML = `
