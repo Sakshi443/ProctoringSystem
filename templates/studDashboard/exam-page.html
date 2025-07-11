@@ -210,43 +210,44 @@
       }
     });
 
-async function loadExams() {
-  console.log("Loading exams...");
-  const querySnapshot = await getDocs(collection(db, "exams"));
+    async function loadExams() {
+      console.log("Loading exams...");
+      const querySnapshot = await getDocs(collection(db, "exams"));
 
-  for (const docSnap of querySnapshot.docs) {
-    const exam = docSnap.data();
-    const creatorId = exam.createdBy || null;
+      for (const docSnap of querySnapshot.docs) {
+        const exam = docSnap.data();
+        const creatorId = exam.createdBy || '';
 
-    let creatorEmail = 'Unknown';
+        let creatorEmail = 'Unknown';
 
-    if (creatorId) {
-      try {
-        // Get the user document directly using the creatorId as document ID
-        const userRef = doc(db, "users", creatorId);
-        const userSnap = await getDoc(userRef);
+        if (creatorId) {
+          try {
+            // Directly get the user document using creatorId as the document ID (more efficient)
+            const userRef = doc(db, "users", creatorId);
+            const userSnap = await getDoc(userRef);
 
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          creatorEmail = userData.email || 'Unknown';
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            creatorEmail = userData.email || 'Unknown';
+          }
+        } catch (error) {
+          console.error("Error fetching creator email:", error);
         }
-      } catch (error) {
-        console.error("Error fetching creator email:", error);
-      }
-    }
+      } 
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
-      <td><p class="text-sm mb-0">${creatorEmail}</p></td>
-      <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
-      <td class="align-middle text-center">
-        <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${docSnap.id}')">Select</button>
-      </td>
-    `;
-    examTableBody.appendChild(row);
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
+        <td><p class="text-sm mb-0">${creatorEmail}</p></td>
+        <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
+        <td class="align-middle text-center">
+          <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${docSnap.id}')">Select</button>
+        </td>
+      `;
+      examTableBody.appendChild(row);
+    }
   }
-}
+
 
     window.selectExam = async function (examId) {
       // Check if user has already submitted this exam
