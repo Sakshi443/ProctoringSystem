@@ -211,45 +211,51 @@
     });
 
     async function loadExams() {
-      console.log("Loading exams...");
-      const querySnapshot = await getDocs(collection(db, "exams"));
+  console.log("Loading exams...");
+  const querySnapshot = await getDocs(collection(db, "exams"));
 
-      for (const docSnap of querySnapshot.docs) {
-        const exam = docSnap.data();
-        const creatorId = exam.createdBy || '';
-        console.log("Creator ID:", creatorId);
+  for (const docSnap of querySnapshot.docs) {
+    const exam = docSnap.data();
+    const creatorId = exam.createdBy || '';
 
-        let creatorEmail = 'Unknown';
+    let creatorEmail = 'Unknown';
 
-        if (creatorId) {
-          try {
-            // Directly get the user document using creatorId as the document ID (more efficient)
-            const userRef = doc(db, "users");
-            const q = query(usersRef, where("uid", "==", creatorId));
-            const querySnapshot = await getDocs(q);
+    // Fetch email of exam creator
+    if (creatorId) {
+      try {
+        const userRef = doc(db, "users", creatorId);
+        const userSnap = await getDoc(userRef);
 
-          querySnapshot.forEach((userDoc) => {
-          const userData = userDoc.data();
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
           creatorEmail = userData.email || 'Unknown';
-        });
-
+        }
       } catch (error) {
         console.error("Error fetching creator email:", error);
       }
     }
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
-        <td><p class="text-sm mb-0">${creatorEmail}</p></td>
-        <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
-        <td class="align-middle text-center">
-          <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${docSnap.id}')">Select</button>
-        </td>
-      `;
-      examTableBody.appendChild(row);
+    // Format the start date and time
+    let startDateTimeFormatted = 'Not Set';
+    if (exam.startDateTime) {
+      const dateObj = new Date(exam.startDateTime);
+      const datePart = dateObj.toLocaleDateString();     // e.g., 7/11/2025
+      const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });  // e.g., 02:30 PM
+      startDateTimeFormatted = `${datePart} ${timePart}`;
     }
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
+      <td><p class="text-sm mb-0">${startDateTimeFormatted}</p></td>
+      <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
+      <td class="align-middle text-center">
+        <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${docSnap.id}')">Select</button>
+      </td>
+    `;
+    examTableBody.appendChild(row);
   }
+}
 
 
     window.selectExam = async function (examId) {
