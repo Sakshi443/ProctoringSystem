@@ -146,7 +146,7 @@
                       <thead>
                         <tr>
                           <th class="text-uppercase text-secondary text-xs font-weight-bolder">Exam Name</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Subject</th>
+                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Questions</th>
                           <th class="text-uppercase text-secondary text-xs font-weight-bolder">Duration</th>
                           <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">Action</th>
                         </tr>
@@ -214,11 +214,13 @@
       const querySnapshot = await getDocs(collection(db, "exams"));
       querySnapshot.forEach((doc) => {
         const exam = doc.data();
+        const questionCount = exam.questions ? exam.questions.length : 0;  // ✅ Count questions
+
         const row = document.createElement("tr");
 
         row.innerHTML = `
         <td><p class="text-sm mb-0">${exam.testName}</p></td>
-        <td><p class="text-sm mb-0">${exam.subject || 'N/A'}</p></td>
+        <td><p class="text-sm mb-0">${questionCount || 'N/A'}</p></td>
         <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
         <td class="align-middle text-center">
           <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${doc.id}')">Select</button>
