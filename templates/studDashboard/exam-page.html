@@ -146,7 +146,7 @@
                       <thead>
                         <tr>
                           <th class="text-uppercase text-secondary text-xs font-weight-bolder">Exam Name</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Subject</th>
+                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">created By</th>
                           <th class="text-uppercase text-secondary text-xs font-weight-bolder">Duration</th>
                           <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">Action</th>
                         </tr>
@@ -168,7 +168,7 @@
     // Import Firebase core and required services
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import {
       getFirestore,
       collection,
@@ -210,23 +210,43 @@
       }
     });
 
-    async function loadExams() {
-      const querySnapshot = await getDocs(collection(db, "exams"));
-      querySnapshot.forEach((doc) => {
-        const exam = doc.data();
-        const row = document.createElement("tr");
+async function loadExams() {
+  console.log("Loading exams...");
+  const querySnapshot = await getDocs(collection(db, "exams"));
 
-        row.innerHTML = `
-        <td><p class="text-sm mb-0">${exam.testName}</p></td>
-        <td><p class="text-sm mb-0">${exam.subject || 'N/A'}</p></td>
-        <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
-        <td class="align-middle text-center">
-          <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${doc.id}')">Select</button>
-        </td>
-      `;
-        examTableBody.appendChild(row);
-      });
+  for (const docSnap of querySnapshot.docs) {
+    const exam = docSnap.data();
+    const creatorId = exam.createdBy || null;
+
+    let creatorEmail = 'Unknown';
+
+    if (creatorId) {
+      try {
+        // Get the user document directly using the creatorId as document ID
+        const userRef = doc(db, "users", creatorId);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          creatorEmail = userData.email || 'Unknown';
+        }
+      } catch (error) {
+        console.error("Error fetching creator email:", error);
+      }
     }
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
+      <td><p class="text-sm mb-0">${creatorEmail}</p></td>
+      <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
+      <td class="align-middle text-center">
+        <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${docSnap.id}')">Select</button>
+      </td>
+    `;
+    examTableBody.appendChild(row);
+  }
+}
 
     window.selectExam = async function (examId) {
       // Check if user has already submitted this exam
@@ -274,7 +294,7 @@
     }
 
     function logout() {
-      firebase.auth().signOut().then(() => {
+      signOut().then(() => {
         // Redirect to login page
         window.location.href = "../index.html";
       }).catch((error) => {
