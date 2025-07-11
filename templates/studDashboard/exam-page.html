@@ -114,52 +114,47 @@
     </nav>
     <!-- End Navbar -->
     <div class="container-fluid py-2">
-      <div class="row">
-        <div class="col-12">
-          <div class="card my-4">
-            <div class="card-header pb-0">
-              <h6 class="mb-0">Available Exams</h6>
-            </div>
-            <div class="card-body px-4 pt-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Exam Name</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Starts At</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Ends At</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Questions</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder">Duration (min)</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="examTableBody">
-                  </tbody>
-                </table>
-              </div>
-            </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="card my-4">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Available Exams</h6>
+        </div>
+        <div class="card-body px-4 pt-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder">Exam Name</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder">Starts At</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder">Ends At</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder">Questions</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder">Duration (min)</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="examTableBody">
+                <!-- Exams will be populated here -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
   </main>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    query,
-    where
-  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBPc_rkY_RKIoEk91mHD2ulkCQpqLv3m2U",
     authDomain: "proctor-92afc.firebaseapp.com",
     projectId: "proctor-92afc",
-    storageBucket: "proctor-92afc.appspot.com",
+    storageBucket: "proctor-92afc.firebasestorage.app",
     messagingSenderId: "241015750718",
     appId: "1:241015750718:web:473382a019e349cad9516f",
     measurementId: "G-SCZ7G5701B"
@@ -184,58 +179,47 @@
   });
 
   async function loadExams() {
-    examTableBody.innerHTML = '';  // Clear any previous rows
-    const examSnapshot = await getDocs(collection(db, "exams"));
+    const querySnapshot = await getDocs(collection(db, "exams"));
     const now = new Date();
 
-    examSnapshot.forEach(async (docSnap) => {
+    querySnapshot.forEach(async (docSnap) => {
       const exam = docSnap.data();
       const examId = docSnap.id;
-
-      const start = new Date(exam.startDateTime);
-      const end = new Date(exam.endDateTime);
-      const totalQuestions = exam.questions?.length || 0;
-      const duration = exam.duration || 'N/A';
-
-      // Check if this student has already attempted this exam
-      const submissionsRef = collection(db, `exams/${examId}/submissions`);
-      const submissionQuery = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
-      const submissionSnapshot = await getDocs(submissionQuery);
+      const startDate = new Date(exam.startDateTime);
+      const endDate = new Date(exam.endDateTime);
+      const totalQuestions = exam.questions ? exam.questions.length : 0;
 
       let actionButton = '<button class="btn btn-secondary btn-sm" disabled>Not Started</button>';
 
-      if (!submissionSnapshot.empty) {
-        actionButton = '<button class="btn btn-dark btn-sm" disabled>Already Attempted</button>';
-      } else if (now >= start && now <= end) {
+      const submissionsRef = collection(db, `exams/${examId}/submissions`);
+      const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        actionButton = '<button class="btn btn-danger btn-sm" disabled>Already Attempted</button>';
+      } else if (now >= startDate && now <= endDate) {
         actionButton = `<button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${examId}')">Start Exam</button>`;
-      } else if (now > end) {
-        actionButton = '<button class="btn btn-danger btn-sm" disabled>Closed</button>';
+      } else if (now > endDate) {
+        actionButton = '<button class="btn btn-dark btn-sm" disabled>Closed</button>';
       }
 
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
-        <td><p class="text-sm mb-0">${start.toLocaleString()}</p></td>
-        <td><p class="text-sm mb-0">${end.toLocaleString()}</p></td>
+        <td><p class="text-sm mb-0">${exam.testName || 'N/A'}</p></td>
+        <td><p class="text-sm mb-0">${startDate.toLocaleString() || 'N/A'}</p></td>
+        <td><p class="text-sm mb-0">${endDate.toLocaleString() || 'N/A'}</p></td>
         <td><p class="text-sm mb-0">${totalQuestions}</p></td>
-        <td><p class="text-sm mb-0">${duration}</p></td>
+        <td><p class="text-sm mb-0">${exam.duration || 'N/A'}</p></td>
         <td class="align-middle text-center">${actionButton}</td>
       `;
+
       examTableBody.appendChild(row);
     });
   }
 
   window.selectExam = async function (examId) {
-    const submissionsRef = collection(db, `exams/${examId}/submissions`);
-    const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      alert("❌ You have already given this exam.");
-    } else {
-      localStorage.setItem("currentExamId", examId);
-      window.location.href = "startExam.html";
-    }
+    localStorage.setItem("currentExamId", examId);
+    window.location.href = "startExam.html";
   };
 </script>
 
