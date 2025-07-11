@@ -54,7 +54,7 @@
                             </div>
                             <ul>
                                 <li>
-                                    <a href="#"
+                                    <a href="/templates/index.html"
                                         class="block px-4 py-2 text-sm text-gray-100 hover:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-300 dark:hover:text-gray-800"
                                         onclick="logout()">Sign out</a>
                                 </li>
@@ -171,8 +171,8 @@
 
     <!-- // Add in <section> for Exam selection -->
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import {
             getFirestore, collection, getDocs, query, where, doc, updateDoc
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -210,9 +210,27 @@
         let currentViolations = [];
         let submissionsMap = {};
 
+        // ✅ Profile Name & Email Update on Login
         onAuthStateChanged(auth, async (user) => {
-            if (!user) return location.href = "/index.html";
+            if (!user) {
+                location.href = "/index.html";
+                return;
+            }
+
             currentUserUID = user.uid;
+
+            const username = user.displayName || "Professor";
+            const email = user.email || "Not Available";
+
+            localStorage.setItem("username", username);
+            localStorage.setItem("email", email);
+
+            const nameElement = document.getElementById("currentUserName");
+            const emailElement = document.getElementById("currentUserEmail");
+
+            if (nameElement) nameElement.textContent = username;
+            if (emailElement) emailElement.textContent = email;
+
             await populateExamDropdown();
         });
 
