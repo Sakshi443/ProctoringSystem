@@ -1,94 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Proctored Exam</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
-  <!-- ONNX Runtime & Silero VAD -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.24/dist/bundle.min.js"></script>
   <style>
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    #startOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    #startBox {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 8px;
-      text-align: center;
-      max-width: 400px;
-    }
-
-    #webcamBox {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      width: 200px;
-      height: 150px;
-      border: 2px solid #4B5563;
-      border-radius: .5rem;
-      overflow: hidden;
-      background: black;
-      z-index: 50;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    #timer {
-      position: fixed;
-      top: 10px;
-      right: 150px;
-      background: #000;
-      color: #fff;
-      padding: 8px 12px;
-      font-weight: bold;
-      border-radius: 8px;
-      z-index: 9999;
-    }
-
-    #violationAlert {
-      position: fixed;
-      top: 6rem;
-      left: 1rem;
-      background: #e53e3e;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 4px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-      display: none;
-      z-index: 100;
-    }
+    html, body { height:100%; margin:0; padding:0; }
+    #startOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.8);
+      display:flex; align-items:center; justify-content:center; z-index:1000; }
+    #startBox { background:#fff; padding:2rem; border-radius:8px; text-align:center; max-width:400px; }
+    #webcamBox { position:fixed; top:1rem; right:1rem; width:200px; height:150px;
+      border:2px solid #4B5563; border-radius:.5rem; overflow:hidden; background:black; z-index:50; }
+    video { width:100%; height:100%; object-fit:cover; }
+    #timer { position:fixed; top:10px; right:150px; background:#000; color:#fff;
+      padding:8px 12px; font-weight:bold; border-radius:8px; z-index:9999; }
+    #violationAlert { position:fixed; top:6rem; left:1rem; background:#e53e3e; color:#fff;
+      padding:8px 12px; border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,.3);
+      display:none; z-index:100; }
   </style>
 </head>
-
 <body class="bg-gray-100">
 
   <script>
     // Prevent back navigation
     history.pushState(null, null, location.href);
     window.addEventListener('popstate', () => history.pushState(null, null, location.href));
-
     // Fullscreen helper
     function openTestFullscreen() {
       const el = document.documentElement;
@@ -103,10 +43,11 @@
     <div id="startBox">
       <h2 class="text-xl font-bold mb-4">Ready to Begin?</h2>
       <label class="flex items-center mb-4">
-        <input type="checkbox" id="agreeRules" class="mr-2" />
+        <input type="checkbox" id="agreeRules" class="mr-2"/>
         <span>I have read and agree to all rules and conditions.</span>
       </label>
-      <button id="startBtn" class="px-6 py-3 bg-blue-600 text-white rounded" disabled>
+      <!-- make this a button type so it doesn't act like a form submit -->
+      <button id="startBtn" type="button" class="px-6 py-3 bg-blue-600 text-white rounded" disabled>
         Start Exam
       </button>
     </div>
@@ -114,7 +55,7 @@
 
   <div id="webcamBox"><video id="webcam" autoplay muted playsinline></video></div>
   <div id="timer">Loading…</div>
-  <div id="violationAlert">⚠ Violation Detected</div>
+  <div id="violationAlert"></div>
 
   <div id="examContainer" class="max-w-4xl mx-auto py-10 px-4" style="display:none;">
     <div class="bg-white p-6 rounded shadow">
@@ -130,7 +71,7 @@
   </div>
 
   <div id="confirmationScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50"
-    style="display:none;">
+       style="display:none;">
     <h2 class="text-3xl font-bold text-green-600 mb-4">✅ Exam Submitted!</h2>
     <p class="text-lg mb-6">Your responses were saved successfully.</p>
     <button onclick="goToDashboard()"
@@ -144,89 +85,135 @@
     import { getFirestore, doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
-    // Firebase config
+    console.log('Module script loaded');
+
+    // ─── Firebase setup ─────────────────────────────────────────────────────────
     const firebaseConfig = {
       apiKey: 'AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc',
       authDomain: 'proctored-system.firebaseapp.com',
       projectId: 'proctored-system',
       storageBucket: 'proctored-system.appspot.com',
       messagingSenderId: '512898908874',
-      appId: '1:512898908874:web:23584b6cad04eb9e0c2a33'
+      appId: '1:512898908874:web:6cad04eb9e0c2a33'
     };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
     const auth = getAuth(app);
 
-    // Cloudinary helper
-    const CLOUD_NAME = 'dsu1pjwyp';
+    // ─── Cloudinary helper ─────────────────────────────────────────────────────
+    const CLOUD_NAME    = 'dsu1pjwyp';
     const UPLOAD_PRESET = 'procted';
     async function uploadToCloudinary(blob) {
       const form = new FormData();
       form.append('file', blob);
       form.append('upload_preset', UPLOAD_PRESET);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-        method: 'POST',
-        body: form
-      });
+      // *ensure URL is a string*
+      const res = await fetch(
+        https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload,
+        { method:'POST', body: form }
+      );
       if (!res.ok) throw new Error('Cloudinary upload failed');
       return (await res.json()).secure_url;
     }
 
+    // ─── Violation queue system ─────────────────────────────────────────────────
+    const violationQueue = [];
+    let isShowing = false;
+    function showViolationAlert(reason) {
+      violationQueue.push(reason);
+      if (!isShowing) displayNext();
+    }
+    function displayNext() {
+      if (!violationQueue.length) {
+        isShowing = false;
+        return;
+      }
+      isShowing = true;
+      const msg = violationQueue.shift();
+      const box = document.getElementById('violationAlert');
+      box.innerText = ⚠ Violation: ${msg};
+      box.style.display = 'block';
+      setTimeout(() => {
+        box.style.display = 'none';
+        displayNext();
+      }, 4000);
+    }
+
+    // ─── Globals ────────────────────────────────────────────────────────────────
     let studentName, studentEmail, examData;
     const examId = localStorage.getItem('currentExamId');
-    if (!examId) location.href = 'studentDashboard.html';
+    console.log('Loaded examId:', examId);
+    if (!examId) {
+      console.error('No examId in localStorage, redirecting');
+      location.href = 'studentDashboard.html';
+    }
 
-    document.getElementById('agreeRules').addEventListener('change', function () {
-      document.getElementById('startBtn').disabled = !this.checked;
+    // ─── UI bindings ────────────────────────────────────────────────────────────
+    document.getElementById('agreeRules').addEventListener('change', e => {
+      document.getElementById('startBtn').disabled = !e.target.checked;
     });
     document.getElementById('startBtn').addEventListener('click', () => {
+      console.log('Start button clicked');
       document.getElementById('startOverlay').style.display = 'none';
       openTestFullscreen();
-      initExam();
+      initExam().catch(err => console.error('initExam error:', err));
     });
 
+    // ─── Initialize Exam ────────────────────────────────────────────────────────
     async function initExam() {
-      // Start webcam
+      console.log('initExam called');
+      // 1) Start webcam
       const video = document.getElementById('webcam');
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream; video.play();
+        const stream = await navigator.mediaDevices.getUserMedia({ video:true });
+        video.srcObject = stream;
+        await video.play();
       } catch {
         alert('Please allow webcam access.');
         return;
       }
 
-      // Load face-api models
+      // 2) Load face-api models
       const MODEL_URL = './models';
       await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
       ]);
 
-      analyzeFrame();     // face-based violations
-      initMicDetection();// Silero VAD-based voice violations
+      analyzeFrame();     // begin face checks
+      initMicDetection(); // begin voice checks
 
+      // 3) Firebase auth & load exam data
       onAuthStateChanged(auth, async user => {
-        if (!user) return location.href = '/index.html';
-        studentName = user.displayName || 'Student';
+        if (!user) {
+          console.error('User not logged in, redirecting');
+          return location.href = '/index.html';
+        }
+        studentName  = user.displayName || 'Student';
         studentEmail = user.email;
-        const snap = await getDoc(doc(db, 'exams', examId));
-        if (!snap.exists()) return location.href = 'studentDashboard.html';
-        examData = snap.data();
-        document.getElementById('examTitle').innerText = examData.testName;
+        console.log('Authenticated as', studentEmail);
 
+        const snap = await getDoc(doc(db, 'exams', examId));
+        if (!snap.exists()) {
+          console.error('Exam doc not found, redirecting');
+          return location.href = 'studentDashboard.html';
+        }
+        examData = snap.data();
+
+        // render title & questions
+        document.getElementById('examTitle').innerText = examData.testName;
         const qc = document.getElementById('questionContainer');
-        examData.questions.forEach((q, i) => {
+        examData.questions.forEach((q,i) => {
           const div = document.createElement('div');
           div.className = 'bg-gray-50 p-4 rounded';
           div.innerHTML = `
-          <p class="font-medium mb-2">${i + 1}. ${q.questionText}</p>
-          ${q.options.map(opt =>
-            `<label class="block mb-1">
-               <input type="radio" name="q${i}" value="${opt}" class="mr-2"/> ${opt}
-             </label>`
-          ).join('')}
-        `;
+            <p class="font-medium mb-2">${i+1}. ${q.questionText}</p>
+            ${q.options.map(opt =>
+              `<label class="block mb-1">
+                 <input type="radio" name="q${i}" value="${opt}" class="mr-2"/> ${opt}
+               </label>`
+            ).join('')}
+          `;
           qc.append(div);
         });
 
@@ -236,244 +223,132 @@
       });
     }
 
+    // ─── Timer ───────────────────────────────────────────────────────────────────
     function startTimer(mins) {
       let rem = mins * 60;
       const el = document.getElementById('timer');
       setInterval(() => {
         if (rem <= 0) return location.href = 'studentDashboard.html';
-        const m = Math.floor(rem / 60), s = rem % 60;
-        el.innerText = `${m}:${s.toString().padStart(2, '0')}`; rem--;
+        const m = Math.floor(rem/60), s = rem%60;
+        el.innerText = ${m}:${s.toString().padStart(2,'0')};
+        rem--;
       }, 1000);
     }
 
-    // async function analyzeFrame() {
-    //   const video = document.getElementById('webcam');
-    //   if (video.readyState !== 4) return setTimeout(analyzeFrame, 2000);
-
-    //   const det = await faceapi
-    //     .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-    //     .withFaceLandmarks(true);
-
-    //   if (det.length === 0) {
-    //     await showViolation('NO_FACE');
-    //   } else if (det.length > 1) {
-    //     await showViolation('MULTIPLE_FACES');
-    //   } else {
-    //     // exactly one face, check looking away
-    //     const lm = det[0].landmarks;
-    //     const nose = lm.getNose()[0];
-    //     const l = lm.getLeftEye()[0];
-    //     const r = lm.getRightEye()[3];
-    //     const away = Math.abs((nose.x - (l.x + r.x) / 2) / video.videoWidth) > 0.1;
-    //     if (away) await showViolation('LOOKING_AWAY');
-    //   }
-
-    //   setTimeout(analyzeFrame, 2000);
-    // }
-
-    let awayCounter = 0;
-
+    // ─── Face detection loop ────────────────────────────────────────────────────
+    let awayCount = 0;
     async function analyzeFrame() {
-      const video = document.getElementById('webcam');
-      if (video.readyState !== 4) return setTimeout(analyzeFrame, 2000);
-
+      const vid = document.getElementById('webcam');
+      if (vid.readyState !== 4) return setTimeout(analyzeFrame, 2000);
       try {
-        const detections = await faceapi
-          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+        const det = await faceapi
+          .detectAllFaces(vid, new faceapi.TinyFaceDetectorOptions({ inputSize:256, scoreThreshold:0.5 }))
           .withFaceLandmarks(true);
-
-        const faceCount = detections.length;
-
-        if (faceCount === 0) {
-          awayCounter = 0;
-          await showViolation('NO_FACE');
-        } else if (faceCount === 1) {
-          const lm = detections[0].landmarks;
+        const count = det.length;
+        if (count === 0) {
+          awayCount = 0;
+          await logAndAlert('NO_FACE','No Face Detected');
+        } else if (count > 1) {
+          awayCount = 0;
+          await logAndAlert('MULTIPLE_FACES','Multiple Faces Detected');
+        } else {
+          const lm = det[0].landmarks;
           const nose = lm.getNose()[0];
-          const l = lm.getLeftEye()[0];
-          const r = lm.getRightEye()[3];
-
-          const faceCenterX = (l.x + r.x) / 2;
-          const deviation = Math.abs((nose.x - faceCenterX) / video.videoWidth);
-
-          if (deviation > 0.1) {
-            awayCounter++;
-            if (awayCounter >= 2) {
-              await showViolation('LOOKING_AWAY');
-              awayCounter = 0;
+          const l = lm.getLeftEye()[0], r = lm.getRightEye()[3];
+          const center = (l.x+r.x)/2;
+          const dev = Math.abs((nose.x-center)/vid.videoWidth);
+          if (dev>0.1) {
+            awayCount++;
+            if (awayCount>=2) {
+              await logAndAlert('LOOKING_AWAY','Looking Away');
+              awayCount=0;
             }
-          } else {
-            awayCounter = 0;
-          }
-
-        } else if (faceCount > 1) {
-          awayCounter = 0;
-          await showViolation('MULTIPLE_FACES');
+          } else awayCount=0;
         }
-      } catch (e) {
-        console.error("Face detection error:", e);
+      } catch(e){
+        console.error('Face error:',e);
       }
-
-      setTimeout(analyzeFrame, 2000); // recursive loop
+      setTimeout(analyzeFrame,2000);
     }
-    // 🎤 Silero-based Voice Activity Detection
+
+    // ─── Voice detection ─────────────────────────────────────────────────────────
     async function initMicDetection() {
       try {
         const myvad = await vad.MicVAD.new({
-          onSpeechStart: () => {
-            console.log('🎤 Voice start detected');
-            showViolation('VOICE_ACTIVITY');
-          },
-          onSpeechEnd: () => {
-            console.log('🎤 Voice end detected');
-          }
+          onSpeechStart:()=>logAndAlert('VOICE_ACTIVITY','Voice Detected'),
+          onSpeechEnd: ()=>{}
         });
         myvad.start();
-      } catch (err) {
+      } catch(err){
         console.warn('VAD init failed:', err);
       }
     }
 
-    async function showViolation(type) {
-      console.log('🚨 Violation:', type);
-      const box = document.getElementById('violationAlert');
-      box.innerText = `⚠ Violation: ${type}`;
-      box.style.display = 'block';
-      setTimeout(() => box.style.display = 'none', 3000);
-
-      // capture webcam snapshot
+    // ─── Log + alert helper ─────────────────────────────────────────────────────
+    async function logAndAlert(type, msg) {
+      showViolationAlert(msg);
+      // capture snapshot
       const vid = document.getElementById('webcam');
       const c = document.createElement('canvas');
-      c.width = vid.videoWidth; c.height = vid.videoHeight;
-      c.getContext('2d').drawImage(vid, 0, 0);
-      c.toBlob(async b => {
+      c.width=vid.videoWidth; c.height=vid.videoHeight;
+      c.getContext('2d').drawImage(vid,0,0);
+      c.toBlob(async blob=>{
         try {
-          const url = await uploadToCloudinary(b);
-          await addDoc(collection(db, `exams/${examId}/violations`), {
-            studentName,
-            studentEmail,
-            type,
-            imageUrl: url,
-            timestamp: new Date().toISOString()
+          const url = await uploadToCloudinary(blob);
+          await addDoc(collection(db, exams/${examId}/violations), {
+            studentName, studentEmail, type, imageUrl:url, timestamp:new Date().toISOString()
           });
-        } catch { }
-      }, 'image/jpeg');
+        } catch{} 
+      },'image/jpeg');
     }
 
+    // ─── Submit handler ─────────────────────────────────────────────────────────
     async function submitExam(e) {
       e.preventDefault();
-      let score = 0, resp = [];
-      document.querySelectorAll('input[type=radio]:checked').forEach(ans => {
-        const i = +ans.name.slice(1), sel = ans.value;
-        const corr = examData.questions[i].options[examData.questions[i].correct];
-        if (sel === corr) score++;
-        resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
+      let score=0, resp=[];
+      document.querySelectorAll('input[type=radio]:checked').forEach(ans=>{
+        const i=+ans.name.slice(1), sel=ans.value;
+        const corr=examData.questions[i].options[examData.questions[i].correct];
+        if(sel===corr) score++;
+        resp.push({question:examData.questions[i].questionText, selected:sel, correct:corr});
       });
-      await addDoc(collection(db, `exams/${examId}/submissions`), {
-        studentName,
-        studentEmail,
-        examId,
-        examTitle: examData.testName,
-        submittedAt: new Date().toISOString(),
-        totalScore: score,
-        responses: resp
+      await addDoc(collection(db, exams/${examId}/submissions), {
+        studentName, studentEmail, examId, examTitle:examData.testName,
+        submittedAt:new Date().toISOString(), totalScore:score, responses:resp
       });
-      document.getElementById('examContainer').style.display = 'none';
-      document.getElementById('confirmationScreen').style.display = 'flex';
-      setTimeout(() => location.href = 'studentDashboard.html', 1000);
+      document.getElementById('examContainer').style.display='none';
+      document.getElementById('confirmationScreen').style.display='flex';
+      setTimeout(()=>location.href='studentDashboard.html',1000);
     }
 
-    function goToDashboard() {
-      location.href = 'studentDashboard.html';
-    }
+    // ─── Helpers & blocks ────────────────────────────────────────────────────────
+    function goToDashboard() { location.href='studentDashboard.html'; }
 
-    // ... Your Firebase, face detection, and exam logic stays unchanged above ...
-
-    // ─── Additional Violation Tracking ───────────────────────────────────────────
-
-    // Handle Fullscreen Request
-    function requestFullscreen() {
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if (el.msRequestFullscreen) el.msRequestFullscreen();
-    }
-
-    // Request fullscreen when exam starts
-    document.getElementById('startBtn').addEventListener('click', () => {
-      localStorage.setItem("startExam", "true");
-      requestFullscreen(); // Ensure fullscreen
-    });
-
-    // Auto re-request fullscreen if exited
-    document.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement) {
-        logViolation("EXIT_FULLSCREEN");
-        showViolationAlert("Exited fullscreen!");
-
-        setTimeout(() => {
-          const retry = confirm("You exited fullscreen. Click OK to re-enter.");
-          if (retry) requestFullscreen();
-        }, 300);
+    document.addEventListener('fullscreenchange',()=>{
+      if(!document.fullscreenElement){
+        showViolationAlert('Exited Fullscreen');
+        setTimeout(()=>{
+          if(confirm('You exited fullscreen. Click OK to re-enter.')) openTestFullscreen();
+        },300);
       }
     });
-
-    // Detect tab switching
-    document.addEventListener("visibilitychange", async () => {
-      if (document.hidden) {
-        await logViolation("TAB_SWITCH");
-        showViolationAlert("Tab switch detected!");
-      }
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden) showViolationAlert('Tab Switch Detected');
     });
+    window.addEventListener('blur',()=>showViolationAlert('Window Lost Focus'));
 
-    // Detect window blur (e.g., switching to another app)
-    window.addEventListener("blur", async () => {
-      await logViolation("WINDOW_BLUR");
-      showViolationAlert("Window lost focus!");
-    });
-
-    // Block right-click and clipboard actions
-    ["copy", "paste", "cut", "contextmenu"].forEach(evt => {
-      document.addEventListener(evt, e => {
+    ['copy','paste','cut','contextmenu'].forEach(evt=>{
+      document.addEventListener(evt,e=>{
         e.preventDefault();
-        logViolation(evt.toUpperCase());
-        showViolationAlert(`Blocked action: ${evt}`);
+        showViolationAlert(Blocked action: ${evt});
       });
     });
-
-    // Block specific key shortcuts (Ctrl+C, Ctrl+V, Ctrl+U)
-    document.addEventListener("keydown", e => {
-      if (e.ctrlKey && ["c", "v", "x", "u"].includes(e.key.toLowerCase())) {
+    document.addEventListener('keydown',e=>{
+      if(e.ctrlKey && ['c','v','x','u'].includes(e.key.toLowerCase())){
         e.preventDefault();
-        const map = { c: "COPY", v: "PASTE", x: "CUT", u: "VIEW_SOURCE" };
-        logViolation(map[e.key.toLowerCase()]);
-        showViolationAlert(`Blocked key: Ctrl+${e.key.toUpperCase()}`);
+        showViolationAlert(Blocked key: Ctrl+${e.key.toUpperCase()});
       }
     });
-
-    // ─── Violation Logging Helper ───────────────────────────────────────────────
-    async function logViolation(type) {
-      try {
-        await addDoc(collection(db, `exams/${examId}/violations`), {
-          studentName,
-          studentEmail,
-          type,
-          timestamp: new Date().toISOString()
-        });
-      } catch (err) {
-        console.warn("Violation logging failed:", err);
-      }
-    }
-
-    function showViolationAlert(reason) {
-      const box = document.getElementById("violationAlert");
-      box.innerText = `⚠ Violation: ${reason}`;
-      box.classList.remove("hidden");
-      setTimeout(() => box.classList.add("hidden"), 4000);
-    }
   </script>
-
-
 </body>
-
 </html>
