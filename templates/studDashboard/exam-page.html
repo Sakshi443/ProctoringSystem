@@ -143,84 +143,129 @@
       </div>
     </div>
   </main>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    where
+  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-      authDomain: "proctored-system.firebaseapp.com",
-      projectId: "proctored-system",
-      storageBucket: "proctored-system.appspot.com",
-      messagingSenderId: "512898908874",
-      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyBPc_rkY_RKIoEk91mHD2ulkCQpqLv3m2U",
+    authDomain: "proctor-92afc.firebaseapp.com",
+    projectId: "proctor-92afc",
+    storageBucket: "proctor-92afc.appspot.com",
+    messagingSenderId: "241015750718",
+    appId: "1:241015750718:web:473382a019e349cad9516f",
+    measurementId: "G-SCZ7G5701B"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore();
-    const auth = getAuth();
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const examTableBody = document.getElementById("examTableBody");
-    let currentUserEmail = "";
+  const examTableBody = document.getElementById("examTableBody");
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        alert("Please login first.");
-        window.location.href = "index.html";
-      } else {
-        currentUserEmail = user.email;
-        loadExams();
+  let currentUserEmail = "";
+  let currentUserUid = "";
+  let currentUserRole = "";
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      alert("Please login first.");
+      window.location.href = "index.html";
+    } else {
+      currentUserEmail = user.email;
+      currentUserUid = user.uid;
+
+      // Example: Role could be stored in localStorage or Firestore - adjust this as per your implementation
+      currentUserRole = localStorage.getItem("role");  // "student" or "professor"
+
+      if (currentUserRole !== "student") {
+        alert("Access denied. This page is for students only.");
+        window.location.href = "studentDashboard.html"; // Redirect elsewhere
+        return;
       }
-    });
 
-    async function loadExams() {
-      const querySnapshot = await getDocs(query(collection(db, "exams"), where("assignedTo", "array-contains", currentUserEmail)));
-      const now = new Date();
+      await loadStudentExams();
+    }
+  });
 
-      querySnapshot.forEach((doc) => {
-        const exam = doc.data();
-        const startDate = new Date(exam.startDateTime);
-        const endDate = new Date(exam.endDateTime);
+  async function loadStudentExams() {
+    examTableBody.innerHTML = "";
 
-        let actionButton = '<button class="btn btn-secondary btn-sm" disabled>Not Started</button>';
+    const examsRef = collection(db, "exams");
+    const studentQuery = query(examsRef, where("assignedTo", "array-contains", currentUserEmail));
+    const snapshot = await getDocs(studentQuery);
 
-        if (now >= startDate && now <= endDate) {
-          actionButton = `<button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${doc.id}')">Start Exam</button>`;
-        } else if (now > endDate) {
-          actionButton = '<button class="btn btn-danger btn-sm" disabled>Closed</button>';
-        }
-
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-          <td><p class="text-sm mb-0">${exam.testName}</p></td>
-          <td><p class="text-sm mb-0">${startDate.toLocaleString()}</p></td>
-          <td><p class="text-sm mb-0">${endDate.toLocaleString()}</p></td>
-          <td><p class="text-sm mb-0">${exam.totalQuestions || '0'}</p></td>
-          <td><p class="text-sm mb-0">${exam.duration || 'N/A'}</p></td>
-          <td class="align-middle text-center">${actionButton}</td>
-        `;
-
-        examTableBody.appendChild(row);
-      });
+    if (snapshot.empty) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td colspan="6" class="text-center text-muted py-3">No exams assigned to you.</td>
+      `;
+      examTableBody.appendChild(row);
+      return;
     }
 
-    window.selectExam = async function (examId) {
-      const { getFirestore, collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js");
-      const db = getFirestore();
-      const submissionsRef = collection(db, `exams/${examId}/submissions`);
-      const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
-      const snapshot = await getDocs(q);
+    for (const docSnap of snapshot.docs) {
+      const exam = docSnap.data();
+      const examId = docSnap.id;
 
-      if (!snapshot.empty) {
-        alert("❌ You have already given this exam.");
-      } else {
-        localStorage.setItem("currentExamId", examId);
-        window.location.href = "startExam.html";
+      const startDate = new Date(exam.startDateTime);
+      const endDate = new Date(exam.endDateTime);
+      const questionCount = exam.questions?.length || 0;
+      const duration = exam.duration || "N/A";
+
+      const alreadyAttempted = await checkIfExamSubmitted(examId);
+
+      let actionButton = `<button class="btn btn-secondary btn-sm" disabled>Unavailable</button>`;
+
+      const now = new Date();
+      if (alreadyAttempted) {
+        actionButton = `<button class="btn btn-danger btn-sm" disabled>Attempted</button>`;
+      } else if (now >= startDate && now <= endDate) {
+        actionButton = `<button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${examId}')">Start Exam</button>`;
+      } else if (now > endDate) {
+        actionButton = `<button class="btn btn-dark btn-sm" disabled>Closed</button>`;
+      } else if (now < startDate) {
+        actionButton = `<button class="btn btn-secondary btn-sm" disabled>Not Started</button>`;
       }
-    };
-  </script>
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
+        <td><p class="text-sm mb-0">${startDate.toLocaleString()}</p></td>
+        <td><p class="text-sm mb-0">${endDate.toLocaleString()}</p></td>
+        <td><p class="text-sm mb-0">${questionCount}</p></td>
+        <td><p class="text-sm mb-0">${duration} min</p></td>
+        <td class="align-middle text-center">${actionButton}</td>
+      `;
+
+      examTableBody.appendChild(row);
+    }
+  }
+
+  async function checkIfExamSubmitted(examId) {
+    const submissionsRef = collection(db, `exams/${examId}/submissions`);
+    const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  }
+
+  window.selectExam = function (examId) {
+    localStorage.setItem("currentExamId", examId);
+    window.location.href = "startExam.html";
+  }
+
+</script>
+
+
 
   <script>
     function logout() {
