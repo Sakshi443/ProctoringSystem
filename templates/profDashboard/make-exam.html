@@ -103,8 +103,6 @@
     </div>
   </aside>
   <!-- end of Navbar -->
-
-
   <div class="p-6 sm:ml-64">
     <div class="p-4 border-2 border-gray-200 rounded-lg mt-14 bg-white shadow">
       <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
@@ -188,14 +186,14 @@
         <div>
           <label class="block mb-1">Options (Click to select correct)</label>
           <div id="optionInputs" class="grid grid-cols-2 gap-2">
-            <input type="text" id="qOpt1" data-opt-index="1" placeholder="Option 1"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt2" data-opt-index="2" placeholder="Option 2"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt3" data-opt-index="3" placeholder="Option 3"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
-            <input type="text" id="qOpt4" data-opt-index="4" placeholder="Option 4"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt1" data-opt-index="1"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 1" />
+            <input type="text" id="qOpt2" data-opt-index="2"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 2" />
+            <input type="text" id="qOpt3" data-opt-index="3"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 3" />
+            <input type="text" id="qOpt4" data-opt-index="4"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 4" />
           </div>
         </div>
       </div>
@@ -211,13 +209,21 @@
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    const firebaseConfig = { /* your config */ };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
+      authDomain: "proctored-system.firebaseapp.com",
+      projectId: "proctored-system",
+      storageBucket: "proctored-system.appspot.com",   // ✅ Fixed URL
+      messagingSenderId: "512898908874",
+      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
+      measurementId: "G-3SL8C6C8RD"
+    };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
 
-    let questionTableBody = document.querySelector('#questionTable tbody');
-    let questionCountSpan = document.getElementById('questionCount');
+    const questionTableBody = document.querySelector('#questionTable tbody');
+    const questionCountSpan = document.getElementById('questionCount');
 
     const updateQuestionCount = () => {
       questionCountSpan.innerText = questionTableBody.children.length;
@@ -252,46 +258,55 @@
     document.querySelectorAll('.optionInput').forEach(input => {
       input.addEventListener('click', () => {
         const type = document.getElementById('qType').value;
-        if (type === 'mcq_single') document.querySelectorAll('.optionInput').forEach(i => i.classList.remove('selected'));
+        if (type === 'mcq_single') {
+          document.querySelectorAll('.optionInput').forEach(i => i.classList.remove('selected'));
+        }
         input.classList.toggle('selected');
       });
     });
 
     document.getElementById('saveQuestionBtn').addEventListener('click', () => {
       const qText = document.getElementById('qText').value.trim();
-      const qMarks = parseInt(document.getElementById('qMarks').value);
+      const qMarks = parseFloat(document.getElementById('qMarks').value);
       const qNegative = document.getElementById('qNegative').value;
       const options = ['qOpt1', 'qOpt2', 'qOpt3', 'qOpt4'].map(id => document.getElementById(id).value.trim());
       const correct = Array.from(document.querySelectorAll('.optionInput.selected')).map(opt => opt.dataset.optIndex);
 
       if (!qText || isNaN(qMarks) || options.some(o => !o) || correct.length === 0) {
-        alert('❌ Fill all fields correctly');
+        alert('❌ Please fill out the question, marks, all options, and select at least one correct answer.');
         return;
       }
 
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td class="border px-2 py-1">${qText}</td>
-        <td class="border px-2 py-1">${qMarks}</td>
-        <td class="border px-2 py-1">${qNegative}</td>
-        <td class="border px-2 py-1">${options.join(', ')}</td>
-        <td class="border px-2 py-1">${correct.join(',')}</td>
-        <td class="border px-2 py-1 text-blue-600 cursor-pointer" onclick="this.closest('tr').remove(); updateQuestionCount();">Delete</td>
-      `;
+      <td class="border px-2 py-1">${qText}</td>
+      <td class="border px-2 py-1">${qMarks}</td>
+      <td class="border px-2 py-1">${qNegative}</td>
+      <td class="border px-2 py-1">${options.join(', ')}</td>
+      <td class="border px-2 py-1">${correct.join(',')}</td>
+      <td class="border px-2 py-1 text-blue-600 cursor-pointer delete-row">Delete</td>
+    `;
       questionTableBody.appendChild(row);
       updateQuestionCount();
       document.getElementById('questionModal').classList.add('hidden');
     });
 
+    questionTableBody.addEventListener('click', (e) => {
+      if (e.target.classList.contains('delete-row')) {
+        e.target.closest('tr').remove();
+        updateQuestionCount();
+      }
+    });
+
     document.getElementById('saveExamBtn').addEventListener('click', async () => {
       const testName = document.getElementById('testName').value.trim();
-      const duration = parseInt(document.getElementById('testDuration').value);
+      const duration = parseFloat(document.getElementById('testDuration').value);
       const start = document.getElementById('startDateTime').value;
       const end = document.getElementById('endDateTime').value;
       const description = document.getElementById('testDescription').value.trim();
 
-      if (!testName || isNaN(duration) || !start || !end || questionTableBody.children.length === 0) {
-        alert('❌ Complete all exam details and add questions.');
+      if (!testName || isNaN(duration) || duration <= 0 || !start || !end || questionTableBody.children.length === 0) {
+        alert('❌ Please complete all exam details and add at least one question.');
         return;
       }
 
@@ -299,7 +314,7 @@
         const cells = row.querySelectorAll('td');
         return {
           text: cells[0].innerText,
-          marks: cells[1].innerText,
+          marks: parseFloat(cells[1].innerText),
           negative: cells[2].innerText,
           options: cells[3].innerText.split(', '),
           correct: cells[4].innerText.split(','),
@@ -319,15 +334,16 @@
 
       try {
         await addDoc(collection(db, 'exams'), examData);
-        alert('✅ Exam saved to Firebase!');
+        alert('✅ Exam saved successfully!');
         location.reload();
       } catch (err) {
-        alert('❌ Failed to save exam');
-        console.error(err);
+        console.error('❌ Error saving exam:', err);
+        alert('❌ Failed to save exam. Please try again.');
       }
     });
 
   </script>
+
 </body>
 
 </html>
