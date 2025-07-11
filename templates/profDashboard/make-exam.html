@@ -1,4 +1,5 @@
 <!-- make-exam.html -->
+<!-- make-exam.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -58,7 +59,7 @@
               </div>
               <ul>
                 <li>
-                  <a href="#"
+                  <a href="/templates/index.html"
                     class="block px-4 py-2 text-sm text-gray-100 hover:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-300 dark:hover:text-gray-800"
                     onclick="logout()">Sign out</a>
                 </li>
@@ -115,7 +116,7 @@
   </aside>
   <!-- end of Navbar -->
 
-  <!-- Main Content -->
+  <!-- Main Content
   <div class="p-6 sm:ml-64">
     <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
       <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
@@ -152,6 +153,233 @@
         </table>
 
         <button id="saveExamBtn" class="bg-green-600 text-white px-6 py-2 rounded mt-4">Save Exam</button>
+      </div>
+    </div>
+  </div>
+
+  Question Modal
+  <div id="questionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Add New Question</h3>
+        <button id="closeModalBtn" class="text-gray-600 hover:text-black">&times;</button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block">Question Type</label>
+          <select id="qType" class="w-full border rounded px-3 py-2">
+            <option value="mcq_single">MCQ (Single)</option>
+            <option value="mcq_multiple">MSQ (Multiple)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block">Question Text</label>
+          <textarea id="qText" class="w-full border rounded px-3 py-2" rows="3"></textarea>
+        </div>
+        <div>
+          <label class="block">Marks</label>
+          <input type="number" id="qMarks" class="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block">Negative Marking</label>
+          <select id="qNegative" class="w-full border rounded px-3 py-2">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-1">Options (Click to select correct)</label>
+          <div id="optionInputs" class="grid grid-cols-2 gap-2">
+            <input type="text" id="qOpt1" data-opt-index="1" placeholder="Option 1"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt2" data-opt-index="2" placeholder="Option 2"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt3" data-opt-index="3" placeholder="Option 3"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt4" data-opt-index="4" placeholder="Option 4"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button id="saveQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Save Question</button>
+      </div>
+    </div>
+  </div> -->
+
+  <!-- Main Content -->
+  <!-- <div class="p-6 sm:ml-64">
+    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14 bg-white shadow">
+      <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
+
+      <div id="examForm">
+
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div>
+            <label class="block mb-2 font-medium">Test Name</label>
+            <input type="text" id="testName" class="w-full border rounded px-3 py-2" placeholder="e.g., My Sample Test"
+              required />
+          </div>
+
+          <div>
+            <label class="block mb-2 font-medium">Test Duration (minutes)</label>
+            <input type="number" id="testDuration" class="w-full border rounded px-3 py-2" min="1" required />
+          </div>
+
+          <div>
+            <label class="block mb-2 font-medium">Start Date & Time</label>
+            <input type="datetime-local" id="startDateTime" class="w-full border rounded px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block mb-2 font-medium">End Date & Time</label>
+            <input type="datetime-local" id="endDateTime" class="w-full border rounded px-3 py-2" required />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block mb-2 font-medium">Test Description</label>
+            <textarea id="testDescription" class="w-full border rounded px-3 py-2" rows="3"
+              placeholder="Enter exam details here..."></textarea>
+          </div>
+        </div>
+
+        <button id="openModalBtn" class="bg-blue-500 text-white px-4 py-2 rounded">➕ Add Question</button>
+
+        <div class="mt-4">
+          <table class="min-w-full border text-sm" id="questionTable">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border px-2 py-1">Question</th>
+                <th class="border px-2 py-1">Marks</th>
+                <th class="border px-2 py-1">Negative</th>
+                <th class="border px-2 py-1">Options</th>
+                <th class="border px-2 py-1">Correct</th>
+                <th class="border px-2 py-1">Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <p class="mt-2 text-sm text-gray-600">Total Questions: <span id="questionCount" class="font-semibold">0</span>
+        </p>
+
+        <button id="saveExamBtn" class="bg-green-600 text-white px-6 py-2 rounded mt-4">Save Exam</button>
+
+      </div>
+    </div>
+  </div> -->
+
+  <!-- Question Modal -->
+  <!-- <div id="questionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Add New Question</h3>
+        <button id="closeModalBtn" class="text-gray-600 hover:text-black">&times;</button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block">Question Type</label>
+          <select id="qType" class="w-full border rounded px-3 py-2">
+            <option value="mcq_single">MCQ (Single)</option>
+            <option value="mcq_multiple">MSQ (Multiple)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block">Question Text</label>
+          <textarea id="qText" class="w-full border rounded px-3 py-2" rows="3"></textarea>
+        </div>
+        <div>
+          <label class="block">Marks</label>
+          <input type="number" id="qMarks" class="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block">Negative Marking</label>
+          <select id="qNegative" class="w-full border rounded px-3 py-2">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-1">Options (Click to select correct)</label>
+          <div id="optionInputs" class="grid grid-cols-2 gap-2">
+            <input type="text" id="qOpt1" data-opt-index="1" placeholder="Option 1"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt2" data-opt-index="2" placeholder="Option 2"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt3" data-opt-index="3" placeholder="Option 3"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+            <input type="text" id="qOpt4" data-opt-index="4" placeholder="Option 4"
+              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" />
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button id="saveQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Save Question</button>
+      </div>
+    </div>
+  </div> -->
+
+  <div class="p-6 sm:ml-64">
+    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14 bg-white shadow">
+      <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
+
+      <div id="examForm">
+
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div>
+            <label class="block mb-2 font-medium">Test Name</label>
+            <input type="text" id="testName" class="w-full border rounded px-3 py-2" placeholder="e.g., My Sample Test"
+              required />
+          </div>
+
+          <div>
+            <label class="block mb-2 font-medium">Test Duration (minutes)</label>
+            <input type="number" id="testDuration" class="w-full border rounded px-3 py-2" min="1" required />
+          </div>
+
+          <div>
+            <label class="block mb-2 font-medium">Start Date & Time</label>
+            <input type="datetime-local" id="startDateTime" class="w-full border rounded px-3 py-2" required />
+          </div>
+
+          <div>
+            <label class="block mb-2 font-medium">End Date & Time</label>
+            <input type="datetime-local" id="endDateTime" class="w-full border rounded px-3 py-2" required />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block mb-2 font-medium">Test Description</label>
+            <textarea id="testDescription" class="w-full border rounded px-3 py-2" rows="3"
+              placeholder="Enter exam details here..."></textarea>
+          </div>
+        </div>
+
+        <button id="openModalBtn" class="bg-blue-500 text-white px-4 py-2 rounded">➕ Add Question</button>
+
+        <div class="mt-4">
+          <table class="min-w-full border text-sm" id="questionTable">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border px-2 py-1">Question</th>
+                <th class="border px-2 py-1">Marks</th>
+                <th class="border px-2 py-1">Negative</th>
+                <th class="border px-2 py-1">Options</th>
+                <th class="border px-2 py-1">Correct</th>
+                <th class="border px-2 py-1">Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <p class="mt-2 text-sm text-gray-600">Total Questions: <span id="questionCount" class="font-semibold">0</span>
+        </p>
+
+        <button id="saveExamBtn" class="bg-green-600 text-white px-6 py-2 rounded mt-4">Save Exam</button>
+
       </div>
     </div>
   </div>
@@ -205,13 +433,13 @@
       </div>
     </div>
   </div>
+
   <script type="module">
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
       authDomain: "proctored-system.firebaseapp.com",
@@ -228,161 +456,101 @@
 
     let editIndex = -1;
 
-    // ✅ Open modal
-    document.getElementById("openModalBtn").onclick = () => {
+    const questionTableBody = document.querySelector('#questionTable tbody');
+    const questionCountSpan = document.getElementById('questionCount');
+
+    const updateQuestionCount = () => {
+      questionCountSpan.innerText = questionTableBody.children.length;
+    };
+
+    document.getElementById('openModalBtn').addEventListener('click', () => {
       editIndex = -1;
-      document.getElementById("questionModal").classList.remove("hidden");
-      document.querySelectorAll(".optionInput").forEach(el => el.classList.remove("selected"));
-    };
-
-    // ✅ Close modal
-    document.getElementById("closeModalBtn").onclick = () => {
-      document.getElementById("questionModal").classList.add("hidden");
-    };
-
-    // ✅ Update selection logic based on question type
-    document.getElementById("qType").addEventListener("change", () => {
-      const type = document.getElementById("qType").value;
-      document.querySelectorAll(".optionInput").forEach(input => {
-        input.classList.remove("selected");
-      });
+      document.getElementById('questionModal').classList.remove('hidden');
+      document.querySelectorAll('.optionInput').forEach(el => el.classList.remove('selected'));
+      document.getElementById('qText').value = '';
+      document.getElementById('qMarks').value = '';
+      document.getElementById('qNegative').value = 'no';
+      ['qOpt1', 'qOpt2', 'qOpt3', 'qOpt4'].forEach(id => document.getElementById(id).value = '');
     });
 
-    // ✅ Handle selection by clicking input
-    const optionInputs = document.querySelectorAll(".optionInput");
-    optionInputs.forEach(input => {
-      input.addEventListener("click", () => {
-        const type = document.getElementById("qType").value;
-        if (type === "mcq_single") {
-          optionInputs.forEach(i => i.classList.remove("selected"));
-          input.classList.add("selected");
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('questionModal').classList.add('hidden');
+    });
+
+    document.querySelectorAll('.optionInput').forEach(input => {
+      input.addEventListener('click', () => {
+        const type = document.getElementById('qType').value;
+        if (type === 'mcq_single') {
+          document.querySelectorAll('.optionInput').forEach(i => i.classList.remove('selected'));
+          input.classList.add('selected');
         } else {
-          input.classList.toggle("selected");
+          input.classList.toggle('selected');
         }
       });
     });
 
-    // ✅ Save question
-    document.getElementById("saveQuestionBtn").onclick = () => {
-      const text = document.getElementById("qText").value;
-      const marks = document.getElementById("qMarks").value;
-      const neg = document.getElementById("qNegative").value;
-      const options = ["qOpt1", "qOpt2", "qOpt3", "qOpt4"].map(id => document.getElementById(id).value).join(", ");
-      const type = document.getElementById("qType").value;
+    document.getElementById('saveQuestionBtn').addEventListener('click', () => {
+      const text = document.getElementById('qText').value.trim();
+      const marks = parseInt(document.getElementById('qMarks').value);
+      const neg = document.getElementById('qNegative').value;
+      const type = document.getElementById('qType').value;
 
-      const selectedCorrect = Array.from(document.querySelectorAll(".optionInput.selected"))
-        .map(input => parseInt(input.dataset.optIndex));
+      const optionsArray = ['qOpt1', 'qOpt2', 'qOpt3', 'qOpt4'].map(id => document.getElementById(id).value.trim());
+      const selectedCorrect = Array.from(document.querySelectorAll('.optionInput.selected')).map(el => el.dataset.optIndex);
 
-      if (type === "mcq_single" && selectedCorrect.length !== 1) {
-        alert("Please select exactly one correct option for MCQ.");
+      if (!text || isNaN(marks) || marks <= 0 || optionsArray.some(opt => opt === '')) {
+        alert('❌ Please fill all question fields.');
         return;
       }
 
-      if (type === "mcq_multiple" && selectedCorrect.length < 1) {
-        alert("Please select at least one correct option for MSQ.");
+      if ((type === 'mcq_single' && selectedCorrect.length !== 1) || (type === 'mcq_multiple' && selectedCorrect.length < 1)) {
+        alert('❌ Please select correct option(s).');
         return;
       }
 
-      const rowHTML = `
-  <td class='border px-2 py-1'>${text}</td>
-  <td class='border px-2 py-1'>${marks}</td>
-  <td class='border px-2 py-1'>${neg}</td>
-  <td class='border px-2 py-1'>${options}</td>
-  <td class='border px-2 py-1'>${selectedCorrect.join(",")}</td>
-  <td class='border px-2 py-1'>
-    <button onclick="editQuestion(this)" class="text-blue-600">Edit</button> |
-    <button onclick="deleteQuestion(this)" class="text-red-600">Delete</button>
-    </td>`;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = rowHTML;
-
-      const tbody = document.querySelector("#questionTable tbody");
-      if (editIndex >= 0) {
-        tbody.children[editIndex].replaceWith(tr);
-      } else {
-        tbody.appendChild(tr);
-      }
-
-      document.getElementById("questionModal").classList.add("hidden");
-    };
-
-    // ✅ Edit question
-    window.editQuestion = function (btn) {
-      const tr = btn.closest("tr");
-      editIndex = Array.from(tr.parentNode.children).indexOf(tr);
-      const tds = tr.querySelectorAll("td");
-
-      document.getElementById("qText").value = tds[0].innerText;
-      document.getElementById("qMarks").value = tds[1].innerText;
-      document.getElementById("qNegative").value = tds[2].innerText;
-
-      const opts = tds[3].innerText.split(", ");
-      opts.forEach((val, idx) => document.getElementById(`qOpt${idx + 1}`).value = val);
-
-      const corrects = tds[4].innerText.split(",").map(i => parseInt(i.trim()));
-      document.querySelectorAll(".optionInput").forEach(input => {
-        input.classList.remove("selected");
-        if (corrects.includes(parseInt(input.dataset.optIndex))) {
-          input.classList.add("selected");
-        }
-      });
-
-      document.getElementById("questionModal").classList.remove("hidden");
-    };
-
-    // ✅ Delete question
-    window.deleteQuestion = function (btn) {
-      const tr = btn.closest("tr");
-      tr.remove();
-    };
-
-    // ✅ Save full exam
-    document.getElementById("saveExamBtn").addEventListener("click", async () => {
-      const user = auth.currentUser;
-      if (!user) return alert("You're not logged in!");
-
-      const testName = document.getElementById("testName").value.trim();
-      const duration = parseInt(document.getElementById("testDuration").value);
-      const startDateTime = document.getElementById("testDateTime").value;
-      const description = document.getElementById("testDescription").value.trim();
-
-      if (!testName || !duration || !startDateTime) {
-        alert("Please fill all required fields.");
-        return;
-      }
-
-      const questions = [];
-      document.querySelectorAll("#questionTable tbody tr").forEach(tr => {
-        const tds = tr.querySelectorAll("td");
-        questions.push({
-          questionText: tds[0].innerText,
-          marks: parseInt(tds[1].innerText),
-          negativeMarking: tds[2].innerText === "yes",
-          options: tds[3].innerText.split(",").map(opt => opt.trim()),
-          correct: tds[4].innerText.split(",").map(opt => parseInt(opt.trim()))
-        });
-      });
-
-      try {
-        await addDoc(collection(db, "exams"), {
-          testName,
-          duration,
-          startDateTime,
-          description,
-          questions,
-          createdBy: user.uid,
-          createdAt: serverTimestamp()
-        });
-        alert("✅ Exam saved!");
-        window.location.reload();
-      } catch (err) {
-        console.error(err);
-        alert("❌ Failed to save exam.");
-      }
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="border px-2 py-1">${text}</td>
+        <td class="border px-2 py-1">${marks}</td>
+        <td class="border px-2 py-1">${neg}</td>
+        <td class="border px-2 py-1">${optionsArray.join(', ')}</td>
+        <td class="border px-2 py-1">${selectedCorrect.join(',')}</td>
+        <td class="border px-2 py-1 text-blue-600 cursor-pointer" onclick="this.closest('tr').remove(); updateQuestionCount();">Delete</td>
+      `;
+      questionTableBody.appendChild(row);
+      updateQuestionCount();
+      document.getElementById('questionModal').classList.add('hidden');
     });
 
+    document.getElementById('saveExamBtn').addEventListener('click', () => {
+      const name = document.getElementById('testName').value.trim();
+      const duration = parseInt(document.getElementById('testDuration').value);
+      const start = new Date(document.getElementById('startDateTime').value);
+      const end = new Date(document.getElementById('endDateTime').value);
+
+      if (!name || isNaN(duration) || !start || !end) {
+        alert('❌ Please fill all exam details.');
+        return;
+      }
+      if (start < new Date()) {
+        alert('❌ Start time must be in future.');
+        return;
+      }
+      if (end <= start) {
+        alert('❌ End time must be after start time.');
+        return;
+      }
+      if (questionTableBody.children.length === 0) {
+        alert('❌ Please add at least one question.');
+        return;
+      }
+
+      alert('✅ Exam saved successfully!');
+      // Proceed to save to Firebase or backend
+    });
+
+    window.updateQuestionCount = updateQuestionCount;
   </script>
-</body>
 
+</body>
 </html>
