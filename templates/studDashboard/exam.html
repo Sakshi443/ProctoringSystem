@@ -26,7 +26,6 @@
   history.pushState(null, null, location.href);
   window.addEventListener('popstate', () => history.pushState(null, null, location.href));
 
-  // Fullscreen helper
   function openTestFullscreen() {
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen();
@@ -110,6 +109,73 @@
   const examId = localStorage.getItem('currentExamId');
   if (!examId) location.href = 'studentDashboard.html';
 
+  // Timer
+  let timerInterval;
+  function startTimer(mins) {
+    let rem = mins * 60;
+    const el = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+      if (rem <= 0) {
+        clearInterval(timerInterval);
+        terminateExam('Time expired');
+        return;
+      }
+      const m = Math.floor(rem / 60), s = rem % 60;
+      el.innerText = ${m}:${s.toString().padStart(2, '0')};
+      rem--;
+    }, 1000);
+  }
+
+  // Violation tracking
+  const violationCounts = {};
+  const THRESHOLDS = {
+    TAB_SWITCH: 3,
+    LOOKING_AWAY: 5,
+    VOICE_ACTIVITY: 5,
+    MULTIPLE_FACES: 2
+  };
+
+  function terminateExam(reason) {
+    alert(Exam terminated: ${reason});
+    location.href = 'studentDashboard.html';
+  }
+
+  async function showViolation(type) {
+    violationCounts[type] = (violationCounts[type] || 0) + 1;
+    const box = document.getElementById('violationAlert');
+    box.innerText = ⚠ Violation: ${type};
+    box.style.display = 'block';
+    setTimeout(() => box.style.display = 'none', 3000);
+
+    // capture downscaled snapshot
+    const vid = document.getElementById('webcam');
+    const c = document.createElement('canvas');
+    c.width = vid.videoWidth / 2;
+    c.height = vid.videoHeight / 2;
+    c.getContext('2d').drawImage(vid, 0, 0, c.width, c.height);
+    c.toBlob(async b => {
+      try {
+        const url = await uploadToCloudinary(b);
+        await addDoc(collection(db, exams/${examId}/violations), {
+          studentName, studentEmail, type, imageUrl: url,
+          timestamp: new Date().toISOString()
+        });
+      } catch {}
+    }, 'image/jpeg');
+
+    // check threshold
+    if (violationCounts[type] >= THRESHOLDS[type]) {
+      terminateExam(${type.replace('_', ' ')} limit reached);
+    }
+  }
+
+  // Tab switch detection
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      showViolation('TAB_SWITCH');
+    }
+  });
+
   document.getElementById('agreeRules').addEventListener('change', function() {
     document.getElementById('startBtn').disabled = !this.checked;
   });
@@ -136,7 +202,7 @@
     await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
 
     analyzeFrame();     // face-based violations
-    initMicDetection();// Silero VAD-based voice violations
+    initMicDetection();// voice violations
 
     onAuthStateChanged(auth, async user => {
       if (!user) return location.href = '/index.html';
@@ -168,15 +234,7 @@
     });
   }
 
-  function startTimer(mins) {
-    let rem = mins * 60;
-    const el = document.getElementById('timer');
-    setInterval(() => {
-      if (rem <= 0) return location.href = 'studentDashboard.html';
-      const m = Math.floor(rem/60), s = rem%60;
-      el.innerText = ${m}:${s.toString().padStart(2,'0')}; rem--;
-    }, 1000);
-  }
+  function startTimer(mins) { /* defined above */ }
 
   async function analyzeFrame() {
     const video = document.getElementById('webcam');
@@ -191,7 +249,6 @@
     } else if (det.length > 1) {
       await showViolation('MULTIPLE_FACES');
     } else {
-      // exactly one face, check looking away
       const lm = det[0].landmarks;
       const nose = lm.getNose()[0];
       const l = lm.getLeftEye()[0];
@@ -203,17 +260,11 @@
     setTimeout(analyzeFrame, 2000);
   }
 
-  // 🎤 Silero-based Voice Activity Detection
   async function initMicDetection() {
     try {
       const myvad = await vad.MicVAD.new({
-        onSpeechStart: () => {
-          console.log('🎤 Voice start detected');
-          showViolation('VOICE_ACTIVITY');
-        },
-        onSpeechEnd: () => {
-          console.log('🎤 Voice end detected');
-        }
+        onSpeechStart: () => showViolation('VOICE_ACTIVITY'),
+        onSpeechEnd: () => {}
       });
       myvad.start();
     } catch (err) {
@@ -221,50 +272,25 @@
     }
   }
 
-  async function showViolation(type) {
-    console.log('🚨 Violation:', type);
-    const box = document.getElementById('violationAlert');
-    box.innerText = ⚠ Violation: ${type};
-    box.style.display = 'block';
-    setTimeout(() => box.style.display = 'none', 3000);
-
-    // capture webcam snapshot
-    const vid = document.getElementById('webcam');
-    const c = document.createElement('canvas');
-    c.width = vid.videoWidth; c.height = vid.videoHeight;
-    c.getContext('2d').drawImage(vid, 0, 0);
-    c.toBlob(async b => {
-      try {
-        const url = await uploadToCloudinary(b);
-        await addDoc(collection(db, exams/${examId}/violations), {
-          studentName,
-          studentEmail,
-          type,
-          imageUrl: url,
-          timestamp: new Date().toISOString()
-        });
-      } catch {}
-    }, 'image/jpeg');
-  }
-
   async function submitExam(e) {
     e.preventDefault();
+    clearInterval(timerInterval);
+
     let score = 0, resp = [];
     document.querySelectorAll('input[type=radio]:checked').forEach(ans => {
       const i = +ans.name.slice(1), sel = ans.value;
-      const corr = examData.questions[i].options[examData.questions[i].correct];
-      if (sel === corr) score++;
-      resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
+      const corrOpt = examData.questions[i].options[examData.questions[i].correct];
+      if (sel === corrOpt) score++;
+      resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corrOpt });
     });
+
     await addDoc(collection(db, exams/${examId}/submissions), {
-      studentName,
-      studentEmail,
-      examId,
+      studentName, studentEmail, examId,
       examTitle: examData.testName,
       submittedAt: new Date().toISOString(),
-      totalScore: score,
-      responses: resp
+      totalScore: score, responses: resp
     });
+
     document.getElementById('examContainer').style.display = 'none';
     document.getElementById('confirmationScreen').style.display = 'flex';
     setTimeout(() => location.href = 'studentDashboard.html', 1000);
