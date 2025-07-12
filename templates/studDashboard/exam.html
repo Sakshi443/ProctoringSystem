@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Proctored Exam</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- face-api.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+  <!-- ONNX Runtime & Silero VAD -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.24/dist/bundle.min.js"></script>
   <style>
@@ -44,7 +46,7 @@
       border: 2px solid #4B5563;
       border-radius: .5rem;
       overflow: hidden;
-      background: black;
+      background: #000;
       z-index: 50;
     }
 
@@ -82,21 +84,6 @@
 </head>
 
 <body class="bg-gray-100">
-
-  <script>
-    // Prevent back navigation
-    history.pushState(null, null, location.href);
-    window.addEventListener('popstate', () => history.pushState(null, null, location.href));
-    // Fullscreen helper
-    function openTestFullscreen() {
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if (el.msRequestFullscreen) el.msRequestFullscreen();
-    }
-  </script>
-
-  <!-- Start Overlay -->
   <div id="startOverlay">
     <div id="startBox">
       <h2 class="text-xl font-bold mb-4">Ready to Begin?</h2>
@@ -104,17 +91,12 @@
         <input type="checkbox" id="agreeRules" class="mr-2" />
         <span>I have read and agree to all rules and conditions.</span>
       </label>
-      <!-- make this a button type so it doesn't act like a form submit -->
-      <button id="startBtn" type="button" class="px-6 py-3 bg-blue-600 text-white rounded" disabled>
-        Start Exam
-      </button>
+      <button id="startBtn" type="button" class="px-6 py-3 bg-blue-600 text-white rounded" disabled>Start Exam</button>
     </div>
   </div>
-
   <div id="webcamBox"><video id="webcam" autoplay muted playsinline></video></div>
   <div id="timer">Loading…</div>
   <div id="violationAlert"></div>
-
   <div id="examContainer" class="max-w-4xl mx-auto py-10 px-4" style="display:none;">
     <div class="bg-white p-6 rounded shadow">
       <h1 id="examTitle" class="text-2xl font-bold mb-6 text-center">Loading Exam…</h1>
@@ -122,291 +104,255 @@
         <div id="questionContainer" class="space-y-6"></div>
         <button id="submitBtn" type="submit"
           class="mt-8 px-6 py-3 bg-green-600 text-white rounded text-lg font-semibold hover:bg-green-700">
-          Submit Exam
-        </button>
+          Submit Exam</button>
       </form>
     </div>
   </div>
-
   <div id="confirmationScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50"
     style="display:none;">
     <h2 class="text-3xl font-bold text-green-600 mb-4">✅ Exam Submitted!</h2>
     <p class="text-lg mb-6">Your responses were saved successfully.</p>
-    <button onclick="goToDashboard()"
-      class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">
-      OK
-    </button>
+    <button onclick="location.href='studentDashboard.html'"
+      class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">OK</button>
   </div>
-
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getFirestore, doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
-    console.log('Module script loaded');
+const firebaseConfig = {
+  apiKey: 'AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc',
+  authDomain: 'proctored-system.firebaseapp.com',
+  projectId: 'proctored-system',
+  storageBucket: 'proctored-system.appspot.com',
+  messagingSenderId: '512898908874',
+  appId: '1:512898908874:web:6cad04eb9e0c2a33'
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-    // ─── Firebase setup ─────────────────────────────────────────────────────────
-    const firebaseConfig = {
-      apiKey: 'AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc',
-      authDomain: 'proctored-system.firebaseapp.com',
-      projectId: 'proctored-system',
-      storageBucket: 'proctored-system.appspot.com',
-      messagingSenderId: '512898908874',
-      appId: '1:512898908874:web:6cad04eb9e0c2a33'
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+const CLOUD_NAME = 'dsu1pjwyp';
+const UPLOAD_PRESET = 'procted';
 
-    // ─── Cloudinary helper ─────────────────────────────────────────────────────
-    const CLOUD_NAME = 'dsu1pjwyp';
-    const UPLOAD_PRESET = 'procted';
-    async function uploadToCloudinary(blob) {
-      const form = new FormData();
-      form.append('file', blob);
-      form.append('upload_preset', UPLOAD_PRESET);
-      // *ensure URL is a string*
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        { method: 'POST', body: form }
-      );
-      if (!res.ok) throw new Error('Cloudinary upload failed');
-      return (await res.json()).secure_url;
-    }
+let examTerminated = false;
 
-    // ─── Violation queue system ─────────────────────────────────────────────────
-    const violationQueue = [];
-    let isShowing = false;
-    function showViolationAlert(reason) {
-      violationQueue.push(reason);
-      if (!isShowing) displayNext();
-    }
-    function displayNext() {
-      if (!violationQueue.length) {
-        isShowing = false;
-        return;
-      }
-      isShowing = true;
-      const msg = violationQueue.shift();
-      const box = document.getElementById('violationAlert');
-      box.innerText = `⚠ Violation: ${msg}`;
-      box.style.display = 'block';
-      setTimeout(() => {
-        box.style.display = 'none';
-        displayNext();
-      }, 4000);
-    }
+async function uploadToCloudinary(blob) {
+  const form = new FormData();
+  form.append('file', blob);
+  form.append('upload_preset', UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method: 'POST',
+    body: form
+  });
+  if (!res.ok) throw new Error('Cloudinary upload failed');
+  return (await res.json()).secure_url;
+}
 
-    // ─── Globals ────────────────────────────────────────────────────────────────
-    let studentName, studentEmail, examData;
-    const examId = localStorage.getItem('currentExamId');
-    console.log('Loaded examId:', examId);
-    if (!examId) {
-      console.error('No examId in localStorage, redirecting');
-      location.href = 'studentDashboard.html';
-    }
+let studentName, studentEmail, examData;
+const examId = localStorage.getItem('currentExamId');
+if (!examId) location.href = 'studentDashboard.html';
 
-    // ─── UI bindings ────────────────────────────────────────────────────────────
-    document.getElementById('agreeRules').addEventListener('change', e => {
-      document.getElementById('startBtn').disabled = !e.target.checked;
+document.getElementById('agreeRules').addEventListener('change', e => {
+  document.getElementById('startBtn').disabled = !e.target.checked;
+});
+document.getElementById('startBtn').addEventListener('click', async () => {
+  document.getElementById('startOverlay').style.display = 'none';
+  requestFullscreen();
+  await initExam();
+});
+
+async function initExam() {
+  const video = document.getElementById('webcam');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    await video.play();
+  } catch {
+    alert('Please allow webcam access.');
+    return;
+  }
+
+  const MODEL_URL = './models';
+  await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+  await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
+  analyzeFrame();
+  initMicDetection();
+  checkWebcamLoop();
+
+  onAuthStateChanged(auth, async user => {
+    if (!user) return location.href = '/index.html';
+    studentName = user.displayName || 'Student';
+    studentEmail = user.email;
+    const snap = await getDoc(doc(db, 'exams', examId));
+    if (!snap.exists()) return location.href = 'studentDashboard.html';
+
+    examData = snap.data();
+    document.getElementById('examTitle').innerText = examData.testName;
+    const qc = document.getElementById('questionContainer');
+    examData.questions.forEach((q, i) => {
+      const div = document.createElement('div');
+      div.className = 'bg-gray-50 p-4 rounded';
+      div.innerHTML = `<p class="font-medium mb-2">${i + 1}. ${q.questionText}</p>${q.options
+        .map(opt => `<label class="block mb-1"><input type="radio" name="q${i}" value="${opt}" class="mr-2" /> ${opt}</label>`)
+        .join('')}`;
+      qc.append(div);
     });
-    document.getElementById('startBtn').addEventListener('click', () => {
-      console.log('Start button clicked');
-      document.getElementById('startOverlay').style.display = 'none';
-      openTestFullscreen();
-      initExam().catch(err => console.error('initExam error:', err));
-    });
 
-    // ─── Initialize Exam ────────────────────────────────────────────────────────
-    async function initExam() {
-      console.log('initExam called');
-      // 1) Start webcam
-      const video = document.getElementById('webcam');
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        await video.play();
-      } catch {
-        alert('Please allow webcam access.');
-        return;
-      }
+    document.getElementById('examContainer').style.display = 'block';
+    startTimer(examData.duration || 60);
+    document.getElementById('examForm').addEventListener('submit', submitExam);
+  });
+}
 
-      // 2) Load face-api models
-      const MODEL_URL = './models';
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
-      ]);
+function startTimer(mins) {
+  let rem = mins * 60;
+  const el = document.getElementById('timer');
+  setInterval(() => {
+    if (examTerminated) return;
+    if (rem <= 0) return location.href = 'studentDashboard.html';
+    const m = Math.floor(rem / 60),
+      s = rem % 60;
+    el.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+    rem--;
+  }, 1000);
+}
 
-      analyzeFrame();     // begin face checks
-      initMicDetection(); // begin voice checks
+let lookAwayCounter = 0;
+async function analyzeFrame() {
+  if (examTerminated) return;
+  const video = document.getElementById('webcam');
+  if (video.readyState !== 4) return setTimeout(analyzeFrame, 2000);
 
-      // 3) Firebase auth & load exam data
-      onAuthStateChanged(auth, async user => {
-        if (!user) {
-          console.error('User not logged in, redirecting');
-          return location.href = '/index.html';
+  try {
+    const detections = await faceapi
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks(true);
+
+    if (!detections.length) {
+      lookAwayCounter = 0;
+      await showViolation('LOOKING_AWAY');
+    } else if (detections.length > 1) {
+      lookAwayCounter = 0;
+      await showViolation('MULTIPLE_FACES');
+    } else {
+      const landmarks = detections[0].landmarks;
+      const leftEye = landmarks.getLeftEye();
+      const rightEye = landmarks.getRightEye();
+      const nose = landmarks.getNose();
+
+      const eyeLeftX = (leftEye[0].x + leftEye[3].x) / 2;
+      const eyeRightX = (rightEye[0].x + rightEye[3].x) / 2;
+      const eyesCenterX = (eyeLeftX + eyeRightX) / 2;
+      const noseTipX = nose[3].x;
+      const relativeDeviation = (noseTipX - eyesCenterX) / video.videoWidth;
+
+      if (Math.abs(relativeDeviation) > 0.08) {
+        lookAwayCounter++;
+        if (lookAwayCounter >= 2) {
+          await showViolation('LOOKING_AWAY');
+          lookAwayCounter = 0;
         }
-        studentName = user.displayName || 'Student';
-        studentEmail = user.email;
-        console.log('Authenticated as', studentEmail);
-
-        const snap = await getDoc(doc(db, 'exams', examId));
-        if (!snap.exists()) {
-          console.error('Exam doc not found, redirecting');
-          return location.href = 'studentDashboard.html';
-        }
-        examData = snap.data();
-
-        // render title & questions
-        document.getElementById('examTitle').innerText = examData.testName;
-        const qc = document.getElementById('questionContainer');
-        examData.questions.forEach((q, i) => {
-          const div = document.createElement('div');
-          div.className = 'bg-gray-50 p-4 rounded';
-          div.innerHTML = `
-            <p class="font-medium mb-2">${i + 1}. ${q.questionText}</p>
-            ${q.options.map(opt =>
-            `<label class="block mb-1">
-                 <input type="radio" name="q${i}" value="${opt}" class="mr-2"/> ${opt}
-               </label>`
-          ).join('')}
-          `;
-          qc.append(div);
-        });
-
-        document.getElementById('examContainer').style.display = 'block';
-        startTimer(examData.duration || 60);
-        document.getElementById('examForm').addEventListener('submit', submitExam);
-      });
-    }
-
-    // ─── Timer ───────────────────────────────────────────────────────────────────
-    function startTimer(mins) {
-      let rem = mins * 60;
-      const el = document.getElementById('timer');
-      setInterval(() => {
-        if (rem <= 0) return location.href = 'studentDashboard.html';
-        const m = Math.floor(rem / 60), s = rem % 60;
-        el.innerText = `${m}:${s.toString().padStart(2, '0')}`;
-        rem--;
-      }, 1000);
-    }
-
-    // ─── Face detection loop ────────────────────────────────────────────────────
-    let awayCount = 0;
-    async function analyzeFrame() {
-      const vid = document.getElementById('webcam');
-      if (vid.readyState !== 4) return setTimeout(analyzeFrame, 2000);
-      try {
-        const det = await faceapi
-          .detectAllFaces(vid, new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.5 }))
-          .withFaceLandmarks(true);
-        const count = det.length;
-        if (count === 0) {
-          awayCount = 0;
-          await logAndAlert('NO_FACE', 'No Face Detected');
-        } else if (count > 1) {
-          awayCount = 0;
-          await logAndAlert('MULTIPLE_FACES', 'Multiple Faces Detected');
-        } else {
-          const lm = det[0].landmarks;
-          const nose = lm.getNose()[0];
-          const l = lm.getLeftEye()[0], r = lm.getRightEye()[3];
-          const center = (l.x + r.x) / 2;
-          const dev = Math.abs((nose.x - center) / vid.videoWidth);
-          if (dev > 0.1) {
-            awayCount++;
-            if (awayCount >= 2) {
-              await logAndAlert('LOOKING_AWAY', 'Looking Away');
-              awayCount = 0;
-            }
-          } else awayCount = 0;
-        }
-      } catch (e) {
-        console.error('Face error:', e);
-      }
-      setTimeout(analyzeFrame, 2000);
-    }
-
-    // ─── Voice detection ─────────────────────────────────────────────────────────
-    async function initMicDetection() {
-      try {
-        const myvad = await vad.MicVAD.new({
-          onSpeechStart: () => logAndAlert('VOICE_ACTIVITY', 'Voice Detected'),
-          onSpeechEnd: () => { }
-        });
-        myvad.start();
-      } catch (err) {
-        console.warn('VAD init failed:', err);
+      } else {
+        lookAwayCounter = 0;
       }
     }
+  } catch (error) {
+    console.error('Face detection error:', error);
+  }
 
-    // ─── Log + alert helper ─────────────────────────────────────────────────────
-    async function logAndAlert(type, msg) {
-      showViolationAlert(msg);
-      // capture snapshot
-      const vid = document.getElementById('webcam');
-      const c = document.createElement('canvas');
-      c.width = vid.videoWidth; c.height = vid.videoHeight;
-      c.getContext('2d').drawImage(vid, 0, 0);
-      c.toBlob(async blob => {
-        try {
-          const url = await uploadToCloudinary(blob);
-          await addDoc(collection(db, `exams/${examId}/violations`), {
-            studentName, studentEmail, type, imageUrl: url, timestamp: new Date().toISOString()
-          });
-        } catch { }
-      }, 'image/jpeg');
-    }
+  setTimeout(analyzeFrame, 2000);
+}
 
-    // ─── Submit handler ─────────────────────────────────────────────────────────
-    async function submitExam(e) {
-      e.preventDefault();
-      let score = 0, resp = [];
-      document.querySelectorAll('input[type=radio]:checked').forEach(ans => {
-        const i = +ans.name.slice(1), sel = ans.value;
-        const corr = examData.questions[i].options[examData.questions[i].correct];
-        if (sel === corr) score++;
-        resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
-      });
-      await addDoc(collection(db, `exams/${examId}/submissions`), {
-        studentName, studentEmail, examId, examTitle: examData.testName,
-        submittedAt: new Date().toISOString(), totalScore: score, responses: resp
-      });
-      document.getElementById('examContainer').style.display = 'none';
-      document.getElementById('confirmationScreen').style.display = 'flex';
-      setTimeout(() => location.href = 'studentDashboard.html', 1000);
-    }
-
-    // ─── Helpers & blocks ────────────────────────────────────────────────────────
-    function goToDashboard() { location.href = 'studentDashboard.html'; }
-
-    document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement) {
-        showViolationAlert('Exited Fullscreen');
-        setTimeout(() => {
-          if (confirm('You exited fullscreen. Click OK to re-enter.')) openTestFullscreen();
-        }, 300);
-      }
+async function initMicDetection() {
+  try {
+    const myvad = await vad.MicVAD.new({
+      onSpeechStart: () => showViolation('VOICE_ACTIVITY'),
+      onSpeechEnd: () => {}
     });
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) showViolationAlert('Tab Switch Detected');
-    });
-    window.addEventListener('blur', () => showViolationAlert('Window Lost Focus'));
+    myvad.start();
+  } catch (e) {
+    console.warn('Mic detection failed:', e);
+  }
+}
 
-    ['copy', 'paste', 'cut', 'contextmenu'].forEach(evt => {
-      document.addEventListener(evt, e => {
-        e.preventDefault();
-        showViolationAlert(`Blocked action: ${evt}`);
-      });
-    });
-    document.addEventListener('keydown', e => {
-      if (e.ctrlKey && ['c', 'v', 'x', 'u'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-        showViolationAlert(`Blocked key: Ctrl+${e.key.toUpperCase()}`);
-      }
-    });
+async function submitExam(e) {
+  e.preventDefault();
+  if (examTerminated) return alert('You cannot submit. Exam was terminated.');
+
+  let score = 0;
+  const resp = [];
+  document.querySelectorAll('input[type=radio]:checked').forEach(ans => {
+    const i = +ans.name.slice(1),
+      sel = ans.value;
+    const corr = examData.questions[i].options[examData.questions[i].correct];
+    if (sel === corr) score++;
+    resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
+  });
+
+  await addDoc(collection(db, `exams/${examId}/submissions`), {
+    studentName,
+    studentEmail,
+    examId,
+    examTitle: examData.testName,
+    submittedAt: new Date().toISOString(),
+    totalScore: score,
+    responses: resp
+  });
+
+  document.getElementById('examContainer').style.display = 'none';
+  document.getElementById('confirmationScreen').style.display = 'flex';
+  setTimeout(() => location.href = 'studentDashboard.html', 1000);
+}
+
+function requestFullscreen() {
+  document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
+}
+
+function terminateExam(reason) {
+  if (examTerminated) return;
+  examTerminated = true;
+  alert(`Exam Terminated: ${reason}`);
+
+  const video = document.getElementById('webcam');
+  if (video?.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
+
+  document.body.innerHTML = `
+    <div class="flex items-center justify-center h-screen bg-red-100 text-center">
+      <div>
+        <h1 class="text-3xl font-bold text-red-600 mb-4">Exam Terminated</h1>
+        <p class="text-lg text-gray-700">${reason}</p>
+        <p class="text-sm text-gray-500 mt-4">You are being redirected...</p>
+      </div>
+    </div>`;
+
+  addDoc(collection(db, `exams/${examId}/violations`), {
+    studentName,
+    studentEmail,
+    type: 'TERMINATION',
+    reason,
+    timestamp: new Date().toISOString()
+  }).finally(() => setTimeout(() => location.href = 'studentDashboard.html', 5000));
+}
+
+function checkWebcamLoop() {
+  if (examTerminated) return;
+  const video = document.getElementById('webcam');
+  if (!video.srcObject || !video.srcObject.active) {
+    showViolation('WEBCAM_LOST');
+  } else {
+    if (webcamLostStartTime) showViolation('WEBCAM_RESTORED');
+  }
+  setTimeout(checkWebcamLoop, 2000);
+}
+
+function cancelExam(reason) {
+  terminateExam(reason);
+}
+
   </script>
 </body>
 
