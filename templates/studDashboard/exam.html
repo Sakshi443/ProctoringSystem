@@ -98,7 +98,7 @@
     const form = new FormData();
     form.append('file', blob);
     form.append('upload_preset', UPLOAD_PRESET);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    const res = await fetch(https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload, {
       method: 'POST',
       body: form
     });
@@ -174,7 +174,7 @@
     setInterval(() => {
       if (rem <= 0) return location.href = 'studentDashboard.html';
       const m = Math.floor(rem/60), s = rem%60;
-      el.innerText = `${m}:${s.toString().padStart(2,'0')}`; rem--;
+      el.innerText = ${m}:${s.toString().padStart(2,'0')}; rem--;
     }, 1000);
   }
 
@@ -224,7 +224,7 @@
   async function showViolation(type) {
     console.log('🚨 Violation:', type);
     const box = document.getElementById('violationAlert');
-    box.innerText = `⚠ Violation: ${type}`;
+    box.innerText = ⚠ Violation: ${type};
     box.style.display = 'block';
     setTimeout(() => box.style.display = 'none', 3000);
 
@@ -236,7 +236,7 @@
     c.toBlob(async b => {
       try {
         const url = await uploadToCloudinary(b);
-        await addDoc(collection(db, `exams/${examId}/violations`), {
+        await addDoc(collection(db, exams/${examId}/violations), {
           studentName,
           studentEmail,
           type,
@@ -256,7 +256,7 @@
       if (sel === corr) score++;
       resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
     });
-    await addDoc(collection(db, `exams/${examId}/submissions`), {
+    await addDoc(collection(db, exams/${examId}/submissions), {
       studentName,
       studentEmail,
       examId,
