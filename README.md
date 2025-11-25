@@ -27,7 +27,7 @@ Ensure you have the following installed:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/Sakshi443/proctor.git
+    git clone https://github.com/Sakshi443/ProctoringSystem.git
     cd proctor
     ```
 
@@ -139,5 +139,6 @@ Contributions are welcome! Please follow these steps:
 ---
 
 **License:** ISC
+
 
 
