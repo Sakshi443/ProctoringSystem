@@ -4,281 +4,509 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proctored Exam</title>
+  <title>Proctored Exam Session</title>
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Proctoring Libs -->
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
-  <!-- ONNX Runtime & Silero VAD -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.24/dist/bundle.min.js"></script>
+
   <style>
-    html,
+    /* Prevent selection and right click */
     body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
+      @apply bg-gray-50 select-none;
     }
 
-    #startOverlay {
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Video container floating - Top Right */
+    #webcamContainer {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    #startBox {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 8px;
-      text-align: center;
-      max-width: 400px;
-    }
-
-    #webcamBox {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
+      top: 80px;
+      /* Below header */
+      right: 24px;
       width: 200px;
       height: 150px;
-      border: 2px solid #4B5563;
-      border-radius: .5rem;
+      border-radius: 12px;
       overflow: hidden;
-      background: black;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       z-index: 50;
+      border: 2px solid #3b82f6;
+      background: #000;
     }
 
-    video {
+    #webcam {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transform: scaleX(-1);
+      /* Mirror effect */
     }
 
-    #timer {
-      position: fixed;
-      top: 10px;
-      right: 150px;
-      background: #000;
-      color: #fff;
-      padding: 8px 12px;
-      font-weight: bold;
-      border-radius: 8px;
-      z-index: 9999;
-    }
-
+    /* Violation Toast - Below Webcam */
     #violationAlert {
       position: fixed;
-      top: 6rem;
-      left: 1rem;
-      background: #e53e3e;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 4px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-      display: none;
-      z-index: 100;
+      top: 240px;
+      /* 80px (header) + 150px (webcam) + 10px spacing */
+      right: 24px;
+      transition: all 0.5s ease;
+      z-index: 40;
+      opacity: 0;
+      transform: translateX(20px);
+      width: 200px;
+    }
+
+    .palette-btn {
+      transition: all 0.2s;
     }
   </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="h-screen overflow-hidden flex flex-col" oncontextmenu="return false;">
 
-  <script>
-    // Prevent back navigation
-    history.pushState(null, null, location.href);
-    window.addEventListener('popstate', () => history.pushState(null, null, location.href));
+  <!-- 1. Start / Permission Overlay -->
+  <div id="startOverlay" class="fixed inset-0 bg-gray-900/95 backdrop-blur-sm z-[100] flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl text-center transform transition-all scale-100">
+      <div class="mb-6 bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-blue-600">
+        <i data-lucide="shield-check" class="w-8 h-8"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">Ready to Start?</h1>
+      <p class="text-gray-500 mb-8">
+        Your exam is about to begin. This session is proctored and monitored.
+        Please ensure you are in a quiet room and your face is visible.
+      </p>
 
-    // Fullscreen helper
-    function openTestFullscreen() {
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if (el.msRequestFullscreen) el.msRequestFullscreen();
-    }
-  </script>
+      <div class="space-y-4 mb-8 text-left bg-gray-50 p-4 rounded-xl text-sm border border-gray-100">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="agreeCamera"
+            class="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+          <span class="text-gray-600">I allow camera and microphone access for proctoring.</span>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="agreeFullscreen"
+            class="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+          <span class="text-gray-600">I understand that exiting full-screen mode will be recorded as a violation.</span>
+        </label>
+      </div>
 
-  <!-- Start Overlay -->
-  <div id="startOverlay">
-    <div id="startBox">
-      <h2 class="text-xl font-bold mb-4">Ready to Begin?</h2>
-      <label class="flex items-center mb-4">
-        <input type="checkbox" id="agreeRules" class="mr-2" />
-        <span>I have read and agree to all rules and conditions.</span>
-      </label>
-      <button id="startBtn" class="px-6 py-3 bg-blue-600 text-white rounded" disabled>
-        Start Exam
+      <button id="startBtn" disabled
+        class="w-full py-3.5 px-6 bg-gray-900 hover:bg-black disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2">
+        Begin Assessment
+        <i data-lucide="arrow-right" class="w-5 h-5"></i>
       </button>
     </div>
   </div>
 
-  <div id="webcamBox"><video id="webcam" autoplay muted playsinline></video></div>
-  <div id="timer">Loading…</div>
-  <div id="violationAlert">⚠ Violation Detected</div>
-
-  <div id="examContainer" class="max-w-4xl mx-auto py-10 px-4" style="display:none;">
-    <div class="bg-white p-6 rounded shadow">
-      <h1 id="examTitle" class="text-2xl font-bold mb-6 text-center">Loading Exam…</h1>
-      <form id="examForm" class="space-y-6">
-        <div id="questionContainer" class="space-y-6"></div>
-        <button id="submitBtn" type="submit"
-          class="mt-8 px-6 py-3 bg-green-600 text-white rounded text-lg font-semibold hover:bg-green-700">
-          Submit Exam
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <div id="confirmationScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50"
-    style="display:none;">
-    <h2 class="text-3xl font-bold text-green-600 mb-4">✅ Exam Submitted!</h2>
-    <p class="text-lg mb-6">Your responses were saved successfully.</p>
-    <button onclick="goToDashboard()"
-      class="px-6 py-3 bg-blue-600 text-white rounded text-lg font-semibold hover:bg-blue-700">
-      OK
+  <!-- 2. Full Screen Violation Warning Overlay -->
+  <div id="fullscreenWarning"
+    class="hidden fixed inset-0 bg-red-900/95 z-[90] flex flex-col items-center justify-center text-white text-center p-4">
+    <i data-lucide="alert-octagon" class="w-24 h-24 mb-6 text-red-400"></i>
+    <h2 class="text-4xl font-bold mb-4">Exam Paused!</h2>
+    <p class="text-xl max-w-md mb-8">You have attempted to exit full-screen mode. This action has been logged.</p>
+    <button onclick="openTestFullscreen()"
+      class="px-8 py-3 bg-white text-red-900 font-bold rounded-lg hover:bg-red-50 transition-colors">
+      Return to Exam
     </button>
   </div>
 
+  <!-- 3. Main Exam Interface (Initially Hidden) -->
+  <div id="examInterface" class="hidden flex flex-col h-full bg-gray-50">
+
+    <!-- Top Bar -->
+    <header
+      class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shadow-sm z-40 relative flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="bg-gray-900 text-white p-2 rounded-lg">
+          <i data-lucide="layout-grid" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 id="examTitle" class="font-bold text-gray-900 text-lg leading-tight">Loading Exam...</h2>
+          <span class="text-xs text-green-600 flex items-center gap-1 font-medium">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            Live Proctoring Active
+          </span>
+        </div>
+      </div>
+
+      <!-- Timer -->
+      <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <div
+          class="bg-gray-900 text-white px-5 py-2 rounded-full font-mono text-xl font-bold shadow-md flex items-center gap-2 min-w-[140px] justify-center">
+          <i data-lucide="timer" class="w-4 h-4 text-blue-400"></i>
+          <span id="timer">--:--</span>
+        </div>
+      </div>
+
+      <button onclick="submitExam(event)" id="submitBtnTop"
+        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors text-sm flex items-center gap-2">
+        Submit Exam
+        <i data-lucide="send" class="w-4 h-4"></i>
+      </button>
+    </header>
+
+    <!-- Content Area -->
+    <div class="flex flex-1 overflow-hidden">
+
+      <!-- Left Sidebar: Question Palette -->
+      <aside class="w-72 bg-white border-r border-gray-200 flex flex-col z-30 shadow-sm">
+        <div class="p-5 border-b border-gray-100">
+          <h3 class="font-bold text-gray-700 mb-2">Question Palette</h3>
+          <div class="flex gap-2 text-xs text-gray-500">
+            <div class="flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded-sm"></span> Done</div>
+            <div class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Visited</div>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-5">
+          <div id="questionPalette" class="grid grid-cols-4 gap-3">
+            <!-- Palette Items injected here -->
+          </div>
+        </div>
+
+        <div class="p-4 bg-gray-50 border-t border-gray-200 text-xs text-center text-gray-500">
+          Proctoring System v1.0
+        </div>
+      </aside>
+
+      <!-- Main Question Area -->
+      <main class="flex-1 overflow-y-auto relative p-8 md:p-12">
+        <div class="max-w-3xl mx-auto">
+          <form id="examForm">
+            <div id="questionDisplay"
+              class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 min-h-[400px] relative">
+              <!-- Single Question Injected Here -->
+              <div class="animate-pulse space-y-4">
+                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          </form>
+
+          <!-- Navigation Buttons -->
+          <div class="flex justify-between mt-8">
+            <button onclick="prevQuestion()" id="prevBtn"
+              class="px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+              <i data-lucide="chevron-left" class="w-4 h-4 mr-2"></i> Previous
+            </button>
+            <button onclick="nextQuestion()" id="nextBtn"
+              class="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+              Next <i data-lucide="chevron-right" class="w-4 h-4 ml-2"></i>
+            </button>
+          </div>
+        </div>
+      </main>
+
+    </div>
+
+    <!-- Floating Webcam -->
+    <div id="webcamContainer" class="group transition-all duration-300 hover:scale-105">
+      <video id="webcam" autoplay muted playsinline></video>
+      <div class="absolute top-2 right-2 flex gap-1">
+        <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+        <div class="w-2 h-2 bg-red-500 rounded-full absolute"></div>
+      </div>
+      <div
+        class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-1 text-white text-[10px] text-center font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+        Monitoring
+      </div>
+    </div>
+
+    <!-- Violation Status Toast -->
+    <div id="violationAlert"
+      class="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded shadow-lg flex items-start gap-3 pointer-events-none">
+      <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+      <div>
+        <p class="font-bold text-sm">Violation Detected</p>
+        <p id="violationMsg" class="text-xs">Please focus on the screen.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getFirestore, doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import { app, auth, db } from '/static/js/firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: 'AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc',
-      authDomain: 'proctored-system.firebaseapp.com',
-      projectId: 'proctored-system',
-      storageBucket: 'proctored-system.appspot.com',
-      messagingSenderId: '512898908874',
-      appId: '1:512898908874:web:23584b6cad04eb9e0c2a33'
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    // Cloudinary helper
-    const CLOUD_NAME = 'dsu1pjwyp';
-    const UPLOAD_PRESET = 'procted';
-    async function uploadToCloudinary(blob) {
-      const form = new FormData();
-      form.append('file', blob);
-      form.append('upload_preset', UPLOAD_PRESET);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-        method: 'POST',
-        body: form
-      });
-      if (!res.ok) throw new Error('Cloudinary upload failed');
-      return (await res.json()).secure_url;
-    }
-
+    // State
     let studentName, studentEmail, examData;
     const examId = localStorage.getItem('currentExamId');
-    if (!examId) location.href = 'studentDashboard.html';
 
-    document.getElementById('agreeRules').addEventListener('change', function () {
-      document.getElementById('startBtn').disabled = !this.checked;
-    });
-    document.getElementById('startBtn').addEventListener('click', () => {
-      document.getElementById('startOverlay').style.display = 'none';
-      openTestFullscreen();
-      initExam();
-    });
+    let currentQuestionIndex = 0;
+    let questions = [];
+    let answers = {}; // { qIndex: "Selected Option" }
+    let visited = {}; // { qIndex: true/false }
 
-    async function initExam() {
-      // Start webcam
-      const video = document.getElementById('webcam');
+    // --- 1. Init & Fullscreen Logic ---
+
+    if (!examId) window.location.href = 'studentDashboard.html';
+
+    const startBtn = document.getElementById('startBtn');
+    const agreeCamera = document.getElementById('agreeCamera');
+    const agreeFullscreen = document.getElementById('agreeFullscreen');
+
+    function checkPermissions() {
+      startBtn.disabled = !(agreeCamera.checked && agreeFullscreen.checked);
+    }
+    agreeCamera.addEventListener('change', checkPermissions);
+    agreeFullscreen.addEventListener('change', checkPermissions);
+
+    startBtn.addEventListener('click', async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream; video.play();
-      } catch {
-        alert('Please allow webcam access.');
-        return;
-      }
+        // Request Full Screen
+        await openTestFullscreen();
 
-      // Load face-api models
+        // Hide Overlay
+        document.getElementById('startOverlay').style.display = 'none';
+        document.getElementById('examInterface').classList.remove('hidden');
+
+        // Init Systems
+        await initWebcam();
+        await initProctoring();
+        await loadExamData();
+
+        // Start Proctoring Loops
+        analyzeFrame();
+        initMicDetection();
+
+        // Fullscreen Listener
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+      } catch (err) {
+        console.error(err);
+        alert("Failed to initialize exam environment. Please allow permissions.");
+      }
+    });
+
+    async function openTestFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) await el.msRequestFullscreen();
+    }
+
+    function handleFullscreenChange() {
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFullscreen) {
+        document.getElementById('fullscreenWarning').classList.remove('hidden');
+        logViolation('EXIT_FULLSCREEN');
+      } else {
+        document.getElementById('fullscreenWarning').classList.add('hidden');
+      }
+    }
+
+    window.openTestFullscreen = openTestFullscreen;
+
+    // --- 2. Exam Data & Rendering ---
+
+    async function loadExamData() {
+      onAuthStateChanged(auth, async user => {
+        if (!user) return window.location.href = '../index.html';
+        studentName = user.displayName || 'Student';
+        studentEmail = user.email;
+
+        const snap = await getDoc(doc(db, 'exams', examId));
+        if (!snap.exists()) {
+          alert("Exam not found!");
+          return window.location.href = 'studentDashboard.html';
+        }
+
+        examData = snap.data();
+        questions = examData.questions || [];
+        document.getElementById('examTitle').innerText = examData.testName;
+
+        visited[0] = true; // Visit first question
+        renderQuestion(0);
+        updatePalette();
+        startTimer(examData.duration || 60);
+      });
+    }
+
+    // Render Single Question
+    function renderQuestion(index) {
+      const container = document.getElementById('questionDisplay');
+      const q = questions[index];
+
+      container.innerHTML = `
+                <div class="mb-6">
+                    <span class="inline-block px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-bold mb-4">Question ${index + 1} of ${questions.length}</span>
+                    <h2 class="text-xl md:text-2xl font-medium text-gray-900 leading-normal">${q.questionText}</h2>
+                </div>
+                
+                <div class="space-y-3">
+                    ${q.options.map((opt) => {
+        const isChecked = answers[index] === opt ? 'checked' : '';
+        return `
+                        <label class="flex items-center p-4 border-2 ${isChecked ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-300'} rounded-xl cursor-pointer transition-all group">
+                            <input type="radio" name="q_current" value="${opt}" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500" ${isChecked} onchange="saveAnswer(${index}, '${opt}')">
+                            <span class="ml-4 text-base md:text-lg text-gray-700 font-medium group-hover:text-gray-900">${opt}</span>
+                        </label>
+                        `;
+      }).join('')}
+                </div>
+            `;
+
+      // Update Buttons
+      document.getElementById('prevBtn').disabled = index === 0;
+      document.getElementById('nextBtn').disabled = index === questions.length - 1;
+
+      currentQuestionIndex = index;
+      visited[index] = true;
+      updatePalette();
+    }
+
+    window.saveAnswer = function (index, value) {
+      answers[index] = value;
+      updatePalette();
+      // Re-render to show active state styling immediately if needed, or just let CSS handle it (handled by literal checked attr logic above? No, need to rerender or DOM toggle)
+      // Simplest is to just toggle classes on siblings
+      document.querySelectorAll('input[name="q_current"]').forEach(input => {
+        const label = input.closest('label');
+        if (input.checked) {
+          label.classList.remove('border-gray-200');
+          label.classList.add('border-blue-600', 'bg-blue-50');
+        } else {
+          label.classList.add('border-gray-200');
+          label.classList.remove('border-blue-600', 'bg-blue-50');
+        }
+      });
+    }
+
+    function updatePalette() {
+      const palette = document.getElementById('questionPalette');
+      palette.innerHTML = '';
+
+      questions.forEach((_, i) => {
+        const btn = document.createElement('button');
+        // Colors: Green=Answered, Blue=Visited(No Answer), White=Unvisited
+        let classes = "w-10 h-10 rounded-lg text-sm font-bold flex items-center justify-center border transition-all ";
+
+        if (answers[i]) {
+          classes += "bg-green-500 text-white border-green-600 shadow-sm"; // Attempted
+        } else if (visited[i]) {
+          classes += "bg-blue-500 text-white border-blue-600 shadow-sm"; // Visited
+        } else {
+          classes += "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"; // Default
+        }
+
+        // Highlight current
+        if (i === currentQuestionIndex) {
+          classes += " ring-2 ring-offset-2 ring-gray-900 transform scale-105";
+        }
+
+        btn.className = classes;
+        btn.innerText = i + 1;
+        btn.onclick = () => renderQuestion(i);
+        palette.appendChild(btn);
+      });
+    }
+
+    window.prevQuestion = () => {
+      if (currentQuestionIndex > 0) renderQuestion(currentQuestionIndex - 1);
+    };
+
+    window.nextQuestion = () => {
+      if (currentQuestionIndex < questions.length - 1) renderQuestion(currentQuestionIndex + 1);
+    };
+
+
+    function startTimer(minutes) {
+      let seconds = minutes * 60;
+      const timerEl = document.getElementById('timer');
+
+      const interval = setInterval(() => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        timerEl.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+
+        if (seconds <= 300) { // Last 5 mins
+          timerEl.parentElement.classList.remove('bg-gray-900');
+          timerEl.parentElement.classList.add('bg-red-600', 'animate-pulse');
+        }
+
+        if (seconds <= 0) {
+          clearInterval(interval);
+          submitExam(new Event('submit')); // Auto submit
+        }
+        seconds--;
+      }, 1000);
+    }
+
+    // --- 3. Proctoring Logic (Preserved) ---
+
+    async function initWebcam() {
+      const video = document.getElementById('webcam');
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+    }
+
+    async function initProctoring() {
       const MODEL_URL = './models';
       await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
       await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
-
-      analyzeFrame();     // face-based violations
-      initMicDetection();// Silero VAD-based voice violations
-
-      onAuthStateChanged(auth, async user => {
-        if (!user) return location.href = '/index.html';
-        studentName = user.displayName || 'Student';
-        studentEmail = user.email;
-        const snap = await getDoc(doc(db, 'exams', examId));
-        if (!snap.exists()) return location.href = 'studentDashboard.html';
-        examData = snap.data();
-        document.getElementById('examTitle').innerText = examData.testName;
-
-        const qc = document.getElementById('questionContainer');
-        examData.questions.forEach((q, i) => {
-          const div = document.createElement('div');
-          div.className = 'bg-gray-50 p-4 rounded';
-          div.innerHTML = `
-          <p class="font-medium mb-2">${i + 1}. ${q.questionText}</p>
-          ${q.options.map(opt =>
-            `<label class="block mb-1">
-               <input type="radio" name="q${i}" value="${opt}" class="mr-2"/> ${opt}
-             </label>`
-          ).join('')}
-        `;
-          qc.append(div);
-        });
-
-        document.getElementById('examContainer').style.display = 'block';
-        startTimer(examData.duration || 60);
-        document.getElementById('examForm').addEventListener('submit', submitExam);
-      });
-    }
-
-    function startTimer(mins) {
-      let rem = mins * 60;
-      const el = document.getElementById('timer');
-      setInterval(() => {
-        if (rem <= 0) return location.href = 'studentDashboard.html';
-        const m = Math.floor(rem / 60), s = rem % 60;
-        el.innerText = `${m}:${s.toString().padStart(2, '0')}`; rem--;
-      }, 1000);
     }
 
     async function analyzeFrame() {
       const video = document.getElementById('webcam');
-      if (video.readyState !== 4) return setTimeout(analyzeFrame, 2000);
-
-      const det = await faceapi
-        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks(true);
-
-      if (det.length === 0) {
-        await showViolation('NO_FACE');
-      } else if (det.length > 1) {
-        await showViolation('MULTIPLE_FACES');
-      } else {
-        // exactly one face, check looking away
-        const lm = det[0].landmarks;
-        const nose = lm.getNose()[0];
-        const l = lm.getLeftEye()[0];
-        const r = lm.getRightEye()[3];
-        const away = Math.abs((nose.x - (l.x + r.x) / 2) / video.videoWidth) > 0.1;
-        if (away) await showViolation('LOOKING_AWAY');
+      if (video.paused || video.ended || !faceapi.nets.tinyFaceDetector.params) {
+        setTimeout(analyzeFrame, 1000);
+        return;
       }
+
+      try {
+        const options = new faceapi.TinyFaceDetectorOptions();
+        const detections = await faceapi.detectAllFaces(video, options).withFaceLandmarks();
+
+        if (detections.length === 0) {
+          showViolationToast("No Face Detected", "NO_FACE");
+        } else if (detections.length > 1) {
+          showViolationToast("Multiple People", "MULTIPLE_FACES");
+        } else {
+          const landmarks = detections[0].landmarks;
+          const nose = landmarks.getNose()[0];
+          const leftEye = landmarks.getLeftEye()[0];
+          const rightEye = landmarks.getRightEye()[3];
+          const eyeCenter = (leftEye.x + rightEye.x) / 2;
+          const deviation = Math.abs((nose.x - eyeCenter) / video.videoWidth);
+
+          if (deviation > 0.08) {
+            showViolationToast("Looking Away", "LOOKING_AWAY");
+          }
+        }
+      } catch (err) { }
 
       setTimeout(analyzeFrame, 2000);
     }
 
-    // 🎤 Silero-based Voice Activity Detection
     async function initMicDetection() {
       try {
         const myvad = await vad.MicVAD.new({
           onSpeechStart: () => {
-            console.log('🎤 Voice start detected');
-            showViolation('VOICE_ACTIVITY');
-          },
-          onSpeechEnd: () => {
-            console.log('🎤 Voice end detected');
+            showViolationToast("Voice Detected", "VOICE_ACTIVITY");
           }
         });
         myvad.start();
@@ -287,68 +515,89 @@
       }
     }
 
-    async function showViolation(type) {
-      console.log('🚨 Violation:', type);
-      const box = document.getElementById('violationAlert');
-      box.innerText = `⚠ Violation: ${type}`;
-      box.style.display = 'block';
-      setTimeout(() => box.style.display = 'none', 3000);
+    const CLOUD_NAME = 'dsu1pjwyp';
+    const UPLOAD_PRESET = 'procted';
+    async function uploadToCloudinary(blob) {
+      const form = new FormData();
+      form.append('file', blob);
+      form.append('upload_preset', UPLOAD_PRESET);
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+          method: 'POST', body: form
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        return (await res.json()).secure_url;
+      } catch (e) { return null; }
+    }
 
-      // capture webcam snapshot
-      const vid = document.getElementById('webcam');
-      const c = document.createElement('canvas');
-      c.width = vid.videoWidth; c.height = vid.videoHeight;
-      c.getContext('2d').drawImage(vid, 0, 0);
-      c.toBlob(async b => {
-        try {
-          const url = await uploadToCloudinary(b);
+    async function logViolation(type) {
+      const video = document.getElementById('webcam');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+
+      canvas.toBlob(async blob => {
+        const imageUrl = await uploadToCloudinary(blob);
+        if (imageUrl) {
           await addDoc(collection(db, `exams/${examId}/violations`), {
-            studentName,
-            studentEmail,
-            type,
-            imageUrl: url,
-            timestamp: new Date().toISOString()
+            studentName, studentEmail, type, imageUrl, timestamp: new Date().toISOString()
           });
-        } catch { }
+        }
       }, 'image/jpeg');
     }
 
-    async function submitExam(e) {
+    let violationTimeout;
+    function showViolationToast(message, type) {
+      const alertBox = document.getElementById('violationAlert');
+      document.getElementById('violationMsg').innerText = message;
+
+      alertBox.style.opacity = '1';
+      alertBox.style.transform = 'translateX(0)';
+
+      logViolation(type);
+
+      clearTimeout(violationTimeout);
+      violationTimeout = setTimeout(() => {
+        alertBox.style.opacity = '0';
+        alertBox.style.transform = 'translateX(20px)';
+      }, 3000);
+    }
+
+    // --- 4. Submission ---
+
+    window.submitExam = async function (e) {
       e.preventDefault();
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Submitting...";
+      const btn = document.getElementById('submitBtnTop');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Submitting...`;
+      btn.disabled = true;
 
       try {
-        let score = 0, resp = [];
-        document.querySelectorAll('input[type=radio]:checked').forEach(ans => {
-          const i = +ans.name.slice(1), sel = ans.value;
-          const corr = examData.questions[i].options[examData.questions[i].correct];
-          if (sel === corr) score++;
-          resp.push({ question: examData.questions[i].questionText, selected: sel, correct: corr });
+        let score = 0, responses = [];
+        questions.forEach((q, i) => {
+          const selected = answers[i] || null; // Use stored answers
+          const correct = q.options[q.correct]; // Assuming correct is an index
+          if (selected === correct) score++;
+          responses.push({ question: q.questionText, selected, correct });
         });
 
         await addDoc(collection(db, `exams/${examId}/submissions`), {
-          studentName,
-          studentEmail,
-          examId,
+          studentName, studentEmail, examId,
           examTitle: examData.testName,
           submittedAt: new Date().toISOString(),
-          totalScore: score,
-          responses: resp
+          totalScore: score, responses
         });
 
-        document.getElementById('examContainer').style.display = 'none';
-        document.getElementById('confirmationScreen').style.display = 'flex';
-        setTimeout(() => location.href = 'studentDashboard.html', 2000);
-
+        window.location.href = 'results.html';
       } catch (err) {
-        console.error("❌ Submission failed:", err);
-        alert("Failed to submit the exam. Please check your internet connection or contact admin.");
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Exam";
+        console.error(err);
+        alert("Submission failed. Check connection.");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
       }
-    }
+    };
+
+    lucide.createIcons();
   </script>
 </body>
 

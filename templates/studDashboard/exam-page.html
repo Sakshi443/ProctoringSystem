@@ -2,321 +2,276 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-  <!-- <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" /> -->
-  <title>
-    Proctor - Student Dashboard
-  </title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Exams - Student</title>
 
-  <!--     Fonts and icons     -->
-  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
-  <!-- Nucleo Icons -->
-  <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
-  <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <!-- Material Icons -->
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <!-- CSS Files -->
-  <link id="pagestyle" href="/static/assets/css/material-dashboard.css?v=3.2.0" rel="stylesheet" />
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Flowbite CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
+      /* gray-50 */
+    }
+  </style>
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2"
-    id="sidenav-main">
-    <div class="sidenav-header">
-      <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
-        aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand px-4 py-3 m-0" href="./StudentDashboard.html" target="_blank">
-        <!-- <img src="/static/assets/img/logo-ct-dark.png" class="navbar-brand-img" width="26" height="26" alt="main_logo"> -->
-        <span class="ms-1 text-sm text-dark">Proctor</span>
+<body class="bg-gray-50">
+
+  <!-- Sidebar Toggle (Mobile) -->
+  <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+    type="button"
+    class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+    <span class="sr-only">Open sidebar</span>
+    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+      <path clip-rule="evenodd" fill-rule="evenodd"
+        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+      </path>
+    </svg>
+  </button>
+
+  <!-- Sidebar -->
+  <aside id="default-sidebar"
+    class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+    aria-label="Sidebar">
+    <div class="h-full px-3 py-4 overflow-y-auto bg-white border-r border-gray-200">
+      <a href="#" class="flex items-center ps-2.5 mb-8 mt-2">
+        <div class="bg-gray-900 text-white p-1.5 rounded-lg mr-3">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <span class="self-center text-xl font-bold whitespace-nowrap text-gray-900">Proctor</span>
       </a>
-    </div>
-    <hr class="horizontal dark mt-0 mb-2">
-    <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="studentDashboard.html" onclick="showSection('studentDashboard')">
-            <i class="material-symbols-rounded opacity-5">dashboard</i>
-            <span class="nav-link-text ms-1">Dashboard</span>
+      <ul class="space-y-2 font-medium">
+        <li>
+          <a href="studentDashboard.html"
+            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="layout-dashboard"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Dashboard</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link active bg-gradient-dark text-white" href="./exam-page.html" onclick="showSection('exams')">
-            <i class="material-symbols-rounded opacity-5">table_view</i>
-            <span class="nav-link-text ms-1">My Exams</span>
+        <li>
+          <a href="exam-page.html" class="flex items-center p-2 text-gray-900 rounded-lg bg-gray-100 group">
+            <i data-lucide="file-text"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">My Exams</span>
           </a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link text-dark" href="./startExam.html">
-            <i class="material-symbols-rounded opacity-5">table_view</i>
-            <span class="nav-link-text ms-1">Start Exam</span>
-          </a>
-        </li> -->
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="./results.html" onclick="showSection('results')">
-            <i class="material-symbols-rounded opacity-5">receipt_long</i>
-            <span class="nav-link-text ms-1">Result</span>
+        <li>
+          <a href="results.html" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="award" class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Results</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="./violations.html" onclick="showSection('violations')">
-            <i class="material-symbols-rounded opacity-5">view_in_ar</i>
-            <span class="nav-link-text ms-1">Violations</span>
+        <li>
+          <a href="violations.html" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="alert-triangle"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Violations</span>
+          </a>
+        </li>
+        <li>
+          <a href="profile.html" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="user" class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Profile</span>
           </a>
         </li>
 
-        <li class="nav-item mt-3">
-          <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Account pages
-          </h6>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="./profile.html">
-            <i class="material-symbols-rounded opacity-5">person</i>
-            <span class="nav-link-text ms-1">Profile</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="../index.html" onclick="logout()">
-            <i class="material-symbols-rounded opacity-5">assignment</i>
-            <span class="nav-link-text ms-1">Sign out</span>
+        <li class="pt-4 mt-4 space-y-2 border-t border-gray-200">
+          <a href="#" id="logoutBtn"
+            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group cursor-pointer">
+            <i data-lucide="log-out" class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Sign Out</span>
           </a>
         </li>
       </ul>
     </div>
   </aside>
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-    <!-- Navbar -->
-    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-3 shadow-none border-radius-xl" id="navbarBlur"
-      data-scroll="true">
-      <div class="container-fluid py-1 px-3">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a>
-            </li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">My Exams</li>
-          </ol>
-        </nav>
-        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-          <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-            <div class="input-group input-group-outline">
-              <label class="form-label">Type here...</label>
-              <input type="text" class="form-control">
-            </div>
-          </div>
-          <ul class="navbar-nav d-flex align-items-center  justify-content-end">
-            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                <div class="sidenav-toggler-inner">
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                </div>
+
+  <!-- Main Content -->
+  <div class="p-4 sm:ml-64">
+    <div class="p-4 mt-10 sm:mt-0">
+
+      <!-- Header -->
+      <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+          <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+              <a href="studentDashboard.html"
+                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                <i data-lucide="home" class="w-4 h-4 me-2"></i>
+                Home
               </a>
             </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-    <!-- End Navbar -->
-    <div class="container-fluid py-2">
-      <div class="row">
-        <!-- add the Main Content here dont change sidebar, navbar, toggle, footer-->
-        <!-- <div class="max-w-4xl mx-auto py-10">
-          <div class="bg-white p-6 rounded shadow">
-            <h1 id="examTitle" class="text-2xl font-bold mb-4">Loading...</h1>
-            <div id="questionContainer" class="space-y-6"></div>
-            <button id="submitBtn" class="mt-6 px-4 py-2 bg-green-600 text-white rounded">Submit Exam</button>
-          </div>
-        </div> -->
-        <!-- Replace the main content area inside your existing Material Dashboard layout -->
-        <div class="container-fluid py-2">
-          <div class="row">
-            <div class="col-12">
-              <div class="card my-4">
-                <div class="card-header pb-0">
-                  <h6 class="mb-0">Available Exams</h6>
-                </div>
-                <div class="card-body px-4 pt-0 pb-2">
-                  <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                      <thead>
-                        <tr>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Exam Name</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Starts At</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder">Duration</th>
-                          <th class="text-uppercase text-secondary text-xs font-weight-bolder text-center">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody id="examTableBody">
-                        <!-- Exams will be populated here -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+            <li aria-current="page">
+              <div class="flex items-center">
+                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 mx-1"></i>
+                <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">My Exams</span>
               </div>
-            </div>
+            </li>
+          </ol>
+        </nav>
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">My Exams</h1>
+            <p class="text-gray-500 mt-1">View and start your assigned examinations.</p>
           </div>
+          <!-- Optional: Filter or Search could go here -->
         </div>
       </div>
+
+      <!-- Exams Table Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">Exam Name</th>
+                <th scope="col" class="px-6 py-3">Starts At</th>
+                <th scope="col" class="px-6 py-3">Duration</th>
+                <th scope="col" class="px-6 py-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="examTableBody">
+              <!-- Loading State -->
+              <tr>
+                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                  <div class="flex justify-center items-center">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mr-2"></div>
+                    Loading exams...
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
-  </main>
+  </div>
+
+  <!-- Firebase Logic -->
   <script type="module">
-    // Import Firebase core and required services
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      getDocs,
-      doc,
-      updateDoc,
-      deleteDoc,
-      query,
-      where
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { app, auth, db } from '/static/js/firebase-config.js';
+    import { collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-      authDomain: "proctored-system.firebaseapp.com",
-      projectId: "proctored-system",
-      storageBucket: "proctored-system.firebasestorage.app",
-      messagingSenderId: "512898908874",
-      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
-      measurementId: "G-3SL8C6C8RD"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    
-    const examTableBody = document.getElementById("examTableBody");
     let currentUserEmail = "";
+    const examTableBody = document.getElementById("examTableBody");
 
+    // Auth Check
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        alert("Please login first.");
-        window.location.href = "index.html";
+        window.location.href = "../index.html";
       } else {
         currentUserEmail = user.email;
         loadExams();
       }
     });
 
+    // Load Exams
     async function loadExams() {
-  console.log("Loading exams...");
-  const querySnapshot = await getDocs(collection(db, "exams"));
-
-  for (const docSnap of querySnapshot.docs) {
-    const exam = docSnap.data();
-    const creatorId = exam.createdBy || '';
-
-    let creatorEmail = 'Unknown';
-
-    // Fetch email of exam creator
-    if (creatorId) {
       try {
-        const userRef = doc(db, "users", creatorId);
-        const userSnap = await getDoc(userRef);
+        const querySnapshot = await getDocs(collection(db, "exams"));
+        examTableBody.innerHTML = ""; // Clear loading
 
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          creatorEmail = userData.email || 'Unknown';
+        if (querySnapshot.empty) {
+          examTableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center">No exams found.</td></tr>';
+          return;
+        }
+
+        const exams = [];
+        querySnapshot.forEach(doc => {
+          exams.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Sort by startDateTime descending (Newest first)
+        exams.sort((a, b) => new Date(b.startDateTime) - new Date(a.startDateTime));
+
+        for (const exam of exams) {
+          // Format Date: DD/MM/YYYY & HH:MM AM/PM
+          let startDateTimeFormatted = 'Not Set';
+          if (exam.startDateTime) {
+            const dateObj = new Date(exam.startDateTime);
+            const datePart = dateObj.toLocaleDateString('en-GB'); // DD/MM/YYYY
+            const timePart = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            startDateTimeFormatted = `${datePart} & ${timePart}`;
+          }
+
+          // Create Row
+          const row = document.createElement("tr");
+          row.className = "bg-white border-b hover:bg-gray-50";
+          row.innerHTML = `
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            ${exam.testName || 'Untitled Exam'}
+                        </th>
+                        <td class="px-6 py-4">
+                            ${startDateTimeFormatted}
+                        </td>
+                        <td class="px-6 py-4">
+                            ${exam.duration || 'N/A'} mins
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="selectExam('${exam.id}')" 
+                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-colors">
+                                Start Exam
+                            </button>
+                        </td>
+                    `;
+          examTableBody.appendChild(row);
         }
       } catch (error) {
-        console.error("Error fetching creator email:", error);
+        console.error("Error loading exams:", error);
+        examTableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error loading data.</td></tr>';
       }
     }
 
-    // Format the start date and time
-    let startDateTimeFormatted = 'Not Set';
-    if (exam.startDateTime) {
-      const dateObj = new Date(exam.startDateTime);
-      const datePart = dateObj.toLocaleDateString();     // e.g., 7/11/2025
-      const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });  // e.g., 02:30 PM
-      startDateTimeFormatted = `${datePart} ${timePart}`;
-    }
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td><p class="text-sm mb-0">${exam.testName || 'Untitled Exam'}</p></td>
-      <td><p class="text-sm mb-0">${startDateTimeFormatted}</p></td>
-      <td><p class="text-sm mb-0">${exam.duration || 'N/A'} mins</p></td>
-      <td class="align-middle text-center">
-        <button class="btn bg-gradient-primary btn-sm" onclick="selectExam('${docSnap.id}')">Select</button>
-      </td>
-    `;
-    examTableBody.appendChild(row);
-  }
-}
-
-
+    // Select Exam (Global Function)
     window.selectExam = async function (examId) {
-      // Check if user has already submitted this exam
-      const submissionsRef = collection(db, `exams/${examId}/submissions`);
-      const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
-      const snapshot = await getDocs(q);
+      try {
+        const submissionsRef = collection(db, `exams/${examId}/submissions`);
+        const q = query(submissionsRef, where("studentEmail", "==", currentUserEmail));
+        const snapshot = await getDocs(q);
 
-      if (!snapshot.empty) {
-        alert("❌ You have already given this exam.");
-      } else {
-        localStorage.setItem("currentExamId", examId);
-        window.location.href = "startExam.html";
+        if (!snapshot.empty) {
+          alert("❌ You have already submitted this exam.");
+        } else {
+          localStorage.setItem("currentExamId", examId);
+          window.location.href = "startExam.html"; // Ensure this page exists or is updated
+        }
+      } catch (error) {
+        console.error("Error selecting exam:", error);
+        alert("Error checking submission status.");
       }
     }
-  </script>
 
-
-
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-  </script>
-
-  <!--   Core JS Files   -->
-  <script src="/static/assets/js/core/popper.min.js"></script>
-  <script src="/static/assets/js/core/bootstrap.min.js"></script>
-  <script src="/static/assets/js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="/static/assets/js/plugins/smooth-scrollbar.min.js"></script>
-  <script src="/static/assets/js/plugins/chartjs.min.js"></script>
-  <script>
-
-  </script>
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-
-    function logout() {
-      signOut().then(() => {
-        // Redirect to login page
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
         window.location.href = "../index.html";
       }).catch((error) => {
-        console.error("Logout failed:", error);
-        alert("Logout failed!");
+        alert("Error signing out.");
       });
-    }
+    });
+
+    lucide.createIcons();
   </script>
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="/static/assets/js/material-dashboard.min.js?v=3.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 
 </html>

@@ -3,259 +3,431 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Dashboard | Approval Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Proctoring System</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Flowbite CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f3f4f6;
-      margin: 0;
-      padding: 2rem;
-    }
-
-    h1 {
-      color: #111827;
-    }
-
-    button {
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      padding: 0.4rem 0.8rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-
-    button:hover {
-      background-color: #2563eb;
-    }
-
-    button:disabled {
-      background-color: #94a3b8;
-      cursor: not-allowed;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      margin-top: 1rem;
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    th,
-    td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    th {
+      font-family: 'Inter', sans-serif;
       background-color: #f9fafb;
-      color: #374151;
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-    }
-
-    .section {
-      margin-top: 3rem;
-    }
-
-    .flex {
-      display: flex;
-      gap: 2rem;
-    }
-
-    .half {
-      flex: 1;
-    }
-
-    .section h2 {
-      margin-bottom: 0.5rem;
-      color: #111827;
-      font-size: 1.2rem;
-    }
-
-    .logout-btn {
-      float: right;
-      background-color: #ef4444;
-    }
-
-    .logout-btn:hover {
-      background-color: #dc2626;
     }
   </style>
 </head>
 
-<body>
-  <h1>👤 Pending Teacher Approvals
-    <button onclick="signOut()" class="logout-btn">Logout</button>
-  </h1>
+<body class="bg-gray-50">
 
-  <table id="pendings">
-    <thead>
-      <tr>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <!-- Sidebar Toggle (Mobile) -->
+  <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+    type="button"
+    class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+    <span class="sr-only">Open sidebar</span>
+    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+      <path clip-rule="evenodd" fill-rule="evenodd"
+        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+      </path>
+    </svg>
+  </button>
 
-  <div class="section flex">
-    <div class="half">
-      <h2>✅ Approved Proctors</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Registered On</th>
-          </tr>
-        </thead>
-        <tbody id="approvedProctors"></tbody>
-      </table>
+  <!-- Sidebar -->
+  <aside id="default-sidebar"
+    class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+    aria-label="Sidebar">
+    <div class="h-full px-3 py-4 overflow-y-auto bg-white border-r border-gray-200">
+      <a href="admin.html" class="flex items-center ps-2.5 mb-8 mt-2">
+        <div class="bg-gray-900 text-white p-1.5 rounded-lg mr-3">
+          <i data-lucide="shield-alert" class="w-6 h-6"></i>
+        </div>
+        <span class="self-center text-xl font-bold whitespace-nowrap text-gray-900">Admin Panel</span>
+      </a>
+      <ul class="space-y-2 font-medium">
+        <li>
+          <a href="admin.html" class="flex items-center p-2 text-white bg-blue-600 rounded-lg group">
+            <i data-lucide="layout-dashboard" class="w-5 h-5 text-white"></i>
+            <span class="ms-3">Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="manage-users.html" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="users" class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Manage Users</span>
+          </a>
+        </li>
+        <li>
+          <a href="manage-exams.html" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="file-text"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Manage Exams</span>
+          </a>
+        </li>
+        <li>
+          <a href="admin-feedback.html" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="message-square"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Feedbacks</span>
+          </a>
+        </li>
+
+        <li class="pt-4 mt-4 space-y-2 border-t border-gray-200">
+          <a href="#" id="logoutBtn"
+            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group cursor-pointer">
+            <i data-lucide="log-out" class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Sign Out</span>
+          </a>
+        </li>
+      </ul>
     </div>
-    <div class="half">
-      <h2>🎓 Approved Students</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Registered On</th>
-          </tr>
-        </thead>
-        <tbody id="approvedStudents"></tbody>
-      </table>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="p-4 sm:ml-64">
+    <div class="p-4 mt-10 sm:mt-0">
+
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">System Overview</h1>
+        <p class="text-gray-500 mt-1">Welcome back, Admin.</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Pending Requests -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-gray-500">Pending Requests</h3>
+            <div class="p-2 bg-yellow-50 text-yellow-600 rounded-lg">
+              <i data-lucide="user-plus" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold text-gray-900" id="totalPending">0</p>
+        </div>
+
+        <!-- Professors -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-gray-500">Professors</h3>
+            <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+              <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold text-gray-900" id="totalProfessors">0</p>
+        </div>
+
+        <!-- Students -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-gray-500">Students</h3>
+            <div class="p-2 bg-green-50 text-green-600 rounded-lg">
+              <i data-lucide="book-open" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold text-gray-900" id="totalStudents">0</p>
+        </div>
+
+        <!-- Exams -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-gray-500">Total Exams</h3>
+            <div class="p-2 bg-orange-50 text-orange-600 rounded-lg">
+              <i data-lucide="file-check" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold text-gray-900" id="totalExams">0</p>
+        </div>
+      </div>
+
+      <!-- Pending Approvals Table -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h3 class="text-lg font-bold text-gray-900">Pending Teacher Approvals</h3>
+        </div>
+        <div class="relative overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">Applicant</th>
+                <th scope="col" class="px-6 py-3">Email</th>
+                <th scope="col" class="px-6 py-3">Requested On</th>
+                <th scope="col" class="px-6 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTableBody">
+              <tr>
+                <td colspan="4" class="px-6 py-4 text-center">Loading pending requests...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Latest Approved Lists -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Latest Professors -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-6 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900 text-purple-700">Latest Approved Professors</h3>
+          </div>
+          <div class="relative overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3">Username</th>
+                  <th scope="col" class="px-6 py-3">Email</th>
+                </tr>
+              </thead>
+              <tbody id="latestProfessorsBody">
+                <tr>
+                  <td colspan="2" class="px-6 py-4 text-center">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Latest Students -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-6 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900 text-green-700">Latest Approved Students</h3>
+          </div>
+          <div class="relative overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3">Username</th>
+                  <th scope="col" class="px-6 py-3">Email</th>
+                </tr>
+              </thead>
+              <tbody id="latestStudentsBody">
+                <tr>
+                  <td colspan="2" class="px-6 py-4 text-center">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
+  <!-- Firebase Logic -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut as fbSignOut
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      getDocs,
-      updateDoc,
-      deleteDoc,
-      doc
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { app, auth, db } from '/static/js/firebase-config.js';
+    import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { collection, getDocs, query, where, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-      authDomain: "proctored-system.firebaseapp.com",
-      projectId: "proctored-system",
-      storageBucket: "proctored-system.appspot.com",
-      messagingSenderId: "512898908874",
-      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
-      measurementId: "G-3SL8C6C8RD",
-    };
+    // Elements
+    const totalPendingEl = document.getElementById('totalPending');
+    const totalProfessorsEl = document.getElementById('totalProfessors');
+    const totalStudentsEl = document.getElementById('totalStudents');
+    const totalExamsEl = document.getElementById('totalExams');
+    const pendingTableBody = document.getElementById('pendingTableBody');
+    const latestProfessorsBody = document.getElementById('latestProfessorsBody');
+    const latestStudentsBody = document.getElementById('latestStudentsBody');
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    onAuthStateChanged(auth, user => {
-      if (!user || user.email !== "mmanoorkar9@gmail.com") {
-        location.href = "index.html";
-      } else {
-        loadPending();
-        loadApprovedUsers();
+    // Auth Check
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
       }
+      fetchData();
     });
 
-    async function loadPending() {
-      const tbody = document.querySelector('#pendings tbody');
-      tbody.innerHTML = '';
-      const q = query(
-        collection(db, "users"),
-        where("role", "==", "teacher"),
-        where("approved", "==", false)
-      );
-      const snap = await getDocs(q);
-      snap.forEach(docSnap => {
-        const { username, email } = docSnap.data();
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${username}</td>
-          <td>${email}</td>
-          <td>
-            <button class="approve" data-id="${docSnap.id}">Approve</button>
-            <button class="reject" data-id="${docSnap.id}">Reject</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+    // Fetch Data
+    async function fetchData() {
+      try {
+        // Fetch All Users to count stats
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        let profCount = 0;
+        let studCount = 0;
+        let pendingUsers = [];
+        let approvedProfs = [];
+        let approvedStuds = [];
 
-      tbody.addEventListener('click', async e => {
-        const btn = e.target;
-        const uid = btn.dataset.id;
-        if (!uid) return;
+        usersSnapshot.forEach(doc => {
+          const data = doc.data();
+          const role = data.role || "";
+          const userData = { id: doc.id, ...data };
 
-        if (btn.classList.contains('approve')) {
-          await updateDoc(doc(db, "users", uid), { approved: true });
-          btn.textContent = "Approved";
-          btn.disabled = true;
-          btn.nextElementSibling.disabled = true;
-        }
-
-        if (btn.classList.contains('reject')) {
-          const confirmed = confirm("Are you sure you want to reject this user?");
-          if (confirmed) {
-            await deleteDoc(doc(db, "users", uid));
-            btn.closest("tr").remove();
+          if (role === 'teacher') {
+            if (data.approved === true) {
+              profCount++;
+              approvedProfs.push(userData);
+            } else if (data.approved === false || data.approved === undefined) {
+              pendingUsers.push(userData);
+            }
+          } else if (role === 'student') {
+            studCount++;
+            approvedStuds.push(userData);
           }
-        }
+        });
+
+        // Fetch Exams
+        const examsSnapshot = await getDocs(collection(db, "exams"));
+        const examCount = examsSnapshot.size;
+
+        // Update Stats
+        totalPendingEl.textContent = pendingUsers.length;
+        totalProfessorsEl.textContent = profCount;
+        totalStudentsEl.textContent = studCount;
+        totalExamsEl.textContent = examCount;
+
+        // Render Pending Table
+        renderPendingTable(pendingUsers);
+
+        // Render Latest Tables
+        renderLatestList(approvedProfs, latestProfessorsBody, 'purple');
+        renderLatestList(approvedStuds, latestStudentsBody, 'green');
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        alert("Error loading dashboard data.");
+      }
+    }
+
+    // Render Pending Table
+    function renderPendingTable(users) {
+      pendingTableBody.innerHTML = "";
+      if (users.length === 0) {
+        pendingTableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center">No pending approvals.</td></tr>`;
+        return;
+      }
+
+      users.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.className = "bg-white border-b hover:bg-gray-50";
+
+        const initials = (user.name || user.username || "?").charAt(0).toUpperCase();
+        const dateStr = user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString() : "N/A";
+
+        tr.innerHTML = `
+                    <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap">
+                         <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 font-bold mr-3">
+                            ${initials}
+                        </div>
+                        <div class="ps-3">
+                            <div class="text-base font-semibold">${user.name || user.username || "Unknown"}</div>
+                            <div class="font-normal text-gray-500 text-xs">Role: Teacher</div>
+                        </div>
+                    </th>
+                    <td class="px-6 py-4">
+                        ${user.email || "No Email"}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${dateStr}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                         <button onclick="window.approveUser('${user.id}')" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 mb-1">Approve</button>
+                         <button onclick="window.rejectUser('${user.id}')" class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 mb-1">Reject</button>
+                    </td>
+                `;
+        pendingTableBody.appendChild(tr);
       });
     }
 
-    async function loadApprovedUsers() {
-      const proctorsTbody = document.getElementById("approvedProctors");
-      const studentsTbody = document.getElementById("approvedStudents");
+    // Render Latest List Helper
+    function renderLatestList(users, tableBody, color) {
+      tableBody.innerHTML = "";
 
-      const [proctorsSnap, studentsSnap] = await Promise.all([
-        getDocs(query(collection(db, "users"), where("role", "==", "teacher"), where("approved", "==", true))),
-        getDocs(query(collection(db, "users"), where("role", "==", "student"), where("approved", "==", true)))
-      ]);
-
-      proctorsSnap.forEach(docSnap => {
-        const { username, email, createdAt } = docSnap.data();
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${username}</td>
-          <td>${email}</td>
-          <td>${createdAt ? createdAt.toDate().toLocaleString() : '-'}</td>
-        `;
-        proctorsTbody.appendChild(tr);
+      // Sort by createdAt desc if available, else standard order
+      users.sort((a, b) => {
+        const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+        const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+        return dateB - dateA;
       });
 
-      studentsSnap.forEach(docSnap => {
-        const { username, email, createdAt } = docSnap.data();
+      const topUsers = users.slice(0, 5); // Take top 5
+
+      if (topUsers.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="2" class="px-6 py-4 text-center">No users found.</td></tr>`;
+        return;
+      }
+
+      topUsers.forEach(user => {
         const tr = document.createElement('tr');
+        tr.className = "bg-white border-b hover:bg-gray-50";
+        const initials = (user.name || user.username || "?").charAt(0).toUpperCase();
+
+        // Dynamic Colors
+        const bgClass = color === 'purple' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600';
+
         tr.innerHTML = `
-          <td>${username}</td>
-          <td>${email}</td>
-          <td>${createdAt ? createdAt.toDate().toLocaleString() : '-'}</td>
-        `;
-        studentsTbody.appendChild(tr);
+                    <th scope="row" class="flex items-center px-6 py-3 text-gray-900 whitespace-nowrap">
+                         <div class="w-8 h-8 rounded-full ${bgClass} flex items-center justify-center font-bold mr-3 text-xs">
+                            ${initials}
+                        </div>
+                        <span class="font-medium">${user.username || user.name || "Unknown"}</span>
+                    </th>
+                    <td class="px-6 py-3 text-gray-500">
+                        ${user.email || "No Email"}
+                    </td>
+                `;
+        tableBody.appendChild(tr);
       });
     }
 
-    // 🚪 Sign out
-    window.signOut = () => fbSignOut(auth).then(() => location.href = "index.html");
+    // Action: Approve
+    window.approveUser = async (userId) => {
+      if (!confirm("Approve this professor request?")) return;
+      try {
+        await updateDoc(doc(db, "users", userId), { approved: true });
+        alert("✅ User approved!");
+        fetchData();
+      } catch (e) {
+        console.error("Error approving:", e);
+        alert("Failed to approve.");
+      }
+    };
+
+    // Action: Reject
+    window.rejectUser = async (userId) => {
+      if (!confirm("Reject and delete this request?")) return;
+      try {
+        await deleteDoc(doc(db, "users", userId));
+        alert("❌ Request rejected and deleted.");
+        fetchData();
+      } catch (e) {
+        console.error("Error rejecting:", e);
+        alert("Failed to reject.");
+      }
+    };
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      }).catch((error) => {
+        alert("Error signing out.");
+      });
+    });
+
+    // Mobile Toggle Helper
+    const sidebarToggle = document.querySelector('[data-drawer-toggle="default-sidebar"]');
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => {
+        const sidebar = document.getElementById('default-sidebar');
+        sidebar.classList.toggle('-translate-x-full');
+      });
+    }
+
+    lucide.createIcons();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 
 </html>

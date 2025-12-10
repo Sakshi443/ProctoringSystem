@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Exams - Professor</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Flowbite CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+
+    <!-- Sidebar Toggle (Mobile) -->
+    <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+        type="button"
+        class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+        <span class="sr-only">Open sidebar</span>
+        <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg">
+            <path clip-rule="evenodd" fill-rule="evenodd"
+                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+            </path>
+        </svg>
+    </button>
+
+    <!-- Sidebar -->
+    <aside id="default-sidebar"
+        class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+        aria-label="Sidebar">
+        <div class="h-full px-3 py-4 overflow-y-auto bg-white border-r border-gray-200">
+            <a href="#" class="flex items-center ps-2.5 mb-8 mt-2">
+                <div class="bg-gray-900 text-white p-1.5 rounded-lg mr-3">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <span class="self-center text-xl font-bold whitespace-nowrap text-gray-900">Proctor</span>
+            </a>
+            <ul class="space-y-2 font-medium">
+                <li>
+                    <a href="professorDashboard.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="layout-dashboard"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage-exams.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg bg-gray-100 group">
+                        <i data-lucide="file-text"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">My Exams</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="make-exam.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="plus-circle"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Create Exam</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin-panel.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="settings"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Admin Panel</span>
+                    </a>
+                </li>
+
+                <li class="pt-4 mt-4 space-y-2 border-t border-gray-200">
+                    <a href="profile.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="user"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Profile</span>
+                    </a>
+                    <a href="#" id="logoutBtn"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group cursor-pointer">
+                        <i data-lucide="log-out"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Sign Out</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="p-4 sm:ml-64">
+        <div class="p-4 mt-10 sm:mt-0">
+
+            <!-- Header -->
+            <div class="mb-8">
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="professorDashboard.html"
+                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <i data-lucide="home" class="w-4 h-4 me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 mx-1"></i>
+                                <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">My Exams</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">My Exams</h1>
+                        <p class="text-gray-500 mt-1">View and manage all your created assessments.</p>
+                    </div>
+                    <a href="make-exam.html"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 flex items-center">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                        Create New Exam
+                    </a>
+                </div>
+            </div>
+
+            <!-- Exam List -->
+            <div class="space-y-4" id="examList">
+                <!-- Loading State -->
+                <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100 text-center animate-pulse">
+                    <p class="text-gray-400">Loading your exams...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Assign Student Modal -->
+    <div id="studentModal" tabindex="-1" aria-hidden="true"
+        class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="relative w-full max-w-2xl max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow">
+                <!-- Modal header -->
+                <div class="flex items-start justify-between p-4 border-b rounded-t">
+                    <h3 class="text-xl font-semibold text-gray-900">
+                        Assign Students to Exam
+                    </h3>
+                    <button type="button" id="closeModalBtn"
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-6 space-y-6">
+                    <div class="mb-4">
+                        <label
+                            class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                            <input type="checkbox" id="selectAllStudents"
+                                class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            <span class="text-gray-900 font-medium">Select All Students</span>
+                        </label>
+                    </div>
+                    <div id="studentCheckboxes" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto">
+                        <!-- Student checkboxes will go here -->
+                    </div>
+                </div>
+                <!-- Modal footer -->
+                <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b">
+                    <button id="confirmAssignBtn" type="button"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        Assign Selected
+                    </button>
+                    <button id="cancelModalBtn" type="button"
+                        class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { app, auth, db } from '/static/js/firebase-config.js';
+        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { doc, getDoc, collection, getDocs, query, where, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        let selectedExamId = null;
+
+        // Modal Elements
+        const studentModal = document.getElementById('studentModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const confirmAssignBtn = document.getElementById('confirmAssignBtn');
+
+        function toggleModal(show) {
+            if (show) {
+                studentModal.classList.remove('hidden');
+                studentModal.classList.add('flex');
+            } else {
+                studentModal.classList.add('hidden');
+                studentModal.classList.remove('flex');
+            }
+        }
+
+        [closeModalBtn, cancelModalBtn].forEach(btn => btn.addEventListener('click', () => toggleModal(false)));
+
+        // Date Formatter
+        function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return "N/A";
+            const date = new Date(dateTimeStr);
+            const datePart = date.toLocaleDateString('en-GB');
+            const timePart = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            return `${datePart} & ${timePart}`;
+        }
+
+        // Auth Check
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "../../index.html";
+            } else {
+                loadMyExams(user);
+            }
+        });
+
+        function loadMyExams(user) {
+            const examList = document.getElementById("examList");
+            const examsRef = query(collection(db, "exams"), where("createdBy", "==", user.uid));
+
+            onSnapshot(examsRef, (snapshot) => {
+                examList.innerHTML = "";
+                if (snapshot.empty) {
+                    examList.innerHTML = `
+                        <div class="p-12 bg-white rounded-xl shadow-sm border border-gray-100 text-center">
+                             <div class="mb-4 bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
+                                <i data-lucide="file-text" class="w-8 h-8 text-gray-400"></i>
+                             </div>
+                             <h3 class="text-lg font-semibold text-gray-900">No Exams Found</h3>
+                             <p class="text-gray-500 mt-2">You haven't created any exams yet.</p>
+                             <a href="make-exam.html" class="mt-4 inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+                                Create Your First Exam <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                             </a>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Sort by Created At (descending) assuming 'createdAt' exists or fallback to startDateTime
+                const exams = [];
+                snapshot.forEach(doc => exams.push({ id: doc.id, ...doc.data() }));
+
+                // Client-side sort if needed
+                exams.sort((a, b) => {
+                    const dateA = a.createdAt ? a.createdAt.seconds : (a.startDateTime ? new Date(a.startDateTime).getTime() / 1000 : 0);
+                    const dateB = b.createdAt ? b.createdAt.seconds : (b.startDateTime ? new Date(b.startDateTime).getTime() / 1000 : 0);
+                    return dateB - dateA;
+                });
+
+                exams.forEach(data => {
+                    const assignedCount = data.assignedTo ? data.assignedTo.length : 0;
+                    const start = formatDateTime(data.start || data.startDateTime);
+                    const totalQuestions = data.totalQuestions ?? (Array.isArray(data.questions) ? data.questions.length : 0);
+                    const duration = data.duration ?? data.testDuration ?? 0;
+
+                    const card = document.createElement("div");
+                    card.className = "bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition hover:shadow-md";
+
+                    card.innerHTML = `
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                     <h2 class="text-xl font-bold text-gray-900">${data.name || data.testName || "Untitled Exam"}</h2>
+                                     <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded border border-blue-400">
+                                        ${assignedCount} Assigned
+                                     </span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-y-1 gap-x-8 text-sm text-gray-600 mt-3">
+                                    <div class="flex items-center gap-2">
+                                         <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                                         <span>Start: <span class="font-medium text-gray-900">${start}</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                         <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
+                                         <span>Duration: <span class="font-medium text-gray-900">${duration} min</span></span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                         <i data-lucide="help-circle" class="w-4 h-4 text-gray-400"></i>
+                                         <span>Questions: <span class="font-medium text-gray-900">${totalQuestions}</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 mt-4 md:mt-0">
+                                <button onclick="window.loadStudents('${data.id}')" class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none transition">
+                                    <i data-lucide="users" class="w-4 h-4 mr-2"></i>
+                                    Assign
+                                </button>
+                                <!-- Future: Add Edit/Delete here -->
+                            </div>
+                        </div>
+                    `;
+                    examList.appendChild(card);
+                });
+                lucide.createIcons();
+            });
+        }
+
+        // Load Students (Same as dashboard)
+        window.loadStudents = async (examId) => {
+            selectedExamId = examId;
+            const checkboxes = document.getElementById("studentCheckboxes");
+            checkboxes.innerHTML = '<div class="col-span-2 text-center text-gray-500">Loading students...</div>';
+            toggleModal(true);
+
+            try {
+                const usersSnap = await getDocs(query(collection(db, "users"), where("role", "==", "student")));
+                checkboxes.innerHTML = "";
+
+                if (usersSnap.empty) {
+                    checkboxes.innerHTML = '<div class="col-span-2 text-center text-gray-500">No students found.</div>';
+                    return;
+                }
+
+                usersSnap.forEach(userDoc => {
+                    const data = userDoc.data();
+                    const div = document.createElement("div");
+                    div.innerHTML = `
+                        <label class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                            <input type="checkbox" value="${userDoc.id}" class="student-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">${data.username || data.name || "Unknown"}</p>
+                                <p class="text-xs text-gray-500">${data.email || "No Email"}</p>
+                            </div>
+                        </label>
+                    `;
+                    checkboxes.appendChild(div);
+                });
+
+                // Re-attach select all
+                const selectAll = document.getElementById("selectAllStudents");
+                selectAll.checked = false;
+                const newSelectAll = selectAll.cloneNode(true);
+                selectAll.parentNode.replaceChild(newSelectAll, selectAll);
+                newSelectAll.addEventListener('change', (e) => {
+                    document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = e.target.checked);
+                });
+
+            } catch (error) {
+                console.error("Error loading students:", error);
+                checkboxes.innerHTML = '<div class="col-span-2 text-center text-red-500">Error loading students.</div>';
+            }
+        };
+
+        // Confirm Assign
+        confirmAssignBtn.addEventListener("click", async () => {
+            const selected = Array.from(document.querySelectorAll(".student-checkbox:checked")).map(cb => cb.value);
+            if (selected.length === 0) {
+                alert("Please select at least one student.");
+                return;
+            }
+            if (selectedExamId) {
+                confirmAssignBtn.textContent = "Assigning...";
+                confirmAssignBtn.disabled = true;
+                try {
+                    await updateDoc(doc(db, "exams", selectedExamId), { assignedTo: selected });
+                    alert("Success! Exam assigned.");
+                    toggleModal(false);
+                } catch (error) {
+                    alert("Error assigning exam.");
+                } finally {
+                    confirmAssignBtn.textContent = "Assign Selected";
+                    confirmAssignBtn.disabled = false;
+                }
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut(auth).then(() => {
+                window.location.href = "../../index.html";
+            });
+        });
+
+        lucide.createIcons();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+</body>
+
+</html>

@@ -136,23 +136,9 @@
     </div>
 
     <script type="module">
-        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-            authDomain: "proctored-system.firebaseapp.com",
-            projectId: "proctored-system",
-            storageBucket: "proctored-system.firebasestorage.app",
-            messagingSenderId: "512898908874",
-            appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
-            measurementId: "G-3SL8C6C8RD"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth();
+        import { app, auth, db } from '/static/js/firebase-config.js';
+        import { collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         window.logout = async () => {
             await signOut(auth);

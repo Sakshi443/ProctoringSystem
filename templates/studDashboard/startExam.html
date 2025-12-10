@@ -2,213 +2,260 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <!-- <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" /> -->
-    <title>
-        Proctor - Student Dashboard
-    </title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Start Exam - Proctor</title>
 
-    <!--     Fonts and icons     -->
-    <link rel="stylesheet" type="text/css"
-        href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
-    <!-- Nucleo Icons -->
-    <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
-    <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
-    <!-- Font Awesome Icons -->
-    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-    <!-- Material Icons -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <!-- CSS Files -->
-    <link id="pagestyle" href="/static/assets/css/material-dashboard.css?v=3.2.0" rel="stylesheet" />
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Flowbite CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+    </style>
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
-    <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2"
-        id="sidenav-main">
-        <div class="sidenav-header">
-            <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
-                aria-hidden="true" id="iconSidenav"></i>
-            <a class="navbar-brand px-4 py-3 m-0" href="./StudentDashboard.html" target="_blank">
-                <!-- <img src="/static/assets/img/logo-ct-dark.png" class="navbar-brand-img" width="26" height="26" alt="main_logo"> -->
-                <span class="ms-1 text-sm text-dark">Proctor</span>
+<body class="bg-gray-50">
+
+    <!-- Sidebar Toggle (Mobile) -->
+    <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+        type="button"
+        class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+        <span class="sr-only">Open sidebar</span>
+        <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg">
+            <path clip-rule="evenodd" fill-rule="evenodd"
+                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+            </path>
+        </svg>
+    </button>
+
+    <!-- Sidebar -->
+    <aside id="default-sidebar"
+        class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+        aria-label="Sidebar">
+        <div class="h-full px-3 py-4 overflow-y-auto bg-white border-r border-gray-200">
+            <a href="#" class="flex items-center ps-2.5 mb-8 mt-2">
+                <div class="bg-gray-900 text-white p-1.5 rounded-lg mr-3">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                </div>
+                <span class="self-center text-xl font-bold whitespace-nowrap text-gray-900">Proctor</span>
             </a>
-        </div>
-        <hr class="horizontal dark mt-0 mb-2">
-        <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="studentDashboard.html"
-                        onclick="showSection('studentDashboard')">
-                        <i class="material-symbols-rounded opacity-5">dashboard</i>
-                        <span class="nav-link-text ms-1">Dashboard</span>
+            <ul class="space-y-2 font-medium">
+                <li>
+                    <a href="studentDashboard.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="layout-dashboard"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Dashboard</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active bg-gradient-dark text-white" href="./exam-page.html"
-                        onclick="showSection('exams')">
-                        <i class="material-symbols-rounded opacity-5">table_view</i>
-                        <span class="nav-link-text ms-1">My Exams</span>
+                <li>
+                    <a href="exam-page.html" class="flex items-center p-2 text-gray-900 rounded-lg bg-gray-100 group">
+                        <i data-lucide="file-text"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">My Exams</span>
                     </a>
                 </li>
-                <!-- <li class="nav-item">
-          <a class="nav-link text-dark" href="./startExam.html">
-            <i class="material-symbols-rounded opacity-5">table_view</i>
-            <span class="nav-link-text ms-1">Start Exam</span>
-          </a>
-        </li> -->
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="./results.html" onclick="showSection('results')">
-                        <i class="material-symbols-rounded opacity-5">receipt_long</i>
-                        <span class="nav-link-text ms-1">Result</span>
+                <li>
+                    <a href="results.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="award"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Results</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="./violations.html" onclick="showSection('violations')">
-                        <i class="material-symbols-rounded opacity-5">view_in_ar</i>
-                        <span class="nav-link-text ms-1">Violations</span>
+                <li>
+                    <a href="violations.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="alert-triangle"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Violations</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="user"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Profile</span>
                     </a>
                 </li>
 
-                <li class="nav-item mt-3">
-                    <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Account pages
-                    </h6>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="./profile.html">
-                        <i class="material-symbols-rounded opacity-5">person</i>
-                        <span class="nav-link-text ms-1">Profile</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark" href="../index.html" onclick="logout()">
-                        <i class="material-symbols-rounded opacity-5">assignment</i>
-                        <span class="nav-link-text ms-1">Sign out</span>
+                <li class="pt-4 mt-4 space-y-2 border-t border-gray-200">
+                    <a href="#" id="logoutBtn"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group cursor-pointer">
+                        <i data-lucide="log-out"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Sign Out</span>
                     </a>
                 </li>
             </ul>
         </div>
     </aside>
-    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-        <!-- Navbar -->
-        <nav class="navbar navbar-main navbar-expand-lg px-0 mx-3 shadow-none border-radius-xl" id="navbarBlur"
-            data-scroll="true">
-            <div class="container-fluid py-1 px-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                        <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a>
-                        </li>
-                        <li class="breadcrumb-item text-sm text-dark active" aria-current="page">My Exams</li>
-                    </ol>
-                </nav>
-                <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-                    <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                        <div class="input-group input-group-outline">
-                            <label class="form-label">Type here...</label>
-                            <input type="text" class="form-control">
-                        </div>
-                    </div>
-                    <ul class="navbar-nav d-flex align-items-center  justify-content-end">
-                        <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-                            <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                                <div class="sidenav-toggler-inner">
-                                    <i class="sidenav-toggler-line"></i>
-                                    <i class="sidenav-toggler-line"></i>
-                                    <i class="sidenav-toggler-line"></i>
-                                </div>
+
+    <!-- Main Content -->
+    <div class="p-4 sm:ml-64">
+        <div class="p-4 mt-10 sm:mt-0">
+
+            <!-- Header -->
+            <div class="mb-8">
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="studentDashboard.html"
+                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <i data-lucide="home" class="w-4 h-4 me-2"></i>
+                                Home
                             </a>
                         </li>
-                    </ul>
-                </div>
+                        <li class="inline-flex items-center">
+                            <a href="exam-page.html"
+                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 mx-1"></i>
+                                My Exams
+                            </a>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 mx-1"></i>
+                                <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Start Exam</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+                <h1 class="text-3xl font-bold text-gray-900">Instructions</h1>
+                <p class="text-gray-500 mt-1">Please read carefully before proceeding.</p>
             </div>
-        </nav>
-        <!-- End Navbar -->
-        <div class="container-fluid py-2">
-            <div class="row">
-                <div class="row min-vh-80">
-                    <div class="col-12">
-                        <div class="card mt-4">
-                            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                                <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                                    <h6 class="text-white text-capitalize ps-3">
-                                        Please read the following instructions carefully before starting the test
-                                    </h6>
-                                    <p class="mb-0 text-white ps-3">
-                                        Failure to follow these rules may lead to disqualification.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="card-body px-5 pt-4 pb-5">
-                                <h4 class="text-center font-weight-bold mb-4">📋 Exam Instructions</h4>
-                                <ul class="text-dark text-lg ps-4">
-                                    <li class="mb-3">🖥️ Your test will open in full-screen mode. Do not exit or switch tabs. Leaving full-screen or switching browsers will auto-submit your test.</li>
-                                    <li class="mb-3">🔄 Do not refresh the page or click the back button during the test.</li>
-                                    <li class="mb-3">🌐 Start the test only on the Chrome browser for the best experience.</li>
-                                    <li class="mb-3">⏱️ Once you click the "Start Test" button, you will be redirected to the test questions page and the timer will begin. Submit your answers within the allotted time.</li>
-                                    <li class="mb-3">📤 Clicking "Submit Test" will finalize and submit your answers. You will not be able to return once submitted.</li>
-                                    <li class="mb-3">⏳ If the test timer expires, your saved responses will be auto-submitted for evaluation.</li>
-                                    <li class="mb-3">📸 Webcam snapshots will be used for invigilation. Poor or missing images may lead to test rejection.</li>
-                                    <li class="mb-3">👤 Keep your face clearly visible at all times. Face detection will be continuously monitored.</li>
-                                    <li class="mb-3">🚫 Do not look away from the screen repeatedly or for too long—this may trigger violations.</li>
-                                    <li class="mb-3">🚫 Do not use headphones, mobile phones, or allow other people near you during the test.</li>
-                                    <li class="mb-3">🚫 Avoid copying, taking screenshots, or recording the screen. Any such action will be flagged and logged.</li>
-                                    <li class="mb-3">⚠️ Violations will trigger warnings. Repeated violations may auto-submit or invalidate your test.</li>
-                                    <li class="mb-3">🔒 Developer tools, view source, and print screen are strictly blocked and monitored.</li>
-                                </ul>
-                                <div class="text-center mt-4">
-                                    <button onclick="startExam()" class="btn bg-gradient-info text-white px-5 py-2">
-                                        Next
-                                    </button>
-                                </div>
-                            </div>
+
+            <!-- Instructions Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+                <!-- Warning Banner -->
+                <div class="bg-red-400 text-white p-6">
+                    <div class="flex items-start">
+                        <i data-lucide="info" class="w-6 h-6 mt-1 mr-3 flex-shrink-0"></i>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Important Notice</h3>
+                            <p class="text-white">Failure to follow these rules may lead to immediate
+                                disqualification. Ensure your environment is secure.</p>
                         </div>
                     </div>
                 </div>
 
+                <div class="p-8">
+                    <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="bg-gray-100 p-2 rounded-lg mr-3">
+                            <i data-lucide="clipboard-list" class="w-6 h-6 text-gray-700"></i>
+                        </span>
+                        Exam Rules & Regulations
+                    </h4>
+
+                    <ul class="space-y-4 text-gray-600">
+                        <li class="flex items-start">
+                            <i data-lucide="monitor" class="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>Full Screen Mode:</strong> The test will open in full-screen. Do not exit or
+                                switch tabs. Leaving full-screen or switching windows will auto-submit your test.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="refresh-cw" class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>No Refreshing:</strong> Do not refresh the page or click the back button
+                                during the test.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="chrome" class="w-5 h-5 text-gray-500 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>Browser:</strong> Start the test only on the <strong>Google Chrome</strong>
+                                browser for the best experience.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>Submission:</strong> Clicking "Submit Test" will finalize your answers. You
+                                cannot return once submitted.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="timer" class="w-5 h-5 text-orange-500 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>Auto-Submit:</strong> If the timer expires, your saved responses will be
+                                automatically submitted.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="camera" class="w-5 h-5 text-purple-500 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>Webcam Monitoring:</strong> Snapshots will be taken. Keep your face clearly
+                                visible. Poor lighting or missing face may lead to rejection.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="eye-off" class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>Behavior:</strong> Do not look away repeatedly. Do not use phones. No other
+                                people allowed in the frame.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="shield-alert" class="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0"></i>
+                            <span><strong>Anti-Cheating:</strong> Copy-paste, screenshots, and developer tools are
+                                blocked and monitored. Violations are logged.</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-10 flex justify-center">
+                        <button onclick="startExam()"
+                            class="px-12 py-4 bg-gray-700 hover:bg-gray-800 text-white text-lg font-bold rounded-lg shadow-lg transition-all transform hover:-translate-y-0.5 focus:ring-4 focus:ring-gray-500 focus:outline-none">
+                            Start Test Now
+                        </button>
+                    </div>
+                </div>
             </div>
-    </main>
+        </div>
 
-    <script>
-        function startExam() {
-            window.location.href = "exam.html"; // 👈 Change this to your exam page path
-        }
-    </script>
+    </div>
+    </div>
 
-    <!--   Core JS Files   -->
-    <script src="/static/assets/js/core/popper.min.js"></script>
-    <script src="/static/assets/js/core/bootstrap.min.js"></script>
-    <script src="/static/assets/js/plugins/perfect-scrollbar.min.js"></script>
-    <script src="/static/assets/js/plugins/smooth-scrollbar.min.js"></script>
-    <script src="/static/assets/js/plugins/chartjs.min.js"></script>
-    <script>
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { app, auth } from '/static/js/firebase-config.js';
+        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    </script>
-    <script>
-        var win = navigator.platform.indexOf('Win') > -1;
-        if (win && document.querySelector('#sidenav-scrollbar')) {
-            var options = {
-                damping: '0.5'
+        // Auth Check
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "../index.html";
             }
-            Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+        });
+
+        // Start Exam Function (Global)
+        window.startExam = function () {
+            const examId = localStorage.getItem("currentExamId");
+            if (!examId) {
+                alert("No exam selected! Redirecting to dashboard...");
+                window.location.href = "exam-page.html";
+                return;
+            }
+            // Proceed to the actual exam interface
+            window.location.href = "exam.html";
         }
 
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                // Redirect to login page
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut(auth).then(() => {
                 window.location.href = "../index.html";
             }).catch((error) => {
-                console.error("Logout failed:", error);
-                alert("Logout failed!");
+                alert("Error signing out.");
             });
-        }
-    </script>
-    <!-- Github buttons -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
-    <script src="/static/assets/js/material-dashboard.min.js?v=3.2.0"></script>
+        });
 
+        lucide.createIcons();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 
 </html>

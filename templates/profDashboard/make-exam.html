@@ -4,326 +4,467 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Make Exam</title>
-  <link rel="stylesheet" href="../css/style.css" />
+  <title>Create Exam - Professor</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Flowbite CSS -->
   <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    .optionInput.selected {
-      border: 2px solid #22c55e;
-      background-color: #f0fdf4;
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
+      /* gray-50 */
+    }
+
+    .option-selected {
+      @apply ring-2 ring-blue-500 bg-blue-50 border-blue-500;
     }
   </style>
 </head>
 
-<body class="g-sidenav-show bg-gray-100">
-  <nav class="fixed top-0 z-50 w-full bg-white border-gray-50  dark:bg-gray-50 dark:border-gray-600">
-    <div class="px-3 py-3 lg:px-5 lg:pl-3">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center justify-start rtl:justify-end">
-          <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-            <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-black">Proctor</span>
-          </a>
-        </div>
-        <div class="flex items-center">
-          <div class="flex items-center ms-3">
-            <button type="button"
-              class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-              aria-expanded="false" data-dropdown-toggle="dropdown-user">
-              <span class="sr-only">Open user menu</span>
-              <a href="#"
-                class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg text-gray-500 border-gray-500 bg-gray-100 hover:bg-gray-100  hover:text-gray-800 hover:border-gray-800 group">
-                <svg class="w-4 h-4 me-2 text-gray-500 group-hover:text-gray-800" aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
-                </svg>
-                Profile
-              </a>
+<body class="bg-gray-50">
 
-              <!-- <img class="w-8 h-8 rounded-full"
-                                src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo"> -->
-            </button>
-            <div id="dropdown-user"
-              class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600">
-              <div class="px-4 py-3">
-                <p id="currentUserName" class="text-sm text-gray-500 dark:text-white">Professor</p>
-                <p id="currentUserEmail" class="text-sm font-medium text-gray-500 truncate dark:text-gray-300">
-                  professor@example.com</p>
-              </div>
-              <ul>
-                <li>
-                  <a href="/templates/index.html"
-                    class="block px-4 py-2 text-sm text-gray-100 hover:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-300 dark:hover:text-gray-800"
-                    onclick="logout()">Sign out</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </nav>
-  <aside id="logo-sidebar"
-    class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-gray-300 border-r border-gray-200 sm:translate-x-0 dark:bg-gray-400 dark:border-gray-500"
+  <!-- Sidebar Toggle (Mobile) -->
+  <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+    type="button"
+    class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+    <span class="sr-only">Open sidebar</span>
+    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+      <path clip-rule="evenodd" fill-rule="evenodd"
+        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+      </path>
+    </svg>
+  </button>
+
+  <!-- Sidebar -->
+  <aside id="default-sidebar"
+    class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
     aria-label="Sidebar">
-    <div class="h-full px-3 pb-4 overflow-y-auto bg-black dark:bg-gray-200">
+    <div class="h-full px-3 py-4 overflow-y-auto bg-white border-r border-gray-200">
+      <a href="#" class="flex items-center ps-2.5 mb-8 mt-2">
+        <div class="bg-gray-900 text-white p-1.5 rounded-lg mr-3">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </div>
+        <span class="self-center text-xl font-bold whitespace-nowrap text-gray-900">Proctor</span>
+      </a>
       <ul class="space-y-2 font-medium">
         <li>
-          <a href="./professorDashboard.html"
-            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-            <span class="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
+          <a href="professorDashboard.html"
+            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="layout-dashboard"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Dashboard</span>
           </a>
         </li>
         <li>
-          <a href="./make-exam.html"
-            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-            <span class="flex-1 ms-3 whitespace-nowrap">Make paper</span>
+          <a href="make-exam.html" class="flex items-center p-2 text-gray-900 rounded-lg bg-gray-100 group">
+            <i data-lucide="plus-circle"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Create Exam</span>
           </a>
         </li>
         <li>
-          <a href="./admin-panel.html"
-            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-            <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
+          <a href="admin-panel.html" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+            <i data-lucide="settings"
+              class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Admin Panel</span>
           </a>
         </li>
-        <li>
-          <a href="/templates/index.html" onclick="logout()"
-            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-            <svg
-              class="shrink-0 w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-800 group-hover:text-gray-400 dark:group-hover:text-white"
-              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
-            </svg>
-            <span class="flex-1 ms-3 whitespace-nowrap">Logout</span>
+
+        <li class="pt-4 mt-4 space-y-2 border-t border-gray-200">
+          <a href="profile.html" class="flex items-center p-2 text-gray-900 rounded-lg bg-gray-100 group">
+            <i data-lucide="user" class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Profile</span>
+          </a>
+          <a href="#" id="logoutBtn"
+            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group cursor-pointer">
+            <i data-lucide="log-out" class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+            <span class="ms-3">Sign Out</span>
           </a>
         </li>
       </ul>
     </div>
   </aside>
-  <!-- end of Navbar -->
-  <div class="p-6 sm:ml-64">
-    <div class="p-4 border-2 border-gray-200 rounded-lg mt-14 bg-white shadow">
-      <h2 class="text-xl font-bold mb-4">📝 Create New Exam</h2>
 
-      <div id="examForm">
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- Main Content -->
+  <div class="p-4 sm:ml-64">
+    <div class="p-4 mt-10 sm:mt-0">
+
+      <!-- Header -->
+      <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+          <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+              <a href="professorDashboard.html"
+                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                <i data-lucide="home" class="w-4 h-4 me-2"></i>
+                Home
+              </a>
+            </li>
+            <li aria-current="page">
+              <div class="flex items-center">
+                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 mx-1"></i>
+                <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Create Exam</span>
+              </div>
+            </li>
+          </ol>
+        </nav>
+        <div class="flex justify-between items-center">
           <div>
-            <label class="block mb-2 font-medium">Test Name</label>
-            <input type="text" id="testName" class="w-full border rounded px-3 py-2" placeholder="e.g., Sample Test" />
-          </div>
-          <div>
-            <label class="block mb-2 font-medium">Test Duration (minutes)</label>
-            <input type="number" id="testDuration" class="w-full border rounded px-3 py-2" min="1" />
-          </div>
-          <div>
-            <label class="block mb-2 font-medium">Start Date & Time</label>
-            <input type="datetime-local" id="startDateTime" class="w-full border rounded px-3 py-2" />
-          </div>
-          <div>
-            <label class="block mb-2 font-medium">End Date & Time</label>
-            <input type="datetime-local" id="endDateTime" class="w-full border rounded px-3 py-2" />
-          </div>
-          <div class="md:col-span-2">
-            <label class="block mb-2 font-medium">Test Description</label>
-            <textarea id="testDescription" class="w-full border rounded px-3 py-2" rows="3"
-              placeholder="Enter exam details here..."></textarea>
+            <h1 class="text-3xl font-bold text-gray-900">Create New Exam</h1>
+            <p class="text-gray-500 mt-1">Set up exam details and add questions.</p>
           </div>
         </div>
+      </div>
 
-        <button id="openModalBtn" class="bg-blue-500 text-white px-4 py-2 rounded">➕ Add Question</button>
+      <!-- Exam Form -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <i data-lucide="file-signature" class="w-5 h-5 mr-2 text-blue-600"></i> Exam Details
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="col-span-1 md:col-span-2">
+            <label for="testName" class="block mb-2 text-sm font-medium text-gray-900">Exam Title</label>
+            <input type="text" id="testName"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="e.g. Mid-Term Physics 2024" required>
+          </div>
 
-        <div class="mt-4">
-          <table class="min-w-full border text-sm" id="questionTable">
-            <thead class="bg-gray-100">
+          <div>
+            <label for="startDateTime" class="block mb-2 text-sm font-medium text-gray-900">Start Date & Time</label>
+            <input type="datetime-local" id="startDateTime"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              required>
+          </div>
+          <div>
+            <label for="endDateTime" class="block mb-2 text-sm font-medium text-gray-900">End Date & Time</label>
+            <input type="datetime-local" id="endDateTime"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              required>
+          </div>
+
+          <div>
+            <label for="testDuration" class="block mb-2 text-sm font-medium text-gray-900">Duration (Minutes)</label>
+            <input type="number" id="testDuration" min="1"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="e.g. 60" required>
+          </div>
+
+          <div class="col-span-1 md:col-span-2">
+            <label for="testDescription" class="block mb-2 text-sm font-medium text-gray-900">Description /
+              Instructions</label>
+            <textarea id="testDescription" rows="3"
+              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter instructions for the students..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Questions Section -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-gray-900 flex items-center">
+            <i data-lucide="list-checks" class="w-5 h-5 mr-2 text-blue-600"></i> Questions
+          </h2>
+          <button type="button" id="openModalBtn"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 flex items-center">
+            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Question
+          </button>
+        </div>
+
+        <div class="relative overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full text-sm text-left text-gray-500" id="questionTable">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
-                <th class="border px-2 py-1">Question</th>
-                <th class="border px-2 py-1">Marks</th>
-                <th class="border px-2 py-1">Negative</th>
-                <th class="border px-2 py-1">Options</th>
-                <th class="border px-2 py-1">Correct</th>
-                <th class="border px-2 py-1">Actions</th>
+                <th scope="col" class="px-6 py-3">#</th>
+                <th scope="col" class="px-6 py-3 w-1/2">Question Text</th>
+                <th scope="col" class="px-6 py-3 text-center">Marks</th>
+                <th scope="col" class="px-6 py-3 text-center">Negative</th>
+                <th scope="col" class="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="questionTableBody">
+              <!-- Questions will appear here -->
+              <!-- Empty State -->
+              <tr id="emptyStateRow">
+                <td colspan="5" class="px-6 py-8 text-center text-gray-400 italic">
+                  No questions added yet. Click "Add Question" to start.
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
 
-        <p class="mt-2 text-sm text-gray-600">Total Questions: <span id="questionCount" class="font-semibold">0</span>
-        </p>
+        <div class="flex items-center justify-between mt-4">
+          <p class="text-sm text-gray-500">Total Questions: <span id="questionCount"
+              class="font-bold text-gray-900">0</span></p>
 
-        <button id="saveExamBtn" class="bg-green-600 text-white px-6 py-2 rounded mt-4">Save Exam</button>
+          <button id="saveExamBtn"
+            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-6 py-3 flex items-center">
+            <i data-lucide="save" class="w-4 h-4 mr-2"></i> Save & Publish Exam
+          </button>
+        </div>
       </div>
+
     </div>
   </div>
 
-  <div id="questionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-xl p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold">Add New Question</h3>
-        <button id="closeModalBtn" class="text-gray-600 hover:text-black">&times;</button>
-      </div>
-      <div class="space-y-4">
-        <div><label class="block">Question Type</label>
-          <select id="qType" class="w-full border rounded px-3 py-2">
-            <option value="mcq_single">MCQ (Single)</option>
-            <option value="mcq_multiple">MSQ (Multiple)</option>
-          </select>
+  <!-- Question Modal -->
+  <div id="questionModal" tabindex="-1" aria-hidden="true"
+    class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="relative w-full max-w-2xl max-h-full">
+      <!-- Modal Content -->
+      <div class="relative bg-white rounded-lg shadow">
+        <div class="flex items-start justify-between p-4 border-b rounded-t">
+          <h3 class="text-xl font-semibold text-gray-900">Add New Question</h3>
+          <button type="button" id="closeModalBtn"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
-        <div><label class="block">Question Text</label>
-          <textarea id="qText" class="w-full border rounded px-3 py-2" rows="3"></textarea>
-        </div>
-        <div><label class="block">Marks</label>
-          <input type="number" id="qMarks" class="w-full border rounded px-3 py-2" />
-        </div>
-        <div><label class="block">Negative Marking</label>
-          <select id="qNegative" class="w-full border rounded px-3 py-2">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-1">Options (Click to select correct)</label>
-          <div id="optionInputs" class="grid grid-cols-2 gap-2">
-            <input type="text" id="qOpt1" data-opt-index="1"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 1" />
-            <input type="text" id="qOpt2" data-opt-index="2"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 2" />
-            <input type="text" id="qOpt3" data-opt-index="3"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 3" />
-            <input type="text" id="qOpt4" data-opt-index="4"
-              class="optionInput w-full border rounded px-3 py-2 cursor-pointer" placeholder="Option 4" />
+
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2">
+              <label class="block mb-2 text-sm font-medium text-gray-900">Question Text</label>
+              <textarea id="qText" rows="2"
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Type your question here..."></textarea>
+            </div>
+
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Marks</label>
+              <input type="number" id="qMarks" min="1"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                placeholder="1">
+            </div>
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-900">Question Type</label>
+              <select id="qType"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="mcq_single">Single Correct (MCQ)</option>
+                <option value="mcq_multiple">Multi Correct (MSQ)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center mb-4">
+            <input id="qNegative" type="checkbox" value=""
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+            <label for="qNegative" class="ms-2 text-sm font-medium text-gray-900">Enable Negative Marking?</label>
+          </div>
+
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900">Options <span
+                class="text-xs text-gray-500 font-normal">(Click option to mark as correct)</span></label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input type="text" id="qOpt1" data-index="1"
+                class="optionInput bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 cursor-pointer hover:bg-gray-100 transition"
+                placeholder="Option 1">
+              <input type="text" id="qOpt2" data-index="2"
+                class="optionInput bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 cursor-pointer hover:bg-gray-100 transition"
+                placeholder="Option 2">
+              <input type="text" id="qOpt3" data-index="3"
+                class="optionInput bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 cursor-pointer hover:bg-gray-100 transition"
+                placeholder="Option 3">
+              <input type="text" id="qOpt4" data-index="4"
+                class="optionInput bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 cursor-pointer hover:bg-gray-100 transition"
+                placeholder="Option 4">
+            </div>
           </div>
         </div>
-      </div>
-      <div class="flex justify-end mt-6">
-        <button id="saveQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Save Question</button>
+
+        <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b">
+          <button id="saveQuestionBtn" type="button"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add
+            to Exam</button>
+        </div>
       </div>
     </div>
   </div>
 
+
+  <!-- Firebase Logic -->
   <script type="module">
+    import { app, auth, db } from '/static/js/firebase-config.js';
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-      authDomain: "proctored-system.firebaseapp.com",
-      projectId: "proctored-system",
-      storageBucket: "proctored-system.appspot.com",   // ✅ Fixed URL
-      messagingSenderId: "512898908874",
-      appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
-      measurementId: "G-3SL8C6C8RD"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-
-    const questionTableBody = document.querySelector('#questionTable tbody');
+    // State
+    const questions = [];
+    const questionTableBody = document.getElementById('questionTableBody');
+    const emptyStateRow = document.getElementById('emptyStateRow');
     const questionCountSpan = document.getElementById('questionCount');
 
-    const updateQuestionCount = () => {
-      questionCountSpan.innerText = questionTableBody.children.length;
+    // Utils
+    const updateQuestionList = () => {
+      if (questions.length === 0) {
+        emptyStateRow.style.display = 'table-row';
+      } else {
+        emptyStateRow.style.display = 'none';
+      }
+
+      // Re-render rows (simple approach) or append. 
+      // Clearing non-empty rows for simplicity in this implementation
+      Array.from(questionTableBody.children).forEach(child => {
+        if (child.id !== 'emptyStateRow') child.remove();
+      });
+
+      questions.forEach((q, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "bg-white border-b hover:bg-gray-50";
+        tr.innerHTML = `
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${idx + 1}</th>
+                    <td class="px-6 py-4 font-medium">${q.questionText}</td>
+                    <td class="px-6 py-4 text-center">${q.marks}</td>
+                    <td class="px-6 py-4 text-center">${q.negativeMarking ? '<span class="text-red-500 font-bold">Yes</span>' : 'No'}</td>
+                    <td class="px-6 py-4 text-right">
+                         <button data-index="${idx}" class="font-medium text-red-600 hover:underline delete-btn">Remove</button>
+                    </td>
+                `;
+        questionTableBody.appendChild(tr);
+      });
+
+      // Update listeners for delete
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          questions.splice(idx, 1);
+          updateQuestionList();
+        });
+      });
+
+      questionCountSpan.textContent = questions.length;
     };
 
+
+    // Auth
     onAuthStateChanged(auth, (user) => {
       if (!user) window.location.href = "../../index.html";
-      else {
-        document.getElementById('currentUserName').textContent = user.displayName || "Professor";
-        document.getElementById('currentUserEmail').textContent = user.email || "No email";
-      }
     });
 
-    window.logout = async () => {
-      await signOut(auth);
-      localStorage.clear();
-      window.location.href = "../../index.html";
+    // Modal Logic
+    const modal = document.getElementById('questionModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const optionInputs = document.querySelectorAll('.optionInput');
+
+    const toggleModal = (show) => {
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
     };
 
-    document.getElementById('openModalBtn').addEventListener('click', () => {
-      document.getElementById('questionModal').classList.remove('hidden');
-      document.querySelectorAll('.optionInput').forEach(el => el.classList.remove('selected'));
+    openModalBtn.addEventListener('click', () => {
+      // Reset fields
       document.getElementById('qText').value = '';
       document.getElementById('qMarks').value = '';
-      ['qOpt1', 'qOpt2', 'qOpt3', 'qOpt4'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('qNegative').checked = false;
+      optionInputs.forEach(i => {
+        i.value = '';
+        i.classList.remove('option-selected');
+        i.classList.remove('bg-blue-50', 'ring-2', 'ring-blue-500', 'border-blue-500'); // Clean Tailwind classes
+        i.classList.add('bg-gray-50', 'border-gray-300'); // Reset to default
+      });
+      toggleModal(true);
     });
 
-    document.getElementById('closeModalBtn').addEventListener('click', () => {
-      document.getElementById('questionModal').classList.add('hidden');
-    });
+    closeModalBtn.addEventListener('click', () => toggleModal(false));
 
-    document.querySelectorAll('.optionInput').forEach(input => {
+    // Option Selection Logic
+    optionInputs.forEach(input => {
       input.addEventListener('click', () => {
         const type = document.getElementById('qType').value;
         if (type === 'mcq_single') {
-          document.querySelectorAll('.optionInput').forEach(i => i.classList.remove('selected'));
+          optionInputs.forEach(i => {
+            i.classList.remove('option-selected', 'bg-blue-50', 'ring-2', 'ring-blue-500', 'border-blue-500');
+            i.classList.add('bg-gray-50', 'border-gray-300');
+          });
         }
-        input.classList.toggle('selected');
+
+        // Toggle current
+        if (input.classList.contains('option-selected')) {
+          input.classList.remove('option-selected', 'bg-blue-50', 'ring-2', 'ring-blue-500', 'border-blue-500');
+          input.classList.add('bg-gray-50', 'border-gray-300');
+        } else {
+          input.classList.add('option-selected', 'bg-blue-50', 'ring-2', 'ring-blue-500', 'border-blue-500');
+          input.classList.remove('bg-gray-50', 'border-gray-300');
+        }
       });
     });
 
+    // Add Question Logic
     document.getElementById('saveQuestionBtn').addEventListener('click', () => {
       const qText = document.getElementById('qText').value.trim();
       const qMarks = parseFloat(document.getElementById('qMarks').value);
-      const qNegative = document.getElementById('qNegative').value;
-      const options = ['qOpt1', 'qOpt2', 'qOpt3', 'qOpt4'].map(id => document.getElementById(id).value.trim());
-      const correct = Array.from(document.querySelectorAll('.optionInput.selected')).map(opt => opt.dataset.optIndex);
+      const qNegative = document.getElementById('qNegative').checked;
+      const type = document.getElementById('qType').value;
 
-      if (!qText || isNaN(qMarks) || options.some(o => !o) || correct.length === 0) {
-        alert('❌ Please fill out the question, marks, all options, and select at least one correct answer.');
+      // Collect options
+      const optionsArr = [];
+      const correctIndices = [];
+
+      optionInputs.forEach(input => {
+        optionsArr.push(input.value.trim()); // index 1 is at array index 0
+        if (input.classList.contains('option-selected')) {
+          correctIndices.push(parseInt(input.dataset.index));
+        }
+      });
+
+      if (!qText || isNaN(qMarks) || qMarks <= 0 || optionsArr.some(o => !o) || correctIndices.length === 0) {
+        alert('❌ Please fill out all fields and select at least one correct answer.');
         return;
       }
 
-      const row = document.createElement('tr');
-      row.innerHTML = `
-      <td class="border px-2 py-1">${qText}</td>
-      <td class="border px-2 py-1">${qMarks}</td>
-      <td class="border px-2 py-1">${qNegative}</td>
-      <td class="border px-2 py-1">${options.join(', ')}</td>
-      <td class="border px-2 py-1">${correct.join(',')}</td>
-      <td class="border px-2 py-1 text-blue-600 cursor-pointer delete-row">Delete</td>
-    `;
-      questionTableBody.appendChild(row);
-      updateQuestionCount();
-      document.getElementById('questionModal').classList.add('hidden');
+      questions.push({
+        questionText: qText,
+        marks: qMarks,
+        negativeMarking: qNegative,
+        options: optionsArr,
+        correct: correctIndices,
+        type: type
+      });
+
+      updateQuestionList();
+      toggleModal(false);
     });
 
-    questionTableBody.addEventListener('click', (e) => {
-      if (e.target.classList.contains('delete-row')) {
-        e.target.closest('tr').remove();
-        updateQuestionCount();
-      }
-    });
-
+    // Save Exam Logic
     document.getElementById('saveExamBtn').addEventListener('click', async () => {
       const user = auth.currentUser;
-      if (!user) return alert("You're not logged in!");
+      if (!user) return alert("Not authenticated.");
+
+      const saveBtn = document.getElementById('saveExamBtn');
 
       const testName = document.getElementById('testName').value.trim();
-      const duration = parseFloat(document.getElementById('testDuration').value);
       const startDateTime = document.getElementById('startDateTime').value;
       const endDateTime = document.getElementById('endDateTime').value;
+      const duration = parseInt(document.getElementById('testDuration').value);
       const description = document.getElementById('testDescription').value.trim();
 
-      if (!testName || isNaN(duration) || duration <= 0 || !startDateTime || !endDateTime || questionTableBody.children.length === 0) {
-        alert('❌ Please complete all exam details and add at least one question.');
+      if (!testName || !startDateTime || !endDateTime || !duration || questions.length === 0) {
+        alert('⚠️ Please fill in all exam details and add at least one question.');
         return;
       }
 
-      const questions = [];
-      document.querySelectorAll("#questionTable tbody tr").forEach(tr => {
-        const tds = tr.querySelectorAll("td");
-        questions.push({
-          questionText: tds[0].innerText,
-          marks: parseInt(tds[1].innerText),
-          negativeMarking: tds[2].innerText === "yes",
-          options: tds[3].innerText.split(",").map(opt => opt.trim()),
-          correct: tds[4].innerText.split(",").map(opt => parseInt(opt.trim()))
-        });
-      });
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Saving...';
+      lucide.createIcons();
 
       try {
         await addDoc(collection(db, "exams"), {
@@ -336,16 +477,30 @@
           createdBy: user.uid,
           createdAt: serverTimestamp()
         });
-        alert("✅ Exam saved successfully!");
+        alert("✅ Exam created successfully!");
         window.location.reload();
-      } catch (err) {
-        console.error('❌ Error saving exam:', err);
-        alert("❌ Failed to save exam. Please try again.");
+      } catch (error) {
+        console.error("Save error:", error);
+        alert("❌ Failed to save exam.");
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-lucide="save" class="w-4 h-4 mr-2"></i> Save & Publish Exam';
+        lucide.createIcons();
       }
-    });  
+    });
 
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "../../index.html";
+      }).catch((error) => {
+        alert("Error signing out.");
+      });
+    });
+
+    lucide.createIcons();
   </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 
 </html>

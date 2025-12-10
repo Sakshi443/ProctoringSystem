@@ -1,41 +1,21 @@
 // ✅ Firebase SDK Modular Imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { app, auth, db } from '/static/js/firebase-config.js';
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
   signOut,
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import {
-  getFirestore,
   doc,
   setDoc,
   getDoc,
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-// ✅ Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-  authDomain: "proctored-system.firebaseapp.com",
-  projectId: "proctored-system",
-  storageBucket: "proctored-system.appspot.com",
-  messagingSenderId: "512898908874",
-  appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
-  measurementId: "G-3SL8C6C8RD",
-};
-
-// ✅ Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// ✅ Panel toggle handlers
-const container = document.getElementById("container");
-document.getElementById("goRegister").onclick = () =>
-  container.classList.add("right-panel-active");
-document.getElementById("goLogin").onclick = () =>
-  container.classList.remove("right-panel-active");
+const googleProvider = new GoogleAuthProvider();
 
 // ✅ Register logic
 document
@@ -69,7 +49,8 @@ document
       );
 
       await signOut(auth);
-      container.classList.remove("right-panel-active");
+      // Logic to switch to login view could go here if needed
+      document.getElementById("showLogin").click(); // Trigger toggle to login
     } catch (err) {
       alert(err.message);
     }
@@ -90,50 +71,98 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       return;
     }
 
-    const uid = cred.user.uid;
+    await handleUserRedirection(cred.user);
 
-    // Admin shortcut
-    if (email === "mmanoorkar9@gmail.com" && pass === "admin123") {
-      const userData = {
-        uid,
-        email: cred.user.email,
-        role: "admin",
-      };
-      sessionStorage.setItem("loggedUser", JSON.stringify(userData));
-      localStorage.setItem("loggedUser", JSON.stringify(userData));
-      window.location.href = "admin.html";
-      return;
-    }
-
-    const snap = await getDoc(doc(db, "users", uid));
-    if (!snap.exists()) throw new Error("No profile found.");
-
-    const { role, approved, username } = snap.data();
-
-    if (!approved) {
-      alert("Your account is pending admin approval.");
-      await signOut(auth);
-      return;
-    }
-
-    const userInfo = {
-      uid,
-      email: cred.user.email,
-      role,
-      username,
-    };
-    sessionStorage.setItem("loggedUser", JSON.stringify(userInfo));
-    localStorage.setItem("loggedUser", JSON.stringify(userInfo));
-
-    if (role === "teacher") {
-      window.location.href = "./profDashboard/professorDashboard.html";
-    } else if (role === "student") {
-      window.location.href = "./studDashboard/studentDashboard.html";
-    } else {
-      alert("Unknown role.");
-      await signOut(auth);
-    }
   } catch (err) {
-    alert(err.message);
+    alert("Login failed: " + err.message);
   }
 });
+
+// ✅ Google Sign-In Logic
+const googleBtn = document.getElementById("googleBtn");
+if (googleBtn) {
+  googleBtn.addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Check if user doc exists, if not create it (Student by default or Ask? We'll default to student for ease)
+      const userDocRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDocRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userDocRef, {
+          username: user.displayName,
+          email: user.email,
+          role: "student", // Default role for Google Login
+          approved: true,
+          createdAt: new Date(),
+          emailVerified: true
+        });
+      }
+
+      await handleUserRedirection(user);
+
+    } catch (error) {
+      console.error(error);
+      alert("Google Sign-In Error: " + error.message);
+    }
+  });
+}
+
+// ✅ Forgot Password Logic
+const forgotBtn = document.getElementById("forgotPasswordBtn");
+if (forgotBtn) {
+  forgotBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const email = prompt("Please enter your email address to reset password:");
+    if (email) {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Password reset email sent! Check your inbox.");
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+  });
+}
+
+// Helper: Handle Redirection
+async function handleUserRedirection(user) {
+  const uid = user.uid;
+
+  // Admin shortcut
+  if (user.email === "mmanoorkar9@gmail.com") {
+    const userData = { uid, email: user.email, role: "admin" };
+    saveSession(userData);
+    window.location.href = "admin.html";
+    return;
+  }
+
+  const snap = await getDoc(doc(db, "users", uid));
+  if (!snap.exists()) throw new Error("No profile found in database.");
+
+  const { role, approved, username } = snap.data();
+
+  if (!approved) {
+    alert("Your account is pending admin approval.");
+    await signOut(auth);
+    return;
+  }
+
+  const userInfo = { uid, email: user.email, role, username };
+  saveSession(userInfo);
+
+  if (role === "teacher") {
+    window.location.href = "./profDashboard/professorDashboard.html";
+  } else if (role === "student") {
+    window.location.href = "./studDashboard/studentDashboard.html";
+  } else {
+    alert("Unknown role.");
+  }
+}
+
+function saveSession(data) {
+  sessionStorage.setItem("loggedUser", JSON.stringify(data));
+  localStorage.setItem("loggedUser", JSON.stringify(data));
+}

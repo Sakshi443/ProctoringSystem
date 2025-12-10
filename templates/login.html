@@ -3,86 +3,276 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Register / Login</title>
-    <link rel="stylesheet" href="/static/css/login.css" />
-    <!-- Firebase v9 modular SDK -->
-    <!-- <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-        <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-        <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script> -->
-    <!-- Firebase SDKs -->
-    <script src="/static/js/firebase-config.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In - Proctor</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Flowbite CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase Config -->
+    <!-- firebase-config.js is imported in login.js -->
+
     <style>
         body {
-            /* background-image: url("../assets/img/background.png"); */
-            background-image: url("https://images.app.goo.gl/zUqnFhujhfexRnX46");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
         }
     </style>
 </head>
 
-<body>
-    <div class="container" id="container">
-        <!-- REGISTER -->
-        <div class="form-container register-container">
-            <form id="registerForm">
-                <h2>Create Account</h2>
-                <input type="text" id="regUsername" placeholder="Username" required />
-                <input type="email" id="regEmail" placeholder="Email" required />
-                <input type="password" id="regPassword" placeholder="Password" required />
-                <select id="regRole" required>
-                    <option value="">Select Role</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="student">Student</option>
-                </select>
-                <button type="submit">Register</button>
-            </form>
-        </div>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 relative">
 
-        <!-- LOGIN -->
-        <div class="form-container login-container">
-            <form id="loginForm">
-                <h2>Sign In</h2>
-                <input type="email" id="loginEmail" placeholder="Email" required />
-                <input type="password" id="loginPassword" placeholder="Password" required />
-                <button type="submit">Login</button>
-            </form>
-        </div>
+    <!-- Back to Home Button (Outside Container) -->
+    <a href="./index.html"
+        class="absolute top-6 left-6 inline-flex items-center text-sm font-medium text-gray-500 hover:text-black transition-colors bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm hover:shadow-md border border-gray-200 z-50">
+        <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+        Back to Home
+    </a>
 
-        <!-- OVERLAY FOR TRANSITION -->
-        <div class="overlay-container">
-            <div class="overlay">
-                <div class="overlay-panel overlay-left">
-                    <h2>Welcome Back!</h2>
-                    <p>Please login to continue</p>
-                    <button class="ghost" id="goLogin">Sign In</button>
+    <!-- Main Card Container -->
+    <div class="flex flex-col md:flex-row w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden h-[600px]">
+
+        <!-- Left Side: Branding & Demo Credentials (Dark Theme) -->
+        <div class="w-full md:w-5/12 bg-gray-900 text-white p-8 flex flex-col justify-between relative">
+
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
+                </svg>
+            </div>
+
+            <!-- Brand -->
+            <div class="relative z-10">
+                <div class="inline-flex items-center space-x-3 mb-4">
+                    <div class="bg-white text-black p-2 rounded-lg">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-2xl font-bold tracking-tight">Proctor</span>
                 </div>
-                <div class="overlay-panel overlay-right">
-                    <h2>Hello, Friend!</h2>
-                    <p>Create your account to get started</p>
-                    <button class="ghost" id="goRegister">Register</button>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Secure, AI-powered proctoring for online assessments.
+                </p>
+            </div>
+
+            <!-- Demo Credentials Card -->
+            <div class="relative z-10 bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-5 shadow-lg">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-1.5 bg-blue-500/10 rounded-md">
+                        <i data-lucide="key" class="w-4 h-4 text-blue-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-sm">Demo Access</h3>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-xs">
+                    <!-- Student -->
+                    <div class="space-y-1.5">
+                        <p class="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">Student Role</p>
+                        <button onclick="navigator.clipboard.writeText('studentid@gmail.com'); alert('Copied Email!')"
+                            class="w-full flex items-center justify-between p-2 bg-gray-800 rounded border border-gray-700 hover:border-blue-500 hover:bg-gray-750 transition-all group text-left">
+                            <span class="truncate text-gray-300 group-hover:text-white">studentid@gmail.com</span>
+                            <i data-lucide="copy" class="w-3 h-3 text-gray-500 group-hover:text-blue-400"></i>
+                        </button>
+                        <button onclick="navigator.clipboard.writeText('student@123'); alert('Copied Password!')"
+                            class="w-full flex items-center justify-between p-2 bg-gray-800 rounded border border-gray-700 hover:border-blue-500 hover:bg-gray-750 transition-all group text-left">
+                            <span class="text-gray-300 group-hover:text-white">student@123</span>
+                            <i data-lucide="copy" class="w-3 h-3 text-gray-500 group-hover:text-blue-400"></i>
+                        </button>
+                    </div>
+
+                    <!-- Professor -->
+                    <div class="space-y-1.5">
+                        <p class="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">Professor Role</p>
+                        <button onclick="navigator.clipboard.writeText('professorid@gmail.com'); alert('Copied Email!')"
+                            class="w-full flex items-center justify-between p-2 bg-gray-800 rounded border border-gray-700 hover:border-blue-500 hover:bg-gray-750 transition-all group text-left">
+                            <span class="truncate text-gray-300 group-hover:text-white">professorid@gmail.com</span>
+                            <i data-lucide="copy" class="w-3 h-3 text-gray-500 group-hover:text-blue-400"></i>
+                        </button>
+                        <button onclick="navigator.clipboard.writeText('professor@123'); alert('Copied Password!')"
+                            class="w-full flex items-center justify-between p-2 bg-gray-800 rounded border border-gray-700 hover:border-blue-500 hover:bg-gray-750 transition-all group text-left">
+                            <span class="text-gray-300 group-hover:text-white">professor@123</span>
+                            <i data-lucide="copy" class="w-3 h-3 text-gray-500 group-hover:text-blue-400"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Right Side: Login Form (Light Theme) -->
+        <div class="w-full md:w-7/12 bg-white p-8 md:p-12 overflow-y-auto">
+
+            <!-- LOGIN CONTAINER -->
+            <div id="loginContainer" class="h-full flex flex-col justify-center">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Welcome back</h2>
+                    <p class="text-gray-500 text-sm mt-1">Enter your account details to continue</p>
+                </div>
+
+                <form id="loginForm" class="space-y-5">
+                    <div>
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-1.5">Email
+                            address</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                            </span>
+                            <input type="email" id="loginEmail" required
+                                class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition-all placeholder-gray-400 text-sm"
+                                placeholder="name@company.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                            <a href="#" id="forgotPasswordBtn"
+                                class="text-xs font-medium text-gray-600 hover:text-black hover:underline">Forgot
+                                password?</a>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                            </span>
+                            <input type="password" id="loginPassword" required
+                                class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition-all placeholder-gray-400 text-sm"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all">
+                        Sign In
+                    </button>
+
+                    <button id="googleBtn" type="button"
+                        class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all mt-4 text-sm">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                            class="w-4 h-4">
+                        Sign in with Google
+                    </button>
+                </form>
+
+                <p class="mt-8 text-center text-sm text-gray-600">
+                    Don't have an account?
+                    <button type="button" id="showRegister" class="font-semibold text-black hover:underline ml-1">Create
+                        an account</button>
+                </p>
+            </div>
+
+            <!-- REGISTER CONTAINER (Hidden by default) -->
+            <div id="registerContainer" class="hidden h-full flex flex-col justify-center">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Create account</h2>
+                    <p class="text-gray-500 text-sm mt-1">Start your proctoring journey today</p>
+                </div>
+
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label for="regUsername" class="block text-sm font-medium text-gray-700 mb-1.5">Full
+                            Name</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </span>
+                            <input type="text" id="regUsername" required
+                                class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition-all placeholder-gray-400 text-sm"
+                                placeholder="John Doe">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="regEmail" class="block text-sm font-medium text-gray-700 mb-1.5">Email
+                            address</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                            </span>
+                            <input type="email" id="regEmail" required
+                                class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition-all placeholder-gray-400 text-sm"
+                                placeholder="name@company.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="regPassword" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                            </span>
+                            <input type="password" id="regPassword" required
+                                class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition-all placeholder-gray-400 text-sm"
+                                placeholder="Create a strong password">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="regRole" class="block text-sm font-medium text-gray-700 mb-1.5">I am a...</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <i data-lucide="briefcase" class="w-4 h-4"></i>
+                            </span>
+                            <select id="regRole" required
+                                class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition-all appearance-none text-sm">
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="student">Student</option>
+                                <option value="teacher">Educator / Teacher</option>
+                            </select>
+                            <span
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all mt-2">
+                        Create Account
+                    </button>
+                </form>
+
+                <p class="mt-8 text-center text-sm text-gray-600">
+                    Already have an account?
+                    <button type="button" id="showLogin" class="font-semibold text-black hover:underline ml-1">Log
+                        in</button>
+                </p>
+            </div>
+
+        </div>
     </div>
 
-    <!-- Your App Logic -->
-    <script type="module" src="/static/js/main.js"></script>
-    <script type="module" src="/static/js/login.js"></script>
-    <!-- <script type="module" src="./auth.js"></script> -->
-
+    <!-- Scripts -->
     <script>
-        // in app.js
-        const container = document.getElementById("container");
-        document.getElementById("goRegister").onclick = () =>
-            container.classList.add("right-panel-active");
-        document.getElementById("goLogin").onclick = () =>
-            container.classList.remove("right-panel-active");
+        lucide.createIcons();
+        const loginContainer = document.getElementById('loginContainer');
+        const registerContainer = document.getElementById('registerContainer');
+        const showRegisterBtn = document.getElementById('showRegister');
+        const showLoginBtn = document.getElementById('showLogin');
 
+        showRegisterBtn.addEventListener('click', () => {
+            loginContainer.classList.add('hidden');
+            registerContainer.classList.remove('hidden');
+        });
+
+        showLoginBtn.addEventListener('click', () => {
+            registerContainer.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+        });
     </script>
+    <script type="module" src="/static/js/login.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+
 </body>
 
 </html>

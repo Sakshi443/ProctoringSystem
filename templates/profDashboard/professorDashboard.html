@@ -2,279 +2,347 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Assignment</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Professor</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Flowbite CSS -->
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
-    <!--     Fonts and icons     -->
-    <link rel="stylesheet" type="text/css"
-        href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
-    <!-- Material Icons -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            /* gray-50 */
+        }
+    </style>
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
-    <nav class="fixed top-0 z-50 w-full bg-white border-gray-50  dark:bg-gray-50 dark:border-gray-600">
-        <div class="px-3 py-3 lg:px-5 lg:pl-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center justify-start rtl:justify-end">
-                    <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-                        <span
-                            class="self-center text-2xl font-semibold whitespace-nowrap dark:text-black">Proctor</span>
-                    </a>
-                </div>
-                <div class="flex items-center">
-                    <div class="flex items-center ms-3">
-                        <button type="button"
-                            class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                            aria-expanded="false" data-dropdown-toggle="dropdown-user">
-                            <span class="sr-only">Open user menu</span>
-                            <a href="#"
-                                class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg text-gray-500 border-gray-500 bg-gray-100 hover:bg-gray-100  hover:text-gray-800 hover:border-gray-800 group">
-                                <svg class="w-4 h-4 me-2 text-gray-500 group-hover:text-gray-800" aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
-                                </svg>
-                                Profile
-                            </a>
+<body class="bg-gray-50">
 
-                            <!-- <img class="w-8 h-8 rounded-full"
-                                src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo"> -->
-                        </button>
-                        <div id="dropdown-user"
-                            class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600">
-                            <div class="px-4 py-3">
-                                <p id="currentUserName" class="text-sm text-gray-500 dark:text-white">Professor</p>
-                                <p id="currentUserEmail"
-                                    class="text-sm font-medium text-gray-500 truncate dark:text-gray-300">
-                                    professor@example.com</p>
-                            </div>
-                            <ul>
-                                <li>
-                                    <a href="/templates/index.html"
-                                        class="block px-4 py-2 text-sm text-gray-100 hover:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-300 dark:hover:text-gray-800"
-                                        onclick="logout()">Sign out</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <aside id="logo-sidebar"
-        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-gray-300 border-r border-gray-200 sm:translate-x-0 dark:bg-gray-400 dark:border-gray-500"
+    <!-- Sidebar Toggle (Mobile) -->
+    <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+        type="button"
+        class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+        <span class="sr-only">Open sidebar</span>
+        <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg">
+            <path clip-rule="evenodd" fill-rule="evenodd"
+                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+            </path>
+        </svg>
+    </button>
+
+    <!-- Sidebar -->
+    <aside id="default-sidebar"
+        class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
         aria-label="Sidebar">
-        <div class="h-full px-3 pb-4 overflow-y-auto bg-black dark:bg-gray-200">
+        <div class="h-full px-3 py-4 overflow-y-auto bg-white border-r border-gray-200">
+            <a href="#" class="flex items-center ps-2.5 mb-8 mt-2">
+                <div class="bg-gray-900 text-white p-1.5 rounded-lg mr-3">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <span class="self-center text-xl font-bold whitespace-nowrap text-gray-900">Proctor</span>
+            </a>
             <ul class="space-y-2 font-medium">
                 <li>
-                    <a href="./professorDashboard.html"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <span class="flex-1 ms-3 whitespace-nowrap">Dashboard</span>
+                    <a href="professorDashboard.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg bg-gray-100 group">
+                        <i data-lucide="layout-dashboard"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Dashboard</span>
                     </a>
                 </li>
                 <li>
-                    <a href="./make-exam.html"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <span class="flex-1 ms-3 whitespace-nowrap">Make paper</span>
+                    <a href="make-exam.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="plus-circle"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Create Exam</span>
                     </a>
                 </li>
                 <li>
-                    <a href="./admin-panel.html"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <span class="flex-1 ms-3 whitespace-nowrap">Admin panel</span>
+                    <a href="manage-exams.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="file-text"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">My Exams</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/templates/index.html" onclick="logout()"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-400 group">
-                        <svg class="shrink-0 w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-800 group-hover:text-gray-400 dark:group-hover:text-white"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
-                        </svg>
-                        <span class="flex-1 ms-3 whitespace-nowrap">Logout</span>
+                    <a href="admin-panel.html"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                        <i data-lucide="settings"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Admin Panel</span>
+                    </a>
+                </li>
+
+                <li class="pt-4 mt-4 space-y-2 border-t border-gray-200">
+                    <a href="profile.html" class="flex items-center p-2 text-gray-900 rounded-lg bg-gray-100 group">
+                        <i data-lucide="user"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Profile</span>
+                    </a>
+                    <a href="#" id="logoutBtn"
+                        class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group cursor-pointer">
+                        <i data-lucide="log-out"
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"></i>
+                        <span class="ms-3">Sign Out</span>
                     </a>
                 </li>
             </ul>
         </div>
     </aside>
-    <!-- end of Navbar -->
 
-    <div class="p-4 sm:ml-64 mt-16">
-        <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-            <h2 class="text-xl font-bold mb-4">Your Tests</h2>
-            <div id="examList" class="space-y-4"></div>
-        </div>
-    </div>
+    <!-- Main Content -->
+    <div class="p-4 sm:ml-64">
+        <div class="p-4 mt-10 sm:mt-0">
 
-    <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
-        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h3 class="text-lg font-semibold mb-4">Select Students to Assign</h3>
-
-            <div class="mb-2">
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" id="selectAllStudents"
-                        class="form-checkbox border-2 border-black rounded-sm">
-                    <span class="text-sm font-medium text-gray-700">Select All Students</span>
-                </label>
-            </div>
-
-            <div id="studentCheckboxes" class="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto border p-2 rounded">
-            </div>
-
-            <div class="flex justify-end gap-4 mt-6">
-                <button id="cancelModalBtn" class="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
-                <button id="confirmAssignBtn" class="px-4 py-2 bg-blue-600 text-white rounded">Assign</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAg-Qc46CzCYdN_JGayHuR7xYxlsryUpZc",
-            authDomain: "proctored-system.firebaseapp.com",
-            projectId: "proctored-system",
-            storageBucket: "proctored-system.appspot.com",
-            messagingSenderId: "512898908874",
-            appId: "1:512898908874:web:23584b6cad04eb9e0c2a33",
-            measurementId: "G-3SL8C6C8RD"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth();
-        let selectedExamId = null;
-
-        function formatDateTime(dateTimeStr) {
-            if (!dateTimeStr) return "N/A";
-            const date = new Date(dateTimeStr);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = String(date.getFullYear()).slice(-2);
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const hours24 = date.getHours();
-            const ampm = hours24 >= 12 ? 'PM' : 'AM';
-            const hours12 = (hours24 % 12) || 12;
-            const displayHoursStr = String(hours12).padStart(2, '0');
-            return `${day}/${month}/${year} ${displayHoursStr}:${minutes}:00 ${ampm}`;
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "../../index.html";
-                return;
-            }
-
-            localStorage.setItem("username", user.displayName || "Professor");
-            localStorage.setItem("email", user.email);
-
-            document.getElementById("currentUserName").textContent = localStorage.getItem("username");
-            document.getElementById("currentUserEmail").textContent = localStorage.getItem("email");
-
-            const examList = document.getElementById("examList");
-            const examsRef = query(collection(db, "exams"), where("createdBy", "==", user.uid));
-
-            onSnapshot(examsRef, (snapshot) => {
-                examList.innerHTML = "";
-                snapshot.forEach(exam => {
-                    const data = exam.data();
-                    const submittedCount = data.assignedTo ? `${data.assignedTo.length} Candidate(s) Assigned` : 'Not Assigned Yet';
-                    const start = formatDateTime(data.start || data.startDateTime);
-                    const end = formatDateTime(data.end || data.endDateTime);
-                    const totalQuestions = data.totalQuestions ?? (Array.isArray(data.questions) ? data.questions.length : 0);
-                    const duration = data.duration ?? data.testDuration ?? 0;
-
-                    const card = document.createElement("div");
-                    card.className = "bg-white rounded-xl shadow p-6 flex items-center justify-between mb-4";
-
-                    card.innerHTML = `
-                        <div class="flex-1">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-2">${data.name || data.testName || "Untitled Test"}</h2>
-                            <div class="flex flex-col text-sm text-gray-600 space-y-1">
-                                <div class="flex items-center gap-8">
-                                    <p><strong>Started at:</strong> ${start}</p>
-                                    <p>${submittedCount}</p>
-                                </div>
-                                <div class="flex items-center gap-8">
-                                    <p><strong>Ends at:</strong> ${end}</p>
-                                    <p>${totalQuestions} Questions, ${duration} minutes</p>
-                                </div>
+            <!-- Header -->
+            <div class="mb-8">
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="#"
+                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <i data-lucide="home" class="w-4 h-4 me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 mx-1"></i>
+                                <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Dashboard</span>
                             </div>
-                        </div>
-                        <div class="flex flex-col gap-2 ml-6">
-                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium" onclick="window.loadStudents('${exam.id}')">
-                                Assign Test
-                            </button>
-                        </div>
-                    `;
-                    examList.appendChild(card);
-                });
-            });
-        });
+                        </li>
+                    </ol>
+                </nav>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Professor Dashboard</h1>
+                        <p class="text-gray-500 mt-1">Manage exams and monitor student progress.</p>
+                    </div>
+                    <a href="make-exam.html"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 flex items-center">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                        Create New Exam
+                    </a>
+                </div>
+            </div>
 
-        window.loadStudents = async (examId) => {
-            selectedExamId = examId;
-            const usersSnap = await getDocs(query(collection(db, "users"), where("role", "==", "student")));
-            const checkboxes = document.getElementById("studentCheckboxes");
-            checkboxes.innerHTML = "";
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="statsGrid">
+                <!-- Active Exams Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start space-x-4">
+                    <div class="p-3 rounded-lg bg-blue-50 text-blue-600">
+                        <i data-lucide="file-text" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Total Exams</h3>
+                        <p id="totalExamsCount" class="text-3xl font-bold text-gray-900 mt-2">--</p>
+                        <p class="text-sm text-gray-500">Created by you</p>
+                    </div>
+                </div>
 
-            usersSnap.forEach(userDoc => {
-                const data = userDoc.data();
-                const checkbox = document.createElement("div");
-                checkbox.innerHTML = `
-                    <label class='flex items-center gap-2'>
-                        <input type='checkbox' value='${userDoc.id}' class='student-checkbox border-2 border-black rounded-sm'>
-                        ${data.username || data.name || "Unnamed"} (${data.email || "No Email"})
-                    </label>`;
-                checkboxes.appendChild(checkbox);
-            });
+                <!-- Candidates Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start space-x-4">
+                    <div class="p-3 rounded-lg bg-green-50 text-green-600">
+                        <i data-lucide="users" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Total Responses</h3>
+                        <p id="totalResponsesCount" class="text-3xl font-bold text-gray-900 mt-2">--</p>
+                        <p class="text-sm text-gray-500">Submissions received</p>
+                    </div>
+                </div>
 
-            const selectAllBox = document.getElementById("selectAllStudents");
-            selectAllBox.checked = false;
+                <!-- Upcoming Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start space-x-4">
+                    <div class="p-3 rounded-lg bg-purple-50 text-purple-600">
+                        <i data-lucide="calendar" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Upcoming</h3>
+                        <p id="upcomingExamsCount" class="text-3xl font-bold text-gray-900 mt-2">--</p>
+                        <p class="text-sm text-gray-500">Scheduled exams</p>
+                    </div>
+                </div>
+            </div>
 
-            const newSelectAllBox = selectAllBox.cloneNode(true);
-            selectAllBox.parentNode.replaceChild(newSelectAllBox, selectAllBox);
+            <!-- Detailed Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                <!-- Recent Exams List -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Your Exams</h3>
+                        <a href="manage-exams.html" class="text-sm font-medium text-blue-600 hover:text-blue-500">View
+                            all</a>
+                    </div>
+                    <div class="space-y-4" id="recentExamsList">
+                        <p class="text-sm text-gray-500 text-center py-4">Loading exams...</p>
+                    </div>
+                </div>
 
-            newSelectAllBox.addEventListener("change", () => {
-                document.querySelectorAll(".student-checkbox").forEach(cb => cb.checked = newSelectAllBox.checked);
-            });
+                <!-- Recent Activity Feed -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Submissions</h3>
+                    <div class="relative border-l border-gray-200 ml-3" id="recentActivityList">
+                        <p class="text-sm text-gray-500 text-center py-4">Loading activity...</p>
+                    </div>
+                </div>
 
-            document.getElementById("studentModal").classList.remove("hidden");
-        };
+                <script type="module">
+                    import { app, auth, db } from '/static/js/firebase-config.js';
+                    import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+                    import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        document.getElementById("cancelModalBtn").addEventListener("click", () => {
-            document.getElementById("studentModal").classList.add("hidden");
-        });
 
-        document.getElementById("confirmAssignBtn").addEventListener("click", async () => {
-            const selected = Array.from(document.querySelectorAll(".student-checkbox:checked")).map(cb => cb.value);
-            if (selected.length > 0 && selectedExamId) {
-                await updateDoc(doc(db, "exams", selectedExamId), { assignedTo: selected });
-                alert("✅ Test assigned successfully");
-                document.getElementById("studentModal").classList.add("hidden");
-            } else {
-                alert("⚠️ Please select at least one student.");
-            }
-        });
+                    // Sidebar 
+                    const sidebar = document.getElementById('default-sidebar');
+                    const toggleBtn = document.querySelector('[data-drawer-toggle="default-sidebar"]');
 
-        window.logout = async () => {
-            await signOut(auth);
-            localStorage.clear();
-            location.href = "../../index.html";
-        };
+                    if (toggleBtn) {
+                        toggleBtn.addEventListener('click', () => {
+                            sidebar.classList.toggle('-translate-x-full');
+                        });
+                    }
 
-    </script>
+                    // Auth Check
+                    onAuthStateChanged(auth, async (user) => {
+                        if (!user) {
+                            window.location.href = "../index.html";
+                        } else {
+                            const docRef = doc(db, "users", user.uid);
+                            const docSnap = await getDoc(docRef);
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                // Display Name
+                                document.querySelector('h1').innerText = `Welcome, ${data.name || 'Professor'}`;
+                            }
+                            loadProfStats(user);
+                        }
+                    });
 
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+                    async function loadProfStats(user) {
+                        try {
+                            // Fetch All Exams
+                            const examsSnap = await getDocs(collection(db, "exams"));
+                            let totalExams = 0;
+                            let upcomingCount = 0;
+                            let myExams = [];
+                            let totalResponses = 0;
+                            let recentSubmissions = [];
+
+                            const now = new Date();
+
+                            // Start
+                            for (const examDoc of examsSnap.docs) {
+                                const exam = examDoc.data();
+
+                                // Filter: Only count if createdBy matches OR count all if field missing (for demo)
+                                // Let's implement filter if 'createdBy' exists, else include
+                                if (exam.createdBy && exam.createdBy !== user.uid && exam.createdBy !== user.email) {
+                                    continue;
+                                }
+
+                                totalExams++;
+
+                                if (exam.startDateTime) {
+                                    const start = new Date(exam.startDateTime);
+                                    if (start > now) upcomingCount++;
+                                }
+
+                                myExams.push({ id: examDoc.id, ...exam });
+
+                                // Fetch submissions
+                                const subSnap = await getDocs(collection(db, `exams/${examDoc.id}/submissions`));
+                                totalResponses += subSnap.size;
+
+                                subSnap.forEach(sub => {
+                                    const sData = sub.data();
+                                    recentSubmissions.push({
+                                        examTitle: exam.testName,
+                                        studentName: sData.studentName,
+                                        date: new Date(sData.submittedAt),
+                                        score: sData.totalScore
+                                    });
+                                });
+                            }
+
+                            // Update Stats
+                            const elTotal = document.getElementById('totalExamsCount');
+                            if (elTotal) elTotal.innerText = totalExams;
+
+                            const elResp = document.getElementById('totalResponsesCount');
+                            if (elResp) elResp.innerText = totalResponses;
+
+                            const elUp = document.getElementById('upcomingExamsCount');
+                            if (elUp) elUp.innerText = upcomingCount;
+
+                            // Render Recent Exams (Top 3 Created)
+                            myExams.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                            let examHTML = '';
+                            myExams.slice(0, 3).forEach(ex => {
+                                const dateStr = ex.startDateTime ? new Date(ex.startDateTime).toLocaleDateString() : 'No Date';
+                                examHTML += `
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h4 class="font-medium text-gray-900">${ex.testName}</h4>
+                                <p class="text-sm text-gray-500">${dateStr} • ${ex.duration} mins</p>
+                            </div>
+                            <a href="manage-exams.html" class="text-blue-600 text-xs hover:underline">Manage</a>
+                        </div>`;
+                            });
+                            document.getElementById('recentExamsList').innerHTML = examHTML || '<p class="text-center text-sm md:p-4">No exams found.</p>';
+
+                            // Render Recent Activity (Top 3 Submissions)
+                            recentSubmissions.sort((a, b) => b.date - a.date);
+                            let subHTML = '';
+                            recentSubmissions.slice(0, 3).forEach(sub => {
+                                const diff = Math.floor((now - sub.date) / 60000);
+                                let timeStr = diff + ' mins ago';
+                                if (diff > 60) timeStr = Math.floor(diff / 60) + ' hours ago';
+                                if (diff > 1440) timeStr = Math.floor(diff / 1440) + ' days ago';
+
+                                subHTML += `
+                        <li class="mb-10 ms-6 list-none relative">
+                            <span class="absolute flex items-center justify-center w-6 h-6 bg-green-100 rounded-full -start-9 ring-8 ring-white">
+                                <i data-lucide="check-circle" class="w-3 h-3 text-green-800"></i>
+                            </span>
+                            <h3 class="flex items-center mb-1 text-base font-semibold text-gray-900">Submission Received</h3>
+                            <time class="block mb-2 text-sm font-normal leading-none text-gray-400">${timeStr}</time>
+                            <p class="text-sm font-normal text-gray-500">${sub.studentName} submitted ${sub.examTitle}.</p>
+                        </li>`;
+                            });
+                            document.getElementById('recentActivityList').innerHTML = subHTML || '<p class="text-center text-sm md:p-4">No recent submissions.</p>';
+                            lucide.createIcons();
+
+                        } catch (e) { console.error(e); }
+                    }
+
+                    // Logout
+                    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        signOut(auth).then(() => {
+                            window.location.href = "../index.html";
+                        });
+                    });
+
+                    lucide.createIcons();
+                </script>
+                <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 
 </html>

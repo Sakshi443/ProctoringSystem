@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 import { signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { db, auth } from "../../js/firebase-config.js";
+import { db, auth } from "/static/js/firebase-config.js";
 
 export async function loadStudentDropdown() {
   try {

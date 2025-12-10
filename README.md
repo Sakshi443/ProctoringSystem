@@ -1,144 +1,198 @@
-# 🛡️ Proctor (ExamSecure)
+# AI-Powered Proctoring System (MVP)
 
-> **Automated Proctoring System to Prevent Exam Cheating**
+> **A secure, scalable, and intelligent automated proctoring solution designed for seamless online assessments.**
 
-Proctor (also known as ExamSecure) is a comprehensive web-based proctoring solution designed to ensure the integrity of online examinations. Leveraging AI and machine learning, it tracks candidate activity remotely to detect and prevent malpractice.
-
-**Key Features:**
-*   🤖 **AI-Powered Monitoring:** Real-time Face Detection, Head Pose Estimation, and Impersonation Detection.
-*   🔒 **Browser Lockdown:** Prevents tab switching and restricts browser functionality during exams.
-*   📊 **Real-time Analysis:** Detects loss of attention and suspicious behavior.
-*   ☁️ **Cloud Integration:** Built on Firebase for secure authentication and real-time data handling.
+[![Live Demo](https://img.shields.io/badge/Demo-Live%20App-brightgreen)](https://proctor-g1yd.onrender.com/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Sakshi443/ProctoringSystem)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🚀 Getting Started
+## 📖 Overview
 
-Follow these instructions to set up the project on your local machine for development and testing.
+The **AI-Powered Proctoring System** is a robust web application designed to maintain the integrity of online examinations. By leveraging computer vision and real-time monitoring, it detects suspicious activities such as multiple faces, absence of the candidate, or unauthorized object usage.
 
-### 📋 Prerequisites
+This project represents a **Minimum Viable Product (MVP)** that demonstrates a production-ready architecture, clean code practices, and a scalable tech stack suitable for real-world deployment.
 
-Ensure you have the following installed:
-*   **Node.js** (v14 or higher)
-*   **Python** (v3.8 or higher)
-*   **Firebase Account** (for database and auth)
+### 🎯 Aim of the MVP
+To provide a secure, browser-based proctoring environment that eliminates the need for intrusive desktop software while ensuring high accuracy in fraud detection.
 
-### 🛠️ Installation
+### 🚀 Core Features
+- **Real-Time Face Detection**: Monitors the candidate's presence and focus.
+- **Multi-Person Detection**: Flags incidents if more than one person is detected in the frame.
+- **Tab Switching Alerts**: Detects and logs when a user switches tabs or minimizes the window.
+- **Automated Snapshots**: Captures evidence at regular intervals or when suspicious activity is detected.
+- **Admin Dashboard**: A centralized panel for reviewers to inspect logs and evidence.
+- **Responsive Design**: optimized for laptops and desktops with a webcam.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Sakshi443/ProctoringSystem.git
-    cd proctor
-    ```
-
-2.  **Install Node.js dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Install Python dependencies:**
-    ```bash
-    pip install flask
-    # If a requirements.txt exists in the future, use: pip install -r requirements.txt
-    ```
-
-### ⚙️ Configuration
-
-1.  **Environment Variables:**
-    Create a `.env` file in the root directory. You can use the following template:
-
-    ```env
-    # Server Configuration
-    PORT=5000
-
-    # Firebase Admin SDK (Path to your service account key)
-    GOOGLE_APPLICATION_CREDENTIALS="./serviceAccountKey.json"
-    ```
-
-2.  **Firebase Setup:**
-    *   Place your Firebase Admin SDK JSON file in the root directory and name it `serviceAccountKey.json`.
-    *   Update `templates/static/js/firebase-config.js` with your client-side Firebase configuration keys.
+### 💡 Problems It Solves
+1.  **Cheating Mitigation**: Reduces the ease of malpractice in remote exams.
+2.  **Remote Accessibility**: Allows candidates to take exams from anywhere without special hardware.
+3.  **Proctor Efficiency**: Automates the monitoring process, allowing one human proctor to oversee hundreds of candidates.
 
 ---
 
-## 💻 Usage Guide
+## 🏗️ Folder Structure (Ideal Production MVP)
 
-### Start the Development Server (Node.js)
+This project follows a clean, modular structure separating concerns between the Client (Frontend) and Server (Backend).
 
-To serve the application using the Node.js Express server:
+```text
+ProctoringSystem/
+├── client/                     # Frontend Application (React.js)
+│   ├── public/                 # Static assets (HTML, Favicons)
+│   ├── src/
+│   │   ├── assets/             # Images, icons, global styles
+│   │   ├── components/         # Reusable UI components (Camera, AlertBox)
+│   │   ├── pages/              # Page views (Dashboard, ExamPage, AdminPanel)
+│   │   ├── hooks/              # Custom React hooks (useCamera, useProctor)
+│   │   ├── services/           # API integration logic (api.js)
+│   │   ├── context/            # Global state management
+│   │   ├── utils/              # Helper functions (validators, formatters)
+│   │   ├── App.js              # Main App component
+│   │   └── index.js            # Entry point
+│   ├── .env                    # Frontend environment variables
+│   └── package.json            # Client dependencies
+│
+├── server/                     # Backend Application (Node.js/Express)
+│   ├── config/                 # Configuration (DB, Cloudinary, Firebase)
+│   ├── controllers/            # Request handlers (authController, examController)
+│   ├── models/                 # Database schemas (User, Session, Log)
+│   ├── routes/                 # API route definitions
+│   ├── middlewares/            # Auth & validation middleware
+│   ├── utils/                  # Utility functions (logger, errorHandling)
+│   ├── app.js                  # Express app setup
+│   ├── server.js               # Server entry point
+│   ├── .env                    # Backend environment variables
+│   └── package.json            # Server dependencies
+│
+└── README.md                   # Project documentation
+```
 
+---
+
+## 🔄 Project Flow & Architecture
+
+### High-Level Flow
+`User` → `Frontend Interface` → `Webcam Stream` → `AI Analysis (Client/Server)` → `Backend API` → `Database` → `Admin Dashboard`
+
+### Detailed Workflow
+1.  **Authentication**: User logs in; JWT token issued.
+2.  **Permission Grant**: User grants camera/microphone access.
+3.  **Exam Session**:
+    *   **Frontend**: Captures video feed using HTML5 Media API.
+    *   **AI Engine**: lightweight models (e.g., TensorFlow.js or FaceAPI) run locally or frame data is sent to backend for analysis.
+    *   **Event Listeners**: Detect `blur` (tab switch) and `resize` events.
+4.  **Alert System**:
+    *   If a violation (e.g., No Face) is detected → Red Alert on UI.
+    *   Violation logged to Backend immediately.
+5.  **Submission**: Exam data and proctoring logs are saved to the Database.
+
+### Architecture Text-Diagram
+
+```mermaid
+graph TD
+    User[Candidate] -->|Access| Client[React Frontend]
+    Client -->|Video Stream| Model[AI/ML Model]
+    Client -->|API Requests| API[Express Backend]
+    
+    subgraph "Proctoring Logic"
+        Model -->|Detect| Face[Face Detection]
+        Model -->|Detect| Obj[Object Detection]
+        Client -->|Listen| Tab[Tab/Window Events]
+    end
+    
+    API -->|Auth/Updates| DB[(Database - Mongo/Firebase)]
+    API -->|Store Evidence| Storage[Cloud Storage]
+    
+    Admin[Admin] -->|View Logs| Client
+    Client -->|Fetch Reports| API
+```
+
+---
+
+## ⚙️ Technical Architecture
+
+### Tech Stack
+*   **Frontend**: React.js, Tailwind CSS (Styling), MediaPipe/TensorFlow.js (AI detection).
+*   **Backend**: Node.js, Express.js.
+*   **Database**: MongoDB / Firebase Firestore (for real-time logs).
+*   **Storage**: Cloudinary / Firebase Storage (for violation snapshots).
+*   **Deployment**: Vercel (Frontend), Render/Heroku (Backend).
+
+### Key Modules
+1.  **FaceTracker Module**: Uses computer vision to calculate head pose and face count.
+2.  **ActivityLogger**: A middleware service that structures violation data before saving.
+3.  **SessionManager**: Handles secure start/stop of exam timers and state.
+
+---
+
+## 🛠️ Installation & Setup
+
+### Prerequisites
+*   Node.js (v14+)
+*   npm or yarn
+*   A Cloud Database URI (MongoDB or Firebase)
+
+### 1. Clone the Repository
 ```bash
-# Run in development mode (with nodemon)
-npm run dev
+git clone https://github.com/Sakshi443/ProctoringSystem.git
+cd ProctoringSystem
+```
 
-# Run in production mode
+### 2. Backend Setup
+```bash
+cd server
+npm install
+# Create a .env file and add your credentials:
+# PORT=5000
+# DB_URI=your_database_connection_string
+# JWT_SECRET=your_secret_key
 npm start
 ```
 
-The application will be available at `http://localhost:5000`.
-
-### Run the Python Backend (Flask)
-
-If you need to run the Python backend (e.g., for specific AI processing routes):
-
+### 3. Frontend Setup
 ```bash
-python main.py
+cd client
+npm install
+# Create a .env file:
+# REACT_APP_API_URL=http://localhost:5000
+npm start
 ```
+
+The app should now be running at `http://localhost:3000`.
 
 ---
 
-## 📂 Project Structure
+## 📡 API Endpoints (Core)
 
-```text
-final-proctor/
-├── app/                  # 🐍 Python Flask Application
-│   ├── __init__.py       # App factory
-│   └── routes.py         # Flask routes
-├── firebase/             # 🔥 Firebase Configuration
-│   └── firebase-config.js
-├── templates/            # 🎨 Frontend (HTML/Templates)
-│   ├── static/           # Static Assets (CSS, JS, Images)
-│   │   ├── css/          # Stylesheets
-│   │   └── js/           # Client-side Logic (Proctoring, Auth)
-│   ├── index.html        # Landing Page
-│   ├── login.html        # Authentication Page
-│   └── ...
-├── app.js                # 🚀 Express App Setup
-├── server.js             # 🏁 Node.js Server Entry Point
-├── main.py               # 🐍 Python Entry Point
-├── package.json          # 📦 Node Dependencies
-└── tailwind.config.js    # 🎨 Tailwind CSS Config
-```
-
----
-
-## 🔌 API Reference
-
-Currently, the project primarily serves frontend views. Backend API endpoints are under development.
-
-| Endpoint | Method | Description |
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `/` | `GET` | Serves the Home/Landing page |
-| `/login.html` | `GET` | Serves the Login page |
-| `/admin.html` | `GET` | Serves the Admin Dashboard |
-
-*Note: The AI proctoring logic is primarily handled via client-side scripts (`templates/static/js/main.js`) interacting with Firebase.*
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/YourFeature`).
-3.  Commit your changes (`git commit -m 'Add some feature'`).
-4.  Push to the branch (`git push origin feature/YourFeature`).
-5.  Open a Pull Request.
+| `POST` | `/api/auth/login` | Authenticate user and receive token. |
+| `POST` | `/api/exam/start` | Initialize a new proctoring session. |
+| `POST` | `/api/log/violation` | Record a detected violation (tab switch, etc). |
+| `POST` | `/api/upload/snapshot` | Upload a screenshot evidence of violation. |
+| `GET` | `/api/admin/reports` | Fetch all session logs for the admin. |
 
 ---
 
-**License:** ISC
+## ✅ Before Submission Checklist
 
+Use this checklist to ensure your MVP submission is perfect.
 
+- [ ] **Demo is Live**: Verify the `onrender` link is active and accessible.
+- [ ] **Clean Console**: Open DevTools (F12) in the browser and fix any red errors.
+- [ ] **Env Variables**: Ensure `.env` is **NOT** committed to GitHub (use `.env.example`).
+- [ ] **Responsive**: Test the exam page on different screen sizes.
+- [ ] **Data Flow**: Verify that a "Tab Switch" actually saves a log in your specific database.
+- [ ] **Code Formatting**: Run Prettier or a formatter on your code before the final commit.
+- [ ] **License**: Ensure the MIT License is present in the repo.
 
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+*Developed by Sakshi Manoorkar*
