@@ -13,7 +13,14 @@ try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   } else {
     // Local development fallback
-    serviceAccount = require("./serviceAccountKey.json");
+    try {
+      serviceAccount = require("./serviceAccountKey.json");
+    } catch (e) {
+      if (e.code === 'MODULE_NOT_FOUND') {
+        throw new Error("FIREBASE_SERVICE_ACCOUNT env var is missing and serviceAccountKey.json was not found locally.");
+      }
+      throw e;
+    }
   }
 
   admin.initializeApp({
